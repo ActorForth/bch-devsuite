@@ -4,7 +4,7 @@ RUN groupadd -r bitcoin && useradd -r -m -g bitcoin bitcoin
 
 RUN set -ex \
 	&& apt-get update \
-	&& apt-get install -qq --no-install-recommends ca-certificates dirmngr gosu gpg wget \
+	&& apt-get install -qq --no-install-recommends ca-certificates dirmngr gosu gpg wget nginx-light \
 	&& rm -rf /var/lib/apt/lists/*
 
 ENV BITCOIN_VERSION 1.8.0.0
