@@ -1,0 +1,48 @@
+version: "3"
+services:
+
+  bitcoin-unlimited:
+    image: zquestz/bitcoin-unlimited
+    container_name: bitcoin-unlimited 
+    expose:
+      - "18332"
+      - "18444"
+      - "28332"
+    ports:
+      - "18332:18332"
+      - "18444:18444"
+      - "28332:28332"
+    volumes:
+      - ./data/bitcoind:/data
+    command: bitcoind -rpcbind=0.0.0.0:18332 -rpcuser=admin -rpcpassword=adminpassword -server -rest -regtest -txindex -reindex -zmqpubhashtx=tcp://0.0.0.0:28332
+    networks:
+      - bitcoin-bridging
+
+
+  electrumx:
+    image: buzzkillb/docker-electrumx:latest
+    container_name: electrumx
+    expose:
+      - "50001"
+      - "50002"
+      - "50004"
+    ports:
+      - "50001:50001"
+      - "50002:50002"
+      - "50004:50004"
+    volumes:
+      - ./data/electrumx:/data
+    environment:
+      - DAEMON_URL=http://admin:adminpassword@bitcoin-unlimited:18332
+      - COIN=BitcoinSV
+      - NET=regtest
+      - LOG_LEVEL=debug
+      - DB_DIRECTORY=/data
+    depends_on:
+      - bitcoin-unlimited
+    networks:
+      - bitcoin-bridging
+
+networks:
+  bitcoin-bridging:
+    external: true
