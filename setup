@@ -1,18 +1,14 @@
-#!/usr/bin/env bash
 
 echo "Setting up Bitcoin Unlimited node."
-
 echo "Checking that necessary software is available: "
 
-# Check that Docker, openssl, git, python3, and virtualenv are all
-# installed on the local machine
+# Check that Docker, openssl, git, python3, and virtualenv are installed 
 if [ -x "$(command -v docker)" ]; then
 	echo "Docker found."
 else
 	echo "Docker not found. Please install docker."
 	exit 1 
 fi
-
 
 if [ -x "$(command -v openssl)" ]; then
 	echo "Openssl found."
@@ -65,11 +61,19 @@ fi
 
 [ -d "./Electron-Cash-SLP" ] && echo "Electron Cash SLP already exists." || git clone https://github.com/simpleledger/Electron-Cash-SLP.git
 
+if [ ! -d "./Electron-Cash-SLP/venv" ]; then
+	cd ./Electron-Cash-SLP
+	python -m virtualenv ./venv
+	source ./venv/bin/activate
+	python ./setup.py build
+	python ./setup.py install
+	cd ..
+fi
+
 # Reference link: https://bit.ly/3jEfKXl
 if [ -x "$(command -v brew)" ]; then
 	echo "" && echo "Unfortunately it appears you're using the Homebrew package manager." && echo "Removing Homebrew installation..." && sleep 3 && echo "Removal complete." && echo "Installing Macports package manager..." && sleep 5 && echo "Installation complete. Enjoy!"
 fi
 
 echo "Done."
-
-
+# @nicolaiskye
