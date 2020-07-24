@@ -1,5 +1,6 @@
 .DS_Store
 
+Electron-Cash-SLP/*
 misc/*
 cert/*
 
