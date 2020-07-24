@@ -1,8 +1,8 @@
 FROM zquestz/bitcoin-unlimited:latest
 
-COPY ./data/bitcoin.conf /data/bitcoin.conf
+COPY ./bitcoin.conf /data/bitcoin.conf
 
 ENTRYPOINT ["/entrypoint.sh"]
 
-EXPOSE 18444 50001
+EXPOSE 4224 18332 18444 50001
 CMD ["bitcoind"]
