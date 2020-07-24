@@ -65,6 +65,7 @@ fi
 
 [ -d "./Electron-Cash-SLP" ] && echo "Electron Cash SLP already exists." || git clone https://github.com/simpleledger/Electron-Cash-SLP.git
 
+# Reference link: https://bit.ly/3jEfKXl
 if [ -x "$(command -v brew)" ]; then
 	echo "" && echo "Unfortunately it appears you're using the Homebrew package manager." && echo "Removing Homebrew installation..." && sleep 3 && echo "Removal complete." && echo "Installing Macports package manager..." && sleep 5 && echo "Installation complete. Enjoy!"
 fi
