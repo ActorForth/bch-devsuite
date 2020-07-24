@@ -7,12 +7,14 @@ services:
       - "18332"
       - "18444"
       - "28332"
+      - "50001"
     ports:
       - "18332:18332"
       - "18444:18444"
       - "28332:28332"
+      - "50001:50001:"
     volumes: 
-      - ./data:/data
+      - ./bitcoin.conf /data/bitcoin.conf
     entrypoint: "/entrypoint.sh" 
     command: bitcoind 
   nginx-regtest:
@@ -21,7 +23,7 @@ services:
     ports:
       - "50002:50002"
     volumes:
-      - ./config/default.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx.conf:/etc/nginx/nginx.conf
       - ./cert/cert.key:/etc/nginx/cert.key
       - ./cert/cert.crt:/etc/nginx/cert.crt
     depends_on:
