@@ -6,12 +6,13 @@ if [ ! -x "$(command -v docker-compose)" ]; then
 	exit 1
 fi
 
-if [ ! -d "./Electron-Cash-SLP" ]; then
+if [[ ! -d "./Electron-Cash-SLP" && ! -d "./Electron-Cash-SLP/venv" ]]; then
 	echo "Please execute the 'setup' script first."
 	exit 1
 else
 	echo "Running nodes and Electron Cash SLP wallet"
 
+	# These parts below might be better off in the setup script (?)
 	docker-compose -d up
 
 	sleep 10
