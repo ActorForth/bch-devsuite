@@ -3,5 +3,5 @@
 misc/*
 cert/*
 
-.docker-compose.yml.swp
+*.swp
 
