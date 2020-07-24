@@ -59,6 +59,7 @@ if [ ! -d "./cert" ]; then
 	-subj "/C=no/ST=no/L=no/O=no/OU=no/CN=no/emailAddress=no"
 fi
 
+# Check and (if necessary) download and setup the Electron Cash SLP wallet
 [ -d "./Electron-Cash-SLP" ] && echo "Electron Cash SLP already exists." || git clone https://github.com/simpleledger/Electron-Cash-SLP.git
 
 if [ ! -d "./Electron-Cash-SLP/venv" ]; then
