@@ -4,12 +4,15 @@ echo "Setting up Bitcoin Unlimited node."
 
 echo "Checking that necessary software is available: "
 
+# Check that Docker, openssl, git, python3, and virtualenv are all
+# installed on the local machine
 if [ -x "$(command -v docker)" ]; then
 	echo "Docker found."
 else
 	echo "Docker not found. Please install docker."
 	exit 1 
 fi
+
 
 if [ -x "$(command -v openssl)" ]; then
 	echo "Openssl found."
@@ -25,7 +28,6 @@ else
 	exit 1
 fi
 
-
 PYV=`python -c "import sys;t='{v[0]}'.format(v=list(sys.version_info[:2]));sys.stdout.write(t)";`
 if [ $PYV -eq 3 ]; then
 	echo "Python found."
@@ -34,7 +36,17 @@ else
 	exit 1
 fi
 
-rm -rf ./cert
+VENV_VER=`python -m virtualenv --version | grep -o 20`
+if [ $VENV_VER -eq 20 ]; then
+	echo "Virtualenv found."
+else
+	echo "Virtualenv not found. Please install virtualenv."
+	exit 1
+fi
+
+# Create new SSL certificate/key pair to be used on nginx server
+[ -d "./cert" ]  && echo "Removing previous certs." && rm -rf ./cert
+
 mkdir ./cert
 
 echo "Creating SSL certificate to use for nginx reverse proxy server."
