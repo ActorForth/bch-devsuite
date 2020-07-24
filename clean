@@ -1,4 +1,22 @@
 #!/usr/bin/env bash
 
-rm -rf cert
-rm -rf Electron-Cash-SLP
+DID_SOMETHING=0
+
+if [ -d "./cert" ]; then
+	echo "Removing certificates directory."
+	rm -rf cert
+	DID_SOMETHING=1
+fi
+
+if [ -d "./Electron-Cash-Slp " ]; then
+	echo "Removing Electron-Cash-SLP directory."
+	rm -rf Electron-Cash-SLP
+	DID_SOMETHING=1
+fi
+
+if [ $DID_SOMETHING -eq 1 ]; then
+	echo "Done."
+else
+	echo "Nothing to do."
+fi
+
