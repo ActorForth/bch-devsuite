@@ -36,4 +36,6 @@ There are a few issues with this setup that could use improvement in the future.
 
 * This setup creates and deletes SSL certificates with little regard. Because it is only intended for local testing purposes, no safeguards are in place to prevent you from losing your certs.
 
+* Currently blocks must be generated manually after transactions are made. The possibility of adding a cron job to generate a block every few seconds could be a consideration to look into.
+
 
