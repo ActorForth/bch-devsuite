@@ -18,6 +18,14 @@ else
 	exit 1
 fi
 
+if [ -x "$(command -v git)" ]; then
+	echo "Git found."
+else
+	echo "Git not found. Please install git."
+	exit 1
+fi
+
+
 PYV=`python -c "import sys;t='{v[0]}'.format(v=list(sys.version_info[:2]));sys.stdout.write(t)";`
 if [ $PYV -eq 3 ]; then
 	echo "Python found."
@@ -34,4 +42,8 @@ echo "Creating SSL certificate to use for nginx reverse proxy server."
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ./cert/cert.key -out ./cert/cert.crt \
 	-subj "/C=no/ST=no/L=no/O=no/OU=no/CN=no/emailAddress=no"
 
+git clone https://github.com/simpleledger/Electron-Cash-SLP.git
+
 echo "Done."
+
+
