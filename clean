@@ -8,7 +8,7 @@ if [ -d "./cert" ]; then
 	DID_SOMETHING=1
 fi
 
-if [ -d "./Electron-Cash-Slp " ]; then
+if [ -d "./Electron-Cash-SLP" ]; then
 	echo "Removing Electron-Cash-SLP directory."
 	rm -rf Electron-Cash-SLP
 	DID_SOMETHING=1
