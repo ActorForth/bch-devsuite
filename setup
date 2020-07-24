@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+echo "Setting up Bitcoin Unlimited node."
+
+echo "Checking that necessary software is available: "
+
+if [ -x "$(command -v docker)" ]; then
+	echo "Docker found."
+else
+	echo "Docker not found. Please install docker."
+	exit 1 
+fi
+
+if [ -x "$(command -v openssl)" ]; then
+	echo "Openssl found."
+else
+	echo "Openssl not found. Please install openssl."
+	exit 1
+fi
+
+PYV=`python -c "import sys;t='{v[0]}'.format(v=list(sys.version_info[:2]));sys.stdout.write(t)";`
+if [ $PYV -eq 3 ]; then
+	echo "Python found."
+else 
+	echo "Python (version 3) not found. Please install Python 3."
+	exit 1
+fi
+
+rm -rf ./cert
+mkdir ./cert
+
+echo "Creating SSL certificate to use for nginx reverse proxy server."
+
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ./cert/cert.key -out ./cert/cert.crt \
+	-subj "/C=no/ST=no/L=no/O=no/OU=no/CN=no/emailAddress=no"
+
+echo "Done."

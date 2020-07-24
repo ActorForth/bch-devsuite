@@ -1,9 +1,8 @@
 version: "3"
 services:
-
-  bitcoin-unlimited:
+  bitcoind-regtest:
     image: zquestz/bitcoin-unlimited
-    container_name: bitcoin-unlimited 
+    container_name: bitcoind-regtest
     expose:
       - "18332"
       - "18444"
@@ -12,37 +11,19 @@ services:
       - "18332:18332"
       - "18444:18444"
       - "28332:28332"
-    volumes:
-      - ./data/bitcoind:/data
-    command: bitcoind -rpcbind=0.0.0.0:18332 -rpcuser=admin -rpcpassword=adminpassword -server -rest -regtest -txindex -reindex -zmqpubhashtx=tcp://0.0.0.0:28332
-    networks:
-      - bitcoin-bridging
-
-
-  electrumx:
-    image: buzzkillb/docker-electrumx:latest
-    container_name: electrumx
-    expose:
-      - "50001"
-      - "50002"
-      - "50004"
+    volumes: 
+      - ./data:/data
+    entrypoint: .
+    command: bitcoind 
+  nginx-regtest:
+    image: nginx:latest
+    container_name: nginx-regtest 
     ports:
-      - "50001:50001"
       - "50002:50002"
-      - "50004:50004"
     volumes:
-      - ./data/electrumx:/data
-    environment:
-      - DAEMON_URL=http://admin:adminpassword@bitcoin-unlimited:18332
-      - COIN=BitcoinSV
-      - NET=regtest
-      - LOG_LEVEL=debug
-      - DB_DIRECTORY=/data
+      - ./config/default.conf:/etc/nginx/conf.d/default.conf
+      - ./cert/cert.key:/etc/nginx/cert.key
+      - ./cert/cert.crt:/etc/nginx/cert.crt
     depends_on:
-      - bitcoin-unlimited
-    networks:
-      - bitcoin-bridging
+      - bitcoind-regtest
 
-networks:
-  bitcoin-bridging:
-    external: true
