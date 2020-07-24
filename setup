@@ -28,16 +28,16 @@ else
 	exit 1
 fi
 
-BU_PYV=`python -c "import sys;t='{v[0]}'.format(v=list(sys.version_info[:2]));sys.stdout.write(t)";`
-if [ $BU_PYV -eq 3 ]; then
+BTK_PY_VER=`python -c "import sys;t='{v[0]}'.format(v=list(sys.version_info[:2]));sys.stdout.write(t)";`
+if [ $BTK_PY_VER -eq 3 ]; then
 	echo "Python found."
 else 
 	echo "Python (version 3) not found. Please install Python 3."
 	exit 1
 fi
 
-VENV_VER=`python -m virtualenv --version | grep -o 20`
-if [ $VENV_VER -eq 20 ]; then
+BTK_VENV_VER=`python -m virtualenv --version | grep -o 20`
+if [ $BTK_VENV_VER -eq 20 ]; then
 	echo "Virtualenv found."
 else
 	echo "Virtualenv not found. Please install virtualenv."
