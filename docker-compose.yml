@@ -13,7 +13,7 @@ services:
       - "28332:28332"
     volumes: 
       - ./data:/data
-    entrypoint: .
+    entrypoint: "/entrypoint.sh" 
     command: bitcoind 
   nginx-regtest:
     image: nginx:latest
