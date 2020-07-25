@@ -14,9 +14,18 @@ if [ -d "./Electron-Cash-SLP" ]; then
 	DID_SOMETHING=1
 fi
 
-if [ -d "~/.electron-cash" ]; then
+BTK_ENV=`uname`
+if [[ $BTK_ENV == "Darwin" ]];then
+	ECW_DIR="/Users/`whoami`/.electron-cash"
+fi
+
+if [[ $BTK_ENV == "Linux" || $BTK_ENV == "FreeBSD" ]];then
+	ECW_DIR="/home/`whoami`/.electron-cash"
+fi
+
+if [ -d "$ECW_DIR" ]; then
 	echo "Removing Electron-Cash wallet directory in home folder"
-	rm -rf ~/.electron-cash/*
+	rm -rf $ECW_DIR/* 
 	DID_SOMETHING=1
 fi
 
