@@ -14,6 +14,12 @@ if [ -d "./Electron-Cash-SLP" ]; then
 	DID_SOMETHING=1
 fi
 
+if [ -d "~/.electron-cash" ]; then
+	echo "Removing Electron-Cash wallet directory in home folder"
+	rm -rf ~/.electron-cash
+	DID_SOMETHING=1
+fi
+
 if [ $DID_SOMETHING -eq 1 ]; then
 	echo "Done."
 else

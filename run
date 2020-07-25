@@ -12,12 +12,13 @@ else
 
 	echo "Running nodes and Electron Cash SLP wallet"
 
-	docker-compose -d up
+	docker-compose up -d
 
 	sleep 4 
 
 	cd ./Electron-Cash-SLP
 	source ./venv/bin/activate
-	./electron-cash -testnet -v
-
+	./electron-cash --testnet -v
+	
+	docker-compose stop
 fi
