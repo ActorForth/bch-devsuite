@@ -25,7 +25,7 @@ fi
 
 if [ -d "$ECW_DIR" ]; then
 	echo "Removing Electron-Cash wallet directory in home folder"
-	rm -rf $ECW_DIR/* 
+	rm -rf $ECW_DIR 
 	DID_SOMETHING=1
 fi
 
