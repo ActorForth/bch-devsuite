@@ -126,13 +126,20 @@ if [ ! -f "./Electron-Cash-SLP/merkle.txt" ]; then
 		"127.0.0.1": {}
 	}
 	EOF
+
+	#BTK_ENV=`uname`
+	#if [[ $BTK_ENV == "Darwin" || $BTK_ENV == "FreeBSD" ]]; then
 	sed -i "" "91s|GENESIS.*$|GENESIS = \"${BTK_GEN_HASH}\"|" networks.py
 	sed -i "" "98s|BITCOIN_CASH_FORK_BLOCK_HEIGHT =.*$|BITCOIN_CASH_FORK_BLOCK_HEIGHT = 150|" networks.py
 	sed -i "" "99s|BITCOIN_CASH_FORK_BLOCK_HASH =.*$|BITCOIN_CASH_FORK_BLOCK_HASH = \"${BTK_FOR_HASH}\"|" networks.py
 	sed -i "" "101s|VERIFICATION_BLOCK_MERKLE_ROOT =.*$|VERIFICATION_BLOCK_MERKLE_ROOT = \"${BTK_VER_MERK}\"|" networks.py
 	sed -i "" "102s|VERIFICATION_BLOCK_HEIGHT =.*$|VERIFICATION_BLOCK_HEIGHT = 200|" networks.py
+#	else
+#		echo "Patching not yet tested on Linux host."
+#	fi
+
 	echo $BTK_VER_MERK > merkle.txt
-	rm genesis.txt fork.txt verification.txt
+	# rm genesis.txt fork.txt verification.txt
 	cd ..
 fi
 
