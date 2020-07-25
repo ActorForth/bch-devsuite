@@ -29,6 +29,4 @@ services:
           - ./nginx.conf:/etc/nginx/nginx.conf
           - ./cert/cert.key:/etc/nginx/cert.key
           - ./cert/cert.crt:/etc/nginx/cert.crt
-            #        depends_on:
-            #          - bitcoind-regtest
 
