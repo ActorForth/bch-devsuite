@@ -80,6 +80,7 @@ fi
 
 # Start the servers and get the genesis & verification block, and merkle root
 if [ ! -f "./Electron-Cash-SLP/merkle.txt" ]; then
+
 	# Generate some blocks, and get their hashes/merkle roots
 	docker ps -a > 1.txt
 	docker-compose up -d
@@ -89,7 +90,8 @@ if [ ! -f "./Electron-Cash-SLP/merkle.txt" ]; then
 	rm 1.txt 2.txt
 	BTK_BU_ID=`cat 3.txt | grep bitcoin-unlimited | awk '{ print $2 }'`
 	BTK_NG_ID=`cat 3.txt | grep nginx | awk '{ print $2 }'`
-	rm 3.txt
+	echo "$BTK_BU_ID $BTK_NG_ID" > docker_container_ids.txt
+	rm 3.txt	
 
 	docker exec -u bitcoin -i $BTK_BU_ID bitcoin-cli generate 210
 	docker exec -u bitcoin -i $BTK_BU_ID bitcoin-cli getblock 0 > ./Electron-Cash-SLP/genesis.txt

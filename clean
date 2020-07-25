@@ -29,6 +29,12 @@ if [ -d "$ECW_DIR" ]; then
 	DID_SOMETHING=1
 fi
 
+if [ -f "./docker_container_ids.txt" ]; then
+	CONTAINER_IDS=`cat ./docker_container_ids.txt`
+	docker stop $CONTAINER_IDS
+	docker rm $CONTAINER_IDS
+fi
+
 if [ $DID_SOMETHING -eq 1 ]; then
 	echo "Done."
 else
