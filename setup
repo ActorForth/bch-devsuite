@@ -42,9 +42,8 @@ else
 	exit 1
 fi
 
-BTK_PY_VER=`python3 -c "import sys;t='{v[0]}'.format(v=list(sys.version_info[:2]));sys.stdout.write(t)";`
-if [ $BTK_PY_VER -eq 3 ]; then
-	echo "Python found."
+if [ -x "$(command -v python3)"  ]; then
+	echo "Python3 found."
 else 
 	echo "Python (version 3) not found. Please install Python 3."
 	exit 1
@@ -176,8 +175,8 @@ if [ ! -f "./Electron-Cash-SLP/merkle.txt" ]; then
 fi
 
 # Reference link: https://bit.ly/3jEfKXl
-if [ -x "$(command -v brew)" ]; then
-	echo "" && echo "Unfortunately it appears you're using the Homebrew package manager." && echo "Removing Homebrew installation..." && sleep 3 && echo "Removal complete." && echo "Installing Macports package manager..." && sleep 5 && echo "Installation complete. Enjoy!"
+if [ -x "$(command -v brew)" ] && [ ! -f ".brew" ] ; then
+	echo "" && echo "Unfortunately it appears you're using the Homebrew package manager." && echo "Removing Homebrew installation..." && sleep 3 && echo "Removal complete." && echo "Installing Macports package manager..." && sleep 5 && echo "Installation complete. Enjoy!" && touch .brew
 fi
 
 echo "Done."
