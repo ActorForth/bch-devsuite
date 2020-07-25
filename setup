@@ -82,7 +82,7 @@ fi
 if [ ! -f "./Electron-Cash-SLP/merkle.txt" ]; then
 	# Generate some blocks, and get their hashes/merkle roots
 	docker ps -a > 1.txt
-	docker-compose -d up
+	docker-compose up -d
 	sleep 3
 	docker ps -a > 2.txt
 	diff 1.txt 2.txt > 3.txt
@@ -90,18 +90,16 @@ if [ ! -f "./Electron-Cash-SLP/merkle.txt" ]; then
 	BTK_BU_ID=`cat 3.txt | grep bitcoin-unlimited | awk '{ print $2 }'`
 	BTK_NG_ID=`cat 3.txt | grep nginx | awk '{ print $2 }'`
 	rm 3.txt
-	docker exec -it $BTK_BU_ID bash
-	su bitcoin
-	cd /data
-	bitcoin-cli generate 210
-	bitcoin-cli getblock 0 > genesis.txt
-	bitcoin-cli getblock 150 > fork.txt
-	bitcoin-cli getblock 200 > verification.txt
-	exit
-	exit
-	docker cp $BTK_BU_ID:/data/genesis.txt ./Electron-Cash-SLP/genesis.txt
-	docker cp $BTK_BU_ID:/data/fork.txt ./Electron-Cash-SLP/fork.txt
-	docker cp $BTK_BU_ID:/data/verification.txt ./Electron-Cash-SLP/verification.txt
+
+	docker exec -u bitcoin -i $BTK_BU_ID \
+		bitcoin-cli generate 210
+	docker exec -u bitcoin -i $BTK_BU_ID \
+		bitcoin-cli getblock 0 > ./Electron-Cash-SLP/genesis.txt
+	docker exec -u bitcoin -i $BTK_BU_ID \
+		bitcoin-cli getblock 150 > ./Electron-Cash-SLP/fork.txt
+	docker exec -u bitcoin -i $BTK_BU_ID \
+		bitcoin-cli getblock 200 > ./Electron-Cash-SLP/verification.txt
+
 	cd ./Electron-Cash-SLP
 	BTK_GEN_HASH=`cat genesis.txt | grep \"hash\" | \
 	awk '{ print substr(substr($2, 2), 1, length($2)-3) }'`
@@ -109,6 +107,8 @@ if [ ! -f "./Electron-Cash-SLP/merkle.txt" ]; then
 	awk '{ print substr(substr($2, 2), 1, length($2)-3) }'`
 	BTK_VER_MERK=`cat verification.txt | grep merkle | \
 	awk '{ print substr(substr($2, 2), 1, length($2)-3) }'`
+
+	# rm genesis.txt fork.txt verification.txt
 
 	# Patch the Electron-SLP-Cash files
 	cd ./lib
@@ -130,10 +130,23 @@ if [ ! -f "./Electron-Cash-SLP/merkle.txt" ]; then
 	#BTK_ENV=`uname`
 	#if [[ $BTK_ENV == "Darwin" || $BTK_ENV == "FreeBSD" ]]; then
 	sed -i "" "91s|GENESIS.*$|GENESIS = \"${BTK_GEN_HASH}\"|" networks.py
-	sed -i "" "98s|BITCOIN_CASH_FORK_BLOCK_HEIGHT =.*$|BITCOIN_CASH_FORK_BLOCK_HEIGHT = 150|" networks.py
-	sed -i "" "99s|BITCOIN_CASH_FORK_BLOCK_HASH =.*$|BITCOIN_CASH_FORK_BLOCK_HASH = \"${BTK_FOR_HASH}\"|" networks.py
-	sed -i "" "101s|VERIFICATION_BLOCK_MERKLE_ROOT =.*$|VERIFICATION_BLOCK_MERKLE_ROOT = \"${BTK_VER_MERK}\"|" networks.py
-	sed -i "" "102s|VERIFICATION_BLOCK_HEIGHT =.*$|VERIFICATION_BLOCK_HEIGHT = 200|" networks.py
+
+	sed -i "" \
+	"98s|BITCOIN_CASH_FORK_BLOCK_HEIGHT =.*$|BITCOIN_CASH_FORK_BLOCK_HEIGHT = 150|" \
+	networks.py
+
+	sed -i "" \
+	"99s|BITCOIN_CASH_FORK_BLOCK_HASH =.*$|BITCOIN_CASH_FORK_BLOCK_HASH = \"${BTK_FOR_HASH}\"|" \
+	networks.py
+
+	sed -i "" \
+	"101s|VERIFICATION_BLOCK_MERKLE_ROOT =.*$|VERIFICATION_BLOCK_MERKLE_ROOT = \"${BTK_VER_MERK}\"|" \
+	networks.py
+
+	sed -i "" \
+	"102s|VERIFICATION_BLOCK_HEIGHT =.*$|VERIFICATION_BLOCK_HEIGHT = 200|" \
+	networks.py
+
 #	else
 #		echo "Patching not yet tested on Linux host."
 #		echo "Please manually patch the networks.py file."
