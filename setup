@@ -1,12 +1,19 @@
-
+#!/usr/bin/env bash
 echo "Setting up Bitcoin Unlimited node."
 echo "Checking that necessary software is available: "
 
-# Check that Docker, openssl, git, python3, and virtualenv are installed 
+# Check that Docker, docker-compose, openssl, git, python3, and virtualenv are installed 
 if [ -x "$(command -v docker)" ]; then
 	echo "Docker found."
 else
 	echo "Docker not found. Please install docker."
+	exit 1 
+fi
+
+if [ -x "$(command -v docker-compose)" ]; then
+	echo "Docker-compose found."
+else
+	echo "Docker-compose not found. Please install docker-compose."
 	exit 1 
 fi
 
@@ -59,7 +66,7 @@ if [ ! -d "./cert" ]; then
 	-subj "/C=no/ST=no/L=no/O=no/OU=no/CN=no/emailAddress=no"
 fi
 
-# Check and (if necessary) download and setup the Electron Cash SLP wallet
+# Check and (if necessary) download+setup the Electron Cash SLP wallet
 [ -d "./Electron-Cash-SLP" ] && echo "Electron Cash SLP already exists." || git clone https://github.com/simpleledger/Electron-Cash-SLP.git
 
 if [ ! -d "./Electron-Cash-SLP/venv" ]; then
@@ -68,6 +75,64 @@ if [ ! -d "./Electron-Cash-SLP/venv" ]; then
 	source ./venv/bin/activate
 	python ./setup.py build
 	python ./setup.py install
+	cd ..
+fi
+
+# Start the servers and get the genesis & verification block, and merkle root
+if [ ! -f "./Electron-Cash-SLP/merkle.txt" ]; then
+	# Generate some blocks, and get their hashes/merkle roots
+	docker ps -a > 1.txt
+	docker-compose -d up
+	sleep 3
+	docker ps -a > 2.txt
+	diff 1.txt 2.txt > 3.txt
+	rm 1.txt 2.txt
+	BTK_BU_ID=`cat 3.txt | grep bitcoin-unlimited | awk '{ print $2 }'`
+	BTK_NG_ID=`cat 3.txt | grep nginx | awk '{ print $2 }'`
+	rm 3.txt
+	docker exec -it $BTK_BU_ID bash
+	su bitcoin
+	cd /data
+	bitcoin-cli generate 210
+	bitcoin-cli getblock 0 > genesis.txt
+	bitcoin-cli getblock 150 > fork.txt
+	bitcoin-cli getblock 200 > verification.txt
+	exit
+	exit
+	docker cp $BTK_BU_ID:/data/genesis.txt ./Electron-Cash-SLP/genesis.txt
+	docker cp $BTK_BU_ID:/data/fork.txt ./Electron-Cash-SLP/fork.txt
+	docker cp $BTK_BU_ID:/data/verification.txt ./Electron-Cash-SLP/verification.txt
+	cd ./Electron-Cash-SLP
+	BTK_GEN_HASH=`cat genesis.txt | grep \"hash\" | \
+	awk '{ print substr(substr($2, 2), 1, length($2)-3) }'`
+	BTK_FOR_HASH=`cat fork.txt | grep \"hash\" | \
+	awk '{ print substr(substr($2, 2), 1, length($2)-3) }'`
+	BTK_VER_MERK=`cat verification.txt | grep merkle | \
+	awk '{ print substr(substr($2, 2), 1, length($2)-3) }'`
+
+	# Patch the Electron-SLP-Cash files
+	cd ./lib
+	rm ./servers_testnet.json
+	cat <<-EOF > "./servers_testnet.json"
+	{
+		"127.0.0.1": {
+			"s": "50002"
+		}
+	}
+	EOF
+	rm ./servers_slpdb_testnet.json
+	cat <<-EOF > "./servers_slpdb_testnet.json"
+	{
+		"127.0.0.1": {}
+	}
+	EOF
+	sed -i "" "91s|GENESIS.*$|GENESIS = \"${BTK_GEN_HASH}\"|" networks.py
+	sed -i "" "98s|BITCOIN_CASH_FORK_BLOCK_HEIGHT =.*$|BITCOIN_CASH_FORK_BLOCK_HEIGHT = 150|" networks.py
+	sed -i "" "99s|BITCOIN_CASH_FORK_BLOCK_HASH =.*$|BITCOIN_CASH_FORK_BLOCK_HASH = \"${BTK_FOR_HASH}\"|" networks.py
+	sed -i "" "101s|VERIFICATION_BLOCK_MERKLE_ROOT =.*$|VERIFICATION_BLOCK_MERKLE_ROOT = \"${BTK_VER_MERK}\"|" networks.py
+	sed -i "" "102s|VERIFICATION_BLOCK_HEIGHT =.*$|VERIFICATION_BLOCK_HEIGHT = 200|" networks.py
+	echo $BTK_VER_MERK > merkle.txt
+	rm genesis.txt fork.txt verification.txt
 	cd ..
 fi
 
