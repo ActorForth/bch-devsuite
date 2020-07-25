@@ -40,7 +40,7 @@ else
 fi
 
 BTK_VENV_VER=`python -m virtualenv --version | grep -o 20`
-if [ $BTK_VENV_VER -eq 20 ]; then
+if [ $BTK_VENV_VER -ge 20 ]; then
 	echo "Virtualenv found."
 else
 	echo "Virtualenv not found. Please install virtualenv."
