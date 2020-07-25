@@ -16,7 +16,7 @@ fi
 
 if [ -d "~/.electron-cash" ]; then
 	echo "Removing Electron-Cash wallet directory in home folder"
-	rm -rf ~/.electron-cash
+	rm -rf ~/.electron-cash/*
 	DID_SOMETHING=1
 fi
 

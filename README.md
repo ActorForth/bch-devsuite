@@ -31,11 +31,22 @@ Lastly, you should run the 'run' script to start the Electron Cash SLP wallet.
 
 # Known Issues
 
+# Serious
+
+* If other bitcoin-unlimited containers exist, the ./setup script will fail
+
+* Wallet will show "not connected" until at least 1 block is generated (after wallet is started)
+
+## Non-serious
+
 There are a few issues with this setup that could use improvement in the future.
 * Currently, this setup relies on the built-in Electrscash indexing server included in the Bitcoin Unlimited node. This isn't an issue per se, but to test with other nodes (such as Bitcoin ABC, Bitcoin Cash Node, or bchd) it will be necessary to seperate the indexing server into a seperate container.
 
 * This setup creates and deletes SSL certificates with little regard. Because it is only intended for local testing purposes, no safeguards are in place to prevent you from losing your certs.
 
 * Currently blocks must be generated manually after transactions are made. The possibility of adding a cron job to generate a block every few seconds could be a consideration to look into.
+
+
+
 
 
