@@ -4,5 +4,6 @@ Electron-Cash-SLP/*
 misc/*
 cert/*
 
+*.txt
 *.swp
 
