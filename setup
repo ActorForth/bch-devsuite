@@ -31,7 +31,7 @@ else
 	exit 1
 fi
 
-BTK_PY_VER=`python -c "import sys;t='{v[0]}'.format(v=list(sys.version_info[:2]));sys.stdout.write(t)";`
+BTK_PY_VER=`python3 -c "import sys;t='{v[0]}'.format(v=list(sys.version_info[:2]));sys.stdout.write(t)";`
 if [ $BTK_PY_VER -eq 3 ]; then
 	echo "Python found."
 else 
@@ -39,8 +39,8 @@ else
 	exit 1
 fi
 
-BTK_VENV_VER=`python -m virtualenv --version | grep -o 20`
-if [ $BTK_VENV_VER -ge 20 ]; then
+BTK_VENV_VER=`python3 -m virtualenv --version | grep -o 20`
+if [[ $BTK_VENV_VER == 20 ]]; then
 	echo "Virtualenv found."
 else
 	echo "Virtualenv not found. Please install virtualenv."
@@ -71,10 +71,10 @@ fi
 
 if [ ! -d "./Electron-Cash-SLP/venv" ]; then
 	cd ./Electron-Cash-SLP
-	python -m virtualenv ./venv
+	python3 -m virtualenv ./venv
 	source ./venv/bin/activate
-	python ./setup.py build
-	python ./setup.py install
+	python3 ./setup.py build
+	python3 ./setup.py install
 	cd ..
 fi
 
