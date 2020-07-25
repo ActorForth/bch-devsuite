@@ -91,14 +91,10 @@ if [ ! -f "./Electron-Cash-SLP/merkle.txt" ]; then
 	BTK_NG_ID=`cat 3.txt | grep nginx | awk '{ print $2 }'`
 	rm 3.txt
 
-	docker exec -u bitcoin -i $BTK_BU_ID \
-		bitcoin-cli generate 210
-	docker exec -u bitcoin -i $BTK_BU_ID \
-		bitcoin-cli getblock 0 > ./Electron-Cash-SLP/genesis.txt
-	docker exec -u bitcoin -i $BTK_BU_ID \
-		bitcoin-cli getblock 150 > ./Electron-Cash-SLP/fork.txt
-	docker exec -u bitcoin -i $BTK_BU_ID \
-		bitcoin-cli getblock 200 > ./Electron-Cash-SLP/verification.txt
+	docker exec -u bitcoin -i $BTK_BU_ID bitcoin-cli generate 210
+	docker exec -u bitcoin -i $BTK_BU_ID bitcoin-cli getblock 0 > ./Electron-Cash-SLP/genesis.txt
+	docker exec -u bitcoin -i $BTK_BU_ID bitcoin-cli getblock 150 > ./Electron-Cash-SLP/fork.txt
+	docker exec -u bitcoin -i $BTK_BU_ID bitcoin-cli getblock 200 > ./Electron-Cash-SLP/verification.txt
 
 	cd ./Electron-Cash-SLP
 	BTK_GEN_HASH=`cat genesis.txt | grep \"hash\" | \
@@ -151,11 +147,11 @@ if [ ! -f "./Electron-Cash-SLP/merkle.txt" ]; then
 #		echo "Patching not yet tested on Linux host."
 #		echo "Please manually patch the networks.py file."
 #	fi
-
+	cd ..
 	echo $BTK_VER_MERK > merkle.txt
 	# rm genesis.txt fork.txt verification.txt
-	cd ../..
-	docker-compose down
+	cd ..
+	docker-compose stop 
 fi
 
 # Reference link: https://bit.ly/3jEfKXl
