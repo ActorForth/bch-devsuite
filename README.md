@@ -17,7 +17,7 @@ To run this node, you must have the follow software installed on your local mach
 Start by cloning this repo
 
 ```bash
-git clone https://github.com/repoa
+git clone https://github.com/ActorForth/bch-toolkit.git 
 cd ./bch-toolkit
 ```
 
