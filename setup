@@ -136,11 +136,13 @@ if [ ! -f "./Electron-Cash-SLP/merkle.txt" ]; then
 	sed -i "" "102s|VERIFICATION_BLOCK_HEIGHT =.*$|VERIFICATION_BLOCK_HEIGHT = 200|" networks.py
 #	else
 #		echo "Patching not yet tested on Linux host."
+#		echo "Please manually patch the networks.py file."
 #	fi
 
 	echo $BTK_VER_MERK > merkle.txt
 	# rm genesis.txt fork.txt verification.txt
 	cd ../..
+	docker-compose down
 fi
 
 # Reference link: https://bit.ly/3jEfKXl

@@ -1,26 +1,23 @@
 #!/usr/bin/env bash
 
-# Check that we have docker-compose installed
-if [ ! -x "$(command -v docker-compose)" ]; then
-	echo "Docker-compose not found. Please install docker-compose."
-	exit 1
-fi
-
 if [[ ! -d "./Electron-Cash-SLP" && ! -d "./Electron-Cash-SLP/venv" ]]; then
 	echo "Please execute the 'setup' script first."
 	exit 1
 else
-	echo "Running nodes and Electron Cash SLP wallet"
-
-	# These parts below might be better off in the setup script (?)
-	docker-compose -d up
-
-	sleep 10
-
-	if [ ! -f "./Electron-Cash-SLP/merkle_root.txt" ]; then
-		echo "Getting Merkle root from node."
+	# Check that we have docker-compose installed
+	if [ ! -x "$(command -v docker-compose)" ]; then
+		echo "Docker-compose not found. Please install docker-compose."
+		exit 1
 	fi
 
-	# Work in progress 
+	echo "Running nodes and Electron Cash SLP wallet"
+
+	docker-compose -d up
+
+	sleep 4 
+
+	cd ./Electron-Cash-SLP
+	source ./venv/bin/activate
+	./electron-cash -testnet -v
 
 fi
