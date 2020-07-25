@@ -2,9 +2,20 @@
 echo "Setting up Bitcoin Unlimited node."
 echo "Checking that necessary software is available: "
 
+BTK_ENV=`uname`
+
 # Check that Docker, docker-compose, openssl, git, python3, and virtualenv are installed 
 if [ -x "$(command -v docker)" ]; then
 	echo "Docker found."
+	if [[ $BTK_ENV == "Linux" ]]; then
+		CHK_DOCKER_ERROR=`docker ps 2>&1` 
+	       	CHK_DOCKER_PERMISSION=`echo $CHK_DOCKER_ERROR | grep "permission denied"`
+		if [ ! -z "$CHK_DOCKER_PERMISSION" ]; then
+			echo "...However... It appears there are permission issues with the installed instance of Docker."
+			echo "This script doesn't support running docker as sudo. Therefore the current user must be in the 'docker' group and have permission to do things like 'docker ps', 'docker run', etc..."
+			exit 1
+		fi
+	fi
 else
 	echo "Docker not found. Please install docker."
 	exit 1 
@@ -125,30 +136,38 @@ if [ ! -f "./Electron-Cash-SLP/merkle.txt" ]; then
 	}
 	EOF
 
-	#BTK_ENV=`uname`
-	#if [[ $BTK_ENV == "Darwin" || $BTK_ENV == "FreeBSD" ]]; then
-	sed -i "" "91s|GENESIS.*$|GENESIS = \"${BTK_GEN_HASH}\"|" networks.py
+	if [[ $BTK_ENV == "Darwin" || $BTK_ENV == "FreeBSD" ]]; then
+		sed -i "" "91s|GENESIS.*$|GENESIS = \"${BTK_GEN_HASH}\"|" networks.py
 
-	sed -i "" \
-	"98s|BITCOIN_CASH_FORK_BLOCK_HEIGHT =.*$|BITCOIN_CASH_FORK_BLOCK_HEIGHT = 150|" \
-	networks.py
+		sed -i "" \
+		"98s|BITCOIN_CASH_FORK_BLOCK_HEIGHT =.*$|BITCOIN_CASH_FORK_BLOCK_HEIGHT = 150|" \
+		networks.py
 
-	sed -i "" \
-	"99s|BITCOIN_CASH_FORK_BLOCK_HASH =.*$|BITCOIN_CASH_FORK_BLOCK_HASH = \"${BTK_FOR_HASH}\"|" \
-	networks.py
+		sed -i "" \
+		"99s|BITCOIN_CASH_FORK_BLOCK_HASH =.*$|BITCOIN_CASH_FORK_BLOCK_HASH = \"${BTK_FOR_HASH}\"|" \
+		networks.py
 
-	sed -i "" \
-	"101s|VERIFICATION_BLOCK_MERKLE_ROOT =.*$|VERIFICATION_BLOCK_MERKLE_ROOT = \"${BTK_VER_MERK}\"|" \
-	networks.py
+		sed -i "" \
+		"101s|VERIFICATION_BLOCK_MERKLE_ROOT =.*$|VERIFICATION_BLOCK_MERKLE_ROOT = \"${BTK_VER_MERK}\"|" \
+		networks.py
 
-	sed -i "" \
-	"102s|VERIFICATION_BLOCK_HEIGHT =.*$|VERIFICATION_BLOCK_HEIGHT = 200|" \
-	networks.py
+		sed -i "" \
+		"102s|VERIFICATION_BLOCK_HEIGHT =.*$|VERIFICATION_BLOCK_HEIGHT = 200|" \
+		networks.py
 
-#	else
-#		echo "Patching not yet tested on Linux host."
-#		echo "Please manually patch the networks.py file."
-#	fi
+	fi
+	if [[ $BTK_ENV == "Linux" ]]; then	
+		sed -i "91s|GENESIS.*$|GENESIS = \"${BTK_GEN_HASH}\"|" networks.py
+
+		sed -i "98s|BITCOIN_CASH_FORK_BLOCK_HEIGHT =.*$|BITCOIN_CASH_FORK_BLOCK_HEIGHT = 150|" networks.py
+
+		sed -i "99s|BITCOIN_CASH_FORK_BLOCK_HASH =.*$|BITCOIN_CASH_FORK_BLOCK_HASH = \"${BTK_FOR_HASH}\"|" networks.py
+
+		sed -i "101s|VERIFICATION_BLOCK_MERKLE_ROOT =.*$|VERIFICATION_BLOCK_MERKLE_ROOT = \"${BTK_VER_MERK}\"|" networks.py
+
+		sed -i "102s|VERIFICATION_BLOCK_HEIGHT =.*$|VERIFICATION_BLOCK_HEIGHT = 200|" networks.py
+	fi
+
 	cd ..
 	echo $BTK_VER_MERK > merkle.txt
 	# rm genesis.txt fork.txt verification.txt
