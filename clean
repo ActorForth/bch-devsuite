@@ -24,9 +24,15 @@ if [[ $BTK_ENV == "Linux" || $BTK_ENV == "FreeBSD" ]];then
 fi
 
 if [ -d "$ECW_DIR" ]; then
-	echo "Removing Electron-Cash wallet directory in home folder"
-	rm -rf $ECW_DIR 
-	DID_SOMETHING=1
+	
+	while true; do
+		read -p "This script is going to DELETE your electron-wallet directory in your home folder. Continue?" yn
+		case $yn in
+			[Yy]* ) echo "Removing Electron-Cash wallet directory in home folder" && rm -rf $ECW_DIR && DID_SOMETHING=1 && break;;
+			[Nn]* ) echo "Okay." && break;;
+			* ) echo "Please answer yes or no.";;
+		esac
+	done
 fi
 
 if [ -f "./docker_container_ids.txt" ]; then
