@@ -6,7 +6,7 @@ This repo intends to be a toolkit for running a local version of a Bitcoin Cash 
 
 To run this node, you must have the follow software installed on your local machine:
 
-* Docker
+* Docker (including docker-compose)
 * Python 3
 * Virtualenv
 * Openssl
@@ -14,22 +14,22 @@ To run this node, you must have the follow software installed on your local mach
 
 # Installation
 
-Start by cloning this repo
+Begin by cloning this repository.
 
 ```bash
 git clone https://github.com/ActorForth/bch-toolkit.git 
 cd ./bch-toolkit
 ```
 
-Next, run the 'setup' script. This will prepare the docker containers, create certificates for ssl, and download Electron-Cash-SLP.
+Next, run the 'setup' script. This will check that the necessary software is installed, create certificates for use with SSL/TLS, prepare the docker containers, download the Electron-Cash-SLP repository, and patch necessary files to enable it to run on the regtest network.
 
-__Note:__ If you wish to have any custom changes applied to the Bitcoin Unlimited or Nginx services, be sure to apply those changes within the _bitcoin.conf_ and _nginx.conf_ files, respectively, before running the setup script.
+__NOTE:__ If you wish to have any custom changes applied to the Bitcoin Unlimited or Nginx Reverse Proxy services, be sure to apply those changes within the _bitcoin.conf_ and _nginx.conf_ files, respectively, before executing the setup script.
 
 ```bash
 ./setup
 ```
 
-Next, you should execute the 'run' script to start the Electron Cash SLP wallet.
+Next, you should execute the 'run' script to start the node service and the Electron Cash SLP wallet.
 
 ```bash
 ./run
@@ -39,9 +39,9 @@ Once the Electron Cash SLP wallet gui appears, it will ask you for "automatic" o
 __Please note:__ you may notice the status bar in the lower left corner indicates "Not connected." In order to remedy this, please open another terminal, navigate to the **bch-toolkit** directory, and execute:
 
 ```bash
-./fix
+./bitcoin-cli
 ```
-This 'fix' script simply generates 10 blocks. After generating the blocks, you should open the "Networks" dialog in the Electron Cash SLP main window, navigate to the "Servers" tab, and un-ban yourself. For some reason, the first time blocks are generated, the localhost server gets banned. This only happens the first time, and you shouldn't need to repeat this step in the future (at least until you run the './clean' script, which removes everything.)
+This script gives you easy access to the bitcoin-cli that communicates with the running node. When executed with no parameters, this script will simply generate 1 block on your regtest blockchain. After generating a block or two, you should open the "Networks" dialog in the Electron Cash SLP main window, navigate to the "Servers" tab, and un-ban the 'localhost' server. For some reason, the first time blocks are generated, the localhost server gets banned. This does only happen the first time, after which you shouldn't need to repeat this step in the future (at least until you run the './clean' script, which completely removes everything and starts you back from scratch.)
 
 # Cleaning Up
 
