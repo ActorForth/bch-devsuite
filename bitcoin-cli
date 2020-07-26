@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -e
+
+if [ -f "./docker_container_ids.txt" ]; then
+	DK_BU=`cat ./docker_container_ids.txt | awk '{ print $1 }'`
+	if [[ ! -z $1 ]]; then
+		docker exec -u bitcoin -i $DK_BU bitcoin-cli $@
+	else
+		echo "Generating 10 blocks..."
+		docker exec -u bitcoin -i $DK_BU bitcoin-cli generate 10
+		echo "Blocks generated."
+	fi
+else
+	echo "Use this fix script AFTER ./setup and ./run"
+	echo "Please note, the wallet should be actively running when you use this script."
+fi
