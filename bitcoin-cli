@@ -4,10 +4,13 @@ set -e
 if [ -f "./docker_container_ids.txt" ]; then
 	DK_BU=`cat ./docker_container_ids.txt | awk '{ print $1 }'`
 	if [[ ! -z $1 ]]; then
+		# This will run the user's command, and also generate 1 block
 		docker exec -u bitcoin -i $DK_BU bitcoin-cli $@
+		docker exec -u bitcoin -i $DK_BU bitcoin-cli generate 1
 	else
+		# If the user gave no arguments, we'll just generate 1 block
 		echo "Generating 10 blocks..."
-		docker exec -u bitcoin -i $DK_BU bitcoin-cli generate 10
+		docker exec -u bitcoin -i $DK_BU bitcoin-cli generate 1
 		echo "Blocks generated."
 	fi
 else

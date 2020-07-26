@@ -3,15 +3,15 @@ services:
     bitcoind-regtest:
         image: zquestz/bitcoin-unlimited
         container_name: bitcoind-regtest
-        expose:
-          - "18332"
-          - "18444"
-          - "28332"
-          - "50001"
+#        expose:
+#          - "18332"
+#          - "18444"
+#          - "28332"
+#          - "50001"
         ports:
-          - "18332:18332"
-          - "18444:18444"
-          - "28332:28332"
+#          - "18332:18332"
+          - "18443:18443"
+#          - "28332:28332"
           - "50001:50001"
         volumes: 
           - ./bitcoin.conf:/data/bitcoin.conf
@@ -21,8 +21,8 @@ services:
     nginx-regtest:
         image: nginx:latest
         container_name: nginx-regtest 
-        expose:
-          - "50002"
+#        expose:
+#          - "50002"
         ports:
           - "50002:50002"
         volumes:
