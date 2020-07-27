@@ -49,8 +49,12 @@ else
 	exit 1
 fi
 
+if [ -x "$(command) -v conda"]; then
+	BTK_CONDA=1
+fi
+
 BTK_VENV_VER=`python3 -m virtualenv --version | grep -o 20`
-if [[ $BTK_VENV_VER == 20 ]]; then
+if [[ $BTK_VENV_VER == 20 || $BTK_CONDA == 1 ]]; then
 	echo "Virtualenv found."
 else
 	echo "Virtualenv not found. Please install virtualenv."
@@ -81,7 +85,11 @@ fi
 
 if [ ! -d "./Electron-Cash-SLP/venv" ]; then
 	cd ./Electron-Cash-SLP
-	python3 -m virtualenv ./venv
+	if [[ $BTK_CONDA == 1]]; then
+		conda create --name venv python=3.7 -y
+	else
+		python3 -m virtualenv ./venv
+	fi
 	source ./venv/bin/activate
 	python3 ./setup.py build
 	python3 ./setup.py install
@@ -169,7 +177,6 @@ if [ ! -f "./Electron-Cash-SLP/merkle.txt" ]; then
 
 	cd ..
 	echo $BTK_VER_MERK > merkle.txt
-	# rm genesis.txt fork.txt verification.txt
 	cd ..
 	docker-compose stop 
 fi

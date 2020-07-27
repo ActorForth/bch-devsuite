@@ -49,4 +49,3 @@ if [ $DID_SOMETHING -eq 1 ]; then
 else
 	echo "Nothing to do."
 fi
-
