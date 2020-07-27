@@ -71,6 +71,29 @@ else
 	exit 1
 fi
 
+# Linux hosts require qt5 library available
+if [[ $BTK_ENV == "Linux" ]]; then
+	BTK_QT_FOUND=0
+	if [[ -x "$(command -v dpkg-query)" ]]; then
+		if dpkg-query -s qtchooser
+		then
+			BTK_QT_FOUND=1
+		fi
+	fi	
+	if [[ -x "$(commmand -v /usr/bin/qmake)" ]]; then
+		BTK_QT_FOUND=1		
+	fi
+
+	if [[ $BTK_QT_FOUND == 1 ]]; then
+		echo "(Linux Host) Qt5 library found."	
+	else
+		echo "(Linux Host) Your machine appears" \
+	                "to be missing the Qt5 libraries necessary for" \
+	                "running the Electrum Cash SLP wallet"
+		exit 1
+	fi
+fi
+
 # Create new SSL certificate/key pair to be used on nginx server
 if [ -d "./cert" ]; then 
 	if [[ -f "./cert/cert.key" && -f "./cert/cert.crt" ]]; then

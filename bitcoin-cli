@@ -5,7 +5,7 @@ if [ -f "./Electron-Cash-SLP/merkle.txt" ]; then
 	if [[ ! -z $1 ]]; then
 		# This will run the user's command, and also generate 5 blocks
 		docker-compose exec bitcoind-regtest bitcoin-cli $@
-		docker-compose exec bitcoind-regtest bitcoin-cli generate 5
+		docker-compose exec bitcoind-regtest bitcoin-cli generate 1
 	else
 		# If the user gave no arguments, we'll just generate 10 blocks
 		echo "Generating 10 blocks..."
