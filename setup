@@ -6,11 +6,11 @@ echo "Checking that necessary software is available: "
 
 BTK_ENV=`uname`
 
-# Check that Docker, docker-compose, openssl, git, python3, and virtualenv are installed 
+# Check that Docker, docker-compose, openssl, git, python3, and virtualenv are installed
 if [ -x "$(command -v docker)" ]; then
 	echo "Docker found."
 	if [[ $BTK_ENV == "Linux" ]]; then
-		CHK_DOCKER_ERROR=`docker ps 2>&1` 
+		CHK_DOCKER_ERROR=`docker ps 2>&1`
 	       	CHK_DOCKER_PERMISSION=`echo $CHK_DOCKER_ERROR | grep "permission denied"`
 		if [ ! -z "$CHK_DOCKER_PERMISSION" ]; then
 			echo "...However... It appears there are permission issues with the installed instance of Docker."
@@ -20,14 +20,14 @@ if [ -x "$(command -v docker)" ]; then
 	fi
 else
 	echo "Docker not found. Please install docker."
-	exit 1 
+	exit 1
 fi
 
 if [ -x "$(command -v docker-compose)" ]; then
 	echo "Docker-compose found."
 else
 	echo "Docker-compose not found. Please install docker-compose."
-	exit 1 
+	exit 1
 fi
 
 if [ -x "$(command -v openssl)" ]; then
@@ -44,9 +44,9 @@ else
 	exit 1
 fi
 
-if [ -x "$(command -v python3)" ]; then
-	echo "Python3 found."
-else 
+if [ -x "$(command -v /Users/naach/opt/anaconda3/envs/pysand/bin/python3)" ]; then
+	echo "/Users/naach/opt/anaconda3/envs/pysand/bin/python3 found."
+else
 	echo "Python (version 3) not found. Please install Python 3."
 	exit 1
 fi
@@ -55,7 +55,7 @@ if [ -x "$(command -v conda)" ]; then
 	BTK_CONDA=1
 fi
 
-BTK_VENV_VER=`python3 -m virtualenv --version | grep -o 20`
+BTK_VENV_VER=`/Users/naach/opt/anaconda3/envs/pysand/bin/python3 -m virtualenv --version | grep -o 20`
 if [[ $BTK_VENV_VER == 20 || $BTK_CONDA == 1 ]]; then
 	echo "Virtualenv found."
 else
@@ -64,7 +64,7 @@ else
 fi
 
 # Create new SSL certificate/key pair to be used on nginx server
-if [ -d "./cert" ]; then 
+if [ -d "./cert" ]; then
 	if [[ -f "./cert/cert.key" && -f "./cert/cert.crt" ]]; then
 		echo "OpenSSL certificates already exist."
 	else
@@ -90,11 +90,11 @@ if [ ! -d "./Electron-Cash-SLP/venv" ]; then
 	if [[ $BTK_CONDA == 1 ]]; then
 		conda create --name venv python=3.7 -y
 	else
-		python3 -m virtualenv ./venv
+		/Users/naach/opt/anaconda3/envs/pysand/bin/python3 -m virtualenv ./venv
 	fi
 	source ./venv/bin/activate
-	python3 ./setup.py build
-	python3 ./setup.py install
+	/Users/naach/opt/anaconda3/envs/pysand/bin/python3 ./setup.py build
+	/Users/naach/opt/anaconda3/envs/pysand/bin/python3 ./setup.py install
 	cd ..
 fi
 
@@ -111,7 +111,7 @@ if [ ! -f "./Electron-Cash-SLP/merkle.txt" ]; then
 	BTK_BU_ID=`cat 3.txt | grep bitcoin-unlimited | awk '{ print $2 }'`
 	BTK_NG_ID=`cat 3.txt | grep nginx | awk '{ print $2 }'`
 	echo "$BTK_BU_ID $BTK_NG_ID" > docker_container_ids.txt
-	rm 3.txt	
+	rm 3.txt
 
 	docker exec -u bitcoin -i $BTK_BU_ID bitcoin-cli generate 210
 	docker exec -u bitcoin -i $BTK_BU_ID bitcoin-cli getblock 0 > ./Electron-Cash-SLP/genesis.txt
@@ -165,7 +165,7 @@ if [ ! -f "./Electron-Cash-SLP/merkle.txt" ]; then
 		networks.py
 
 	fi
-	if [[ $BTK_ENV == "Linux" ]]; then	
+	if [[ $BTK_ENV == "Linux" ]]; then
 		sed -i "91s|GENESIS.*$|GENESIS = \"${BTK_GEN_HASH}\"|" networks.py
 
 		sed -i "98s|BITCOIN_CASH_FORK_BLOCK_HEIGHT =.*$|BITCOIN_CASH_FORK_BLOCK_HEIGHT = 150|" networks.py
@@ -180,7 +180,7 @@ if [ ! -f "./Electron-Cash-SLP/merkle.txt" ]; then
 	cd ..
 	echo $BTK_VER_MERK > merkle.txt
 	cd ..
-	docker-compose stop 
+	docker-compose stop
 fi
 
 # Reference link: https://bit.ly/3jEfKXl
