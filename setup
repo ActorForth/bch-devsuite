@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+set -e
+
 echo "Setting up Bitcoin Unlimited node."
 echo "Checking that necessary software is available: "
 
