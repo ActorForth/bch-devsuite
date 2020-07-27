@@ -4,12 +4,11 @@ set -e
 echo "Setting up Bitcoin Unlimited node."
 echo "Checking that necessary software is available: "
 
-BTK_ENV=`uname`
+BTK_ENV=$(uname)
 
 # Check that Docker, docker-compose, openssl, git, python3, and virtualenv are installed 
 echo "Looking for Docker..."
 if [ -x "$(command -v docker)" ]; then
-	BTK_DOCKER_STATUS=`docker ps`
 	echo "Docker found."
 else
 	echo "Docker not found. Please install docker."
@@ -50,10 +49,10 @@ fi
 
 echo "Looking for virtualenv..."
 set +e
-BTK_VENV_VER=`python3 -m virtualenv --version | grep -o 20`
+BTK_VENV_VER=$(python3 -m virtualenv --version | grep -o 20)
 set -e
 
-if [ -z $BTK_VENV_VER ]; then
+if [ -z "$BTK_VENV_VER" ]; then
 	echo "Looking for Anaconda instead..."
 	if [ -x "$(command -v conda)" ]; then
 		BTK_CONDA=1
@@ -89,7 +88,12 @@ fi
 
 # Check and (if necessary) download+setup the Electron Cash SLP wallet
 echo "Downloading Electron Cash SLP wallet..."
-[ -d "./Electron-Cash-SLP" ] && echo "Electron Cash SLP already exists." || git clone https://github.com/simpleledger/Electron-Cash-SLP.git
+if [ -d "./Electron-Cash-SLP" ]
+then
+   echo "Electron Cash SLP already exists."
+else
+    git clone https://github.com/simpleledger/Electron-Cash-SLP.git
+fi
 
 echo "Setting up python virtual environment..."
 if [ ! -d "./Electron-Cash-SLP/venv" ]; then
@@ -123,12 +127,12 @@ if [ ! -f "./Electron-Cash-SLP/merkle.txt" ]; then
 
 	# Push hashes into environmental variables
 	cd ./Electron-Cash-SLP
-	BTK_GEN_HASH=`cat genesis.txt | grep \"hash\" | \
-	awk '{ print substr(substr($2, 2), 1, length($2)-3) }'`
-	BTK_FOR_HASH=`cat fork.txt | grep \"hash\" | \
-	awk '{ print substr(substr($2, 2), 1, length($2)-3) }'`
-	BTK_VER_MERK=`cat verification.txt | grep merkle | \
-	awk '{ print substr(substr($2, 2), 1, length($2)-3) }'`
+	BTK_GEN_HASH=$(grep \"hash\" genesis.txt | \
+	awk '{ print substr(substr($2, 2), 1, length($2)-3) }')
+	BTK_FOR_HASH=$(grep \"hash\" fork.txt | \
+	awk '{ print substr(substr($2, 2), 1, length($2)-3) }')
+	BTK_VER_MERK=$(grep merkle verification.txt | \
+	awk '{ print substr(substr($2, 2), 1, length($2)-3) }')
 	rm genesis.txt fork.txt verification.txt
 
 	# Patch the Electron-SLP-Cash files
@@ -182,14 +186,22 @@ if [ ! -f "./Electron-Cash-SLP/merkle.txt" ]; then
 	fi
 
 	cd ..
-	echo $BTK_VER_MERK > merkle.txt
+	echo "$BTK_VER_MERK" > merkle.txt
 	cd ..
 	docker-compose stop 
 fi
 
 # Reference link: https://bit.ly/3jEfKXl
 if [ -x "$(command -v brew)" ] && [ ! -f ".brew" ] ; then
-	echo "" && echo "Unfortunately it appears you're using the Homebrew package manager." && echo "Removing Homebrew installation..." && sleep 3 && echo "Removal complete." && echo "Installing Macports package manager..." && sleep 5 && echo "Installation complete. Enjoy!" && touch .brew
+    echo ""
+    echo "Unfortunately it appears you're using the Homebrew package manager."
+    echo "Removing Homebrew installation..."
+    sleep 3
+    echo "Removal complete."
+    echo "Installing Macports package manager..."
+    sleep 5
+    echo "Installation complete. Enjoy!"
+    touch .brew
 fi
 
 echo "Done."
