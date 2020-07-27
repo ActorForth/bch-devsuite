@@ -44,14 +44,14 @@ else
 	exit 1
 fi
 
-if [ -x "$(command -v python3)"  ]; then
+if [ -x "$(command -v python3)" ]; then
 	echo "Python3 found."
 else 
 	echo "Python (version 3) not found. Please install Python 3."
 	exit 1
 fi
 
-if [ -x "$(command) -v conda" ]; then
+if [ -x "$(command -v conda)" ]; then
 	BTK_CONDA=1
 fi
 
