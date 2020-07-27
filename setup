@@ -73,14 +73,17 @@ fi
 
 # Linux hosts require qt5 library available
 if [[ $BTK_ENV == "Linux" ]]; then
+
 	BTK_QT_FOUND=0
+	BTK_DEB=0
+
 	if [[ -x "$(command -v dpkg-query)" ]]; then
+		BTK_DEB=1
 		if dpkg-query -s qtchooser
 		then
 			BTK_QT_FOUND=1
 		fi
-	fi	
-	if [[ -x "$(commmand -v /usr/bin/qmake)" ]]; then
+	elif [[ -x "$(command -v /usr/bin/qmake)" ]]; then
 		BTK_QT_FOUND=1		
 	fi
 
@@ -89,7 +92,14 @@ if [[ $BTK_ENV == "Linux" ]]; then
 	else
 		echo "(Linux Host) Your machine appears" \
 	                "to be missing the Qt5 libraries necessary for" \
-	                "running the Electrum Cash SLP wallet"
+	                "running the Electrum Cash SLP wallet."
+
+		if [[ $BTK_DEB == 1 ]]; then
+			echo "On Ubuntu/Debian-based distributions," \
+				"it may be available in your package" \
+			       "manager under the name 'qt5-default'."
+		fi
+
 		exit 1
 	fi
 fi
