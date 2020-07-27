@@ -9,6 +9,10 @@ BTK_ENV=$(uname)
 # Check that Docker, docker-compose, openssl, git, python3, and virtualenv are installed 
 echo "Looking for Docker..."
 if [ -x "$(command -v docker)" ]; then
+	# Note: The following line may seem useless, however it causes the scirpt to error
+	# if A) Docker is not currently running, or B) permissions are not set correctly
+	# on Linux or FreeBSD host
+	BTK_DOCKER_STATUS=`docker ps`
 	echo "Docker found."
 else
 	echo "Docker not found. Please install docker."
@@ -191,18 +195,4 @@ if [ ! -f "./Electron-Cash-SLP/merkle.txt" ]; then
 	docker-compose stop 
 fi
 
-# Reference link: https://bit.ly/3jEfKXl
-if [ -x "$(command -v brew)" ] && [ ! -f ".brew" ] ; then
-    echo ""
-    echo "Unfortunately it appears you're using the Homebrew package manager."
-    echo "Removing Homebrew installation..."
-    sleep 3
-    echo "Removal complete."
-    echo "Installing Macports package manager..."
-    sleep 5
-    echo "Installation complete. Enjoy!"
-    touch .brew
-fi
-
 echo "Done."
-# Enjoy your new local node!
