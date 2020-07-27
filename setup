@@ -7,22 +7,16 @@ echo "Checking that necessary software is available: "
 BTK_ENV=`uname`
 
 # Check that Docker, docker-compose, openssl, git, python3, and virtualenv are installed 
+echo "Looking for Docker..."
 if [ -x "$(command -v docker)" ]; then
+	BTK_DOCKER_STATUS=`docker ps`
 	echo "Docker found."
-	if [[ $BTK_ENV == "Linux" ]]; then
-		CHK_DOCKER_ERROR=`docker ps 2>&1` 
-	       	CHK_DOCKER_PERMISSION=`echo $CHK_DOCKER_ERROR | grep "permission denied"`
-		if [ ! -z "$CHK_DOCKER_PERMISSION" ]; then
-			echo "...However... It appears there are permission issues with the installed instance of Docker."
-			echo "This script doesn't support running docker as sudo. Therefore the current user must be in the 'docker' group and have permission to do things like 'docker ps', 'docker run', etc..."
-			exit 1
-		fi
-	fi
 else
 	echo "Docker not found. Please install docker."
 	exit 1 
 fi
 
+echo "Looking for docker-compose..."
 if [ -x "$(command -v docker-compose)" ]; then
 	echo "Docker-compose found."
 else
@@ -30,6 +24,7 @@ else
 	exit 1 
 fi
 
+echo "Looking for openssl..."
 if [ -x "$(command -v openssl)" ]; then
 	echo "Openssl found."
 else
@@ -37,6 +32,7 @@ else
 	exit 1
 fi
 
+echo "Looking for git..."
 if [ -x "$(command -v git)" ]; then
 	echo "Git found."
 else
@@ -44,26 +40,31 @@ else
 	exit 1
 fi
 
+echo "Looking for Python 3..."
 if [ -x "$(command -v python3)" ]; then
-	echo "Python3 found."
+	echo "Python 3 found."
 else 
-	echo "Python (version 3) not found. Please install Python 3."
+	echo "Python 3 not found. Please install Python 3."
 	exit 1
 fi
 
+echo "Looking for virtualenv..."
+set +e
 BTK_VENV_VER=`python3 -m virtualenv --version | grep -o 20`
+set -e
 
 if [ -z $BTK_VENV_VER ]; then
+	echo "Looking for Anaconda instead..."
 	if [ -x "$(command -v conda)" ]; then
 		BTK_CONDA=1
-		echo "Using Conda instead."
+		echo "Anaconda found."
 	fi
 fi
 
 if [[ $BTK_VENV_VER == 20 || $BTK_CONDA == 1 ]]; then
 	echo "Virtualenv found."
 else
-	echo "Virtualenv not found. Please install virtualenv."
+	echo "Neither virtualenv nor conda could be found. Please install virtualenv."
 	exit 1
 fi
 
@@ -87,8 +88,10 @@ if [ ! -d "./cert" ]; then
 fi
 
 # Check and (if necessary) download+setup the Electron Cash SLP wallet
+echo "Downloading Electron Cash SLP wallet..."
 [ -d "./Electron-Cash-SLP" ] && echo "Electron Cash SLP already exists." || git clone https://github.com/simpleledger/Electron-Cash-SLP.git
 
+echo "Setting up python virtual environment..."
 if [ ! -d "./Electron-Cash-SLP/venv" ]; then
 	cd ./Electron-Cash-SLP
 	if [[ $BTK_CONDA == 1 ]]; then
@@ -100,11 +103,15 @@ if [ ! -d "./Electron-Cash-SLP/venv" ]; then
 	python3 ./setup.py build
 	python3 ./setup.py install
 	cd ..
+else
+	echo "Environment already exists."
 fi
+
 
 # Start the servers and get the genesis & verification block, and merkle root
 if [ ! -f "./Electron-Cash-SLP/merkle.txt" ]; then
 
+	echo "Starting local node servers..."
 	docker-compose up -d
 	sleep 4
 
@@ -125,6 +132,7 @@ if [ ! -f "./Electron-Cash-SLP/merkle.txt" ]; then
 	rm genesis.txt fork.txt verification.txt
 
 	# Patch the Electron-SLP-Cash files
+	echo "Patching Electon Cash SLP wallet files to work with regtest network..."
 	cd ./lib
 	rm ./servers_testnet.json
 	cat <<-EOF > "./servers_testnet.json"
