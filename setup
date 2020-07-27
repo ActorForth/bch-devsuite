@@ -7,22 +7,16 @@ echo "Checking that necessary software is available: "
 BTK_ENV=`uname`
 
 # Check that Docker, docker-compose, openssl, git, python3, and virtualenv are installed
+echo "Looking for Docker..."
 if [ -x "$(command -v docker)" ]; then
+	BTK_DOCKER_STATUS=`docker ps`
 	echo "Docker found."
-	if [[ $BTK_ENV == "Linux" ]]; then
-		CHK_DOCKER_ERROR=`docker ps 2>&1`
-	       	CHK_DOCKER_PERMISSION=`echo $CHK_DOCKER_ERROR | grep "permission denied"`
-		if [ ! -z "$CHK_DOCKER_PERMISSION" ]; then
-			echo "...However... It appears there are permission issues with the installed instance of Docker."
-			echo "This script doesn't support running docker as sudo. Therefore the current user must be in the 'docker' group and have permission to do things like 'docker ps', 'docker run', etc..."
-			exit 1
-		fi
-	fi
 else
 	echo "Docker not found. Please install docker."
 	exit 1
 fi
 
+echo "Looking for docker-compose..."
 if [ -x "$(command -v docker-compose)" ]; then
 	echo "Docker-compose found."
 else
@@ -30,6 +24,7 @@ else
 	exit 1
 fi
 
+echo "Looking for openssl..."
 if [ -x "$(command -v openssl)" ]; then
 	echo "Openssl found."
 else
@@ -37,6 +32,7 @@ else
 	exit 1
 fi
 
+echo "Looking for git..."
 if [ -x "$(command -v git)" ]; then
 	echo "Git found."
 else
@@ -51,15 +47,24 @@ else
 	exit 1
 fi
 
-if [ -x "$(command -v conda)" ]; then
-	BTK_CONDA=1
+echo "Looking for virtualenv..."
+set +e
+BTK_VENV_VER=`/Users/naach/opt/anaconda3/envs/pysand/bin/python3 -m virtualenv --version | grep -o 20`
+set -e
+
+if [ -z $BTK_VENV_VER ]; then
+	echo "Looking for Anaconda instead..."
+	if [ -x "$(command -v conda)" ]; then
+		BTK_CONDA=1
+		echo "Anaconda found."
+	fi
 fi
 
 BTK_VENV_VER=`/Users/naach/opt/anaconda3/envs/pysand/bin/python3 -m virtualenv --version | grep -o 20`
 if [[ $BTK_VENV_VER == 20 || $BTK_CONDA == 1 ]]; then
 	echo "Virtualenv found."
 else
-	echo "Virtualenv not found. Please install virtualenv."
+	echo "Neither virtualenv nor conda could be found. Please install virtualenv."
 	exit 1
 fi
 
@@ -83,8 +88,10 @@ if [ ! -d "./cert" ]; then
 fi
 
 # Check and (if necessary) download+setup the Electron Cash SLP wallet
+echo "Downloading Electron Cash SLP wallet..."
 [ -d "./Electron-Cash-SLP" ] && echo "Electron Cash SLP already exists." || git clone https://github.com/simpleledger/Electron-Cash-SLP.git
 
+echo "Setting up python virtual environment..."
 if [ ! -d "./Electron-Cash-SLP/venv" ]; then
 	cd ./Electron-Cash-SLP
 	if [[ $BTK_CONDA == 1 ]]; then
@@ -96,28 +103,25 @@ if [ ! -d "./Electron-Cash-SLP/venv" ]; then
 	/Users/naach/opt/anaconda3/envs/pysand/bin/python3 ./setup.py build
 	/Users/naach/opt/anaconda3/envs/pysand/bin/python3 ./setup.py install
 	cd ..
+else
+	echo "Environment already exists."
 fi
+
 
 # Start the servers and get the genesis & verification block, and merkle root
 if [ ! -f "./Electron-Cash-SLP/merkle.txt" ]; then
 
-	# Generate some blocks, and get their hashes/merkle roots
-	docker ps -a > 1.txt
+	echo "Starting local node servers..."
 	docker-compose up -d
-	sleep 3
-	docker ps -a > 2.txt
-	diff 1.txt 2.txt > 3.txt
-	rm 1.txt 2.txt
-	BTK_BU_ID=`cat 3.txt | grep bitcoin-unlimited | awk '{ print $2 }'`
-	BTK_NG_ID=`cat 3.txt | grep nginx | awk '{ print $2 }'`
-	echo "$BTK_BU_ID $BTK_NG_ID" > docker_container_ids.txt
-	rm 3.txt
+	sleep 4
 
-	docker exec -u bitcoin -i $BTK_BU_ID bitcoin-cli generate 210
-	docker exec -u bitcoin -i $BTK_BU_ID bitcoin-cli getblock 0 > ./Electron-Cash-SLP/genesis.txt
-	docker exec -u bitcoin -i $BTK_BU_ID bitcoin-cli getblock 150 > ./Electron-Cash-SLP/fork.txt
-	docker exec -u bitcoin -i $BTK_BU_ID bitcoin-cli getblock 200 > ./Electron-Cash-SLP/verification.txt
+	# Generate some blocks, and get their hashes/merkle roots
+	docker-compose exec bitcoind-regtest bitcoin-cli generate 210
+	docker-compose exec bitcoind-regtest bitcoin-cli getblock 0 > ./Electron-Cash-SLP/genesis.txt
+	docker-compose exec bitcoind-regtest bitcoin-cli getblock 150 > ./Electron-Cash-SLP/fork.txt
+	docker-compose exec bitcoind-regtest bitcoin-cli getblock 200 > ./Electron-Cash-SLP/verification.txt
 
+	# Push hashes into environmental variables
 	cd ./Electron-Cash-SLP
 	BTK_GEN_HASH=`cat genesis.txt | grep \"hash\" | \
 	awk '{ print substr(substr($2, 2), 1, length($2)-3) }'`
@@ -125,10 +129,10 @@ if [ ! -f "./Electron-Cash-SLP/merkle.txt" ]; then
 	awk '{ print substr(substr($2, 2), 1, length($2)-3) }'`
 	BTK_VER_MERK=`cat verification.txt | grep merkle | \
 	awk '{ print substr(substr($2, 2), 1, length($2)-3) }'`
-
-	# rm genesis.txt fork.txt verification.txt
+	rm genesis.txt fork.txt verification.txt
 
 	# Patch the Electron-SLP-Cash files
+	echo "Patching Electon Cash SLP wallet files to work with regtest network..."
 	cd ./lib
 	rm ./servers_testnet.json
 	cat <<-EOF > "./servers_testnet.json"
@@ -146,18 +150,18 @@ if [ ! -f "./Electron-Cash-SLP/merkle.txt" ]; then
 	EOF
 
 	if [[ $BTK_ENV == "Darwin" || $BTK_ENV == "FreeBSD" ]]; then
-		sed -i "" "91s|GENESIS.*$|GENESIS = \"${BTK_GEN_HASH}\"|" networks.py
+		sed -i "" "91s|GENESIS.*$|GENESIS = \"${BTK_GEN_HASH}|" networks.py
 
 		sed -i "" \
 		"98s|BITCOIN_CASH_FORK_BLOCK_HEIGHT =.*$|BITCOIN_CASH_FORK_BLOCK_HEIGHT = 150|" \
 		networks.py
 
 		sed -i "" \
-		"99s|BITCOIN_CASH_FORK_BLOCK_HASH =.*$|BITCOIN_CASH_FORK_BLOCK_HASH = \"${BTK_FOR_HASH}\"|" \
+		"99s|BITCOIN_CASH_FORK_BLOCK_HASH =.*$|BITCOIN_CASH_FORK_BLOCK_HASH = \"${BTK_FOR_HASH}|" \
 		networks.py
 
 		sed -i "" \
-		"101s|VERIFICATION_BLOCK_MERKLE_ROOT =.*$|VERIFICATION_BLOCK_MERKLE_ROOT = \"${BTK_VER_MERK}\"|" \
+		"101s|VERIFICATION_BLOCK_MERKLE_ROOT =.*$|VERIFICATION_BLOCK_MERKLE_ROOT = \"${BTK_VER_MERK}|" \
 		networks.py
 
 		sed -i "" \

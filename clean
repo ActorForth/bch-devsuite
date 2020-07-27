@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -e
 
 DID_SOMETHING=0
 
@@ -36,12 +37,11 @@ if [ -d "$ECW_DIR" ]; then
 	done
 fi
 
-if [ -f "./docker_container_ids.txt" ]; then
+if [ -f "./Electron-Cash-SLP/merkle.txt" ]; then
 	echo "Removing previous docker containers"
-	CONTAINER_IDS=`cat ./docker_container_ids.txt`
-	docker stop $CONTAINER_IDS
-	docker rm $CONTAINER_IDS
-	rm ./docker_container_ids.txt
+	docker-compose down
+	rm ./Electron-Cash-SLP/merkle.txt
+	DID_SOMETHING=1
 fi
 
 if [ $DID_SOMETHING -eq 1 ]; then
