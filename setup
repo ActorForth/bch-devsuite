@@ -178,13 +178,13 @@ if [ ! -f "./Electron-Cash-SLP/merkle.txt" ]; then
 
 	fi
 	if [[ $BTK_ENV == "Linux" ]]; then	
-		sed -i "91s|GENESIS.*$|GENESIS = \"${BTK_GEN_HASH}\"|" networks.py
+		sed -i "91s|GENESIS.*$|GENESIS = \"${BTK_GEN_HASH}|" networks.py
 
 		sed -i "98s|BITCOIN_CASH_FORK_BLOCK_HEIGHT =.*$|BITCOIN_CASH_FORK_BLOCK_HEIGHT = 150|" networks.py
 
-		sed -i "99s|BITCOIN_CASH_FORK_BLOCK_HASH =.*$|BITCOIN_CASH_FORK_BLOCK_HASH = \"${BTK_FOR_HASH}\"|" networks.py
+		sed -i "99s|BITCOIN_CASH_FORK_BLOCK_HASH =.*$|BITCOIN_CASH_FORK_BLOCK_HASH = \"${BTK_FOR_HASH}|" networks.py
 
-		sed -i "101s|VERIFICATION_BLOCK_MERKLE_ROOT =.*$|VERIFICATION_BLOCK_MERKLE_ROOT = \"${BTK_VER_MERK}\"|" networks.py
+		sed -i "101s|VERIFICATION_BLOCK_MERKLE_ROOT =.*$|VERIFICATION_BLOCK_MERKLE_ROOT = \"${BTK_VER_MERK}|" networks.py
 
 		sed -i "102s|VERIFICATION_BLOCK_HEIGHT =.*$|VERIFICATION_BLOCK_HEIGHT = 200|" networks.py
 	fi
