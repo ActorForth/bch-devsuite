@@ -10,6 +10,7 @@ services:
           - "50001:50001"
         volumes: 
           - ./bitcoin.conf:/data/bitcoin.conf
+          - ./bitcoin.conf:/root/.bitcoin/bitcoin.conf
         entrypoint: "/entrypoint.sh" 
         command: bitcoind 
 
