@@ -29,6 +29,7 @@ else
 	echo "- wallet: removes wallet files in your home directory"
 	echo "- wallet-app: removes the Electron Cash SLP wallet folder"
 	echo "- docker: removes the docker containers created by setup"
+	DID_SOMETHING=1
 fi
 
 if [[ -d "./cert" && $BTK_CERTS == 1 ]]; then
