@@ -65,7 +65,7 @@ if [[ -d "$ECW_DIR" && $BTK_WALLET == 1 ]]; then
 	done
 fi
 
-if [[ -f "./Electron-Cash-SLP/merkle.txt" && $BTK_DOCKER ]]; then
+if [[ -f "./Electron-Cash-SLP/merkle.txt" && $BTK_DOCKER == 1 ]]; then
 	echo "Removing previous docker containers"
 	docker-compose down
 	rm ./Electron-Cash-SLP/merkle.txt
