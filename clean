@@ -1,15 +1,43 @@
 #!/usr/bin/env bash
 set -e
 
+BTK_CERTS=0
+BTK_WALLET=0
+BTK_WALLET_APP=0
+BTK_DOCKER=0
 DID_SOMETHING=0
 
-if [ -d "./cert" ]; then
+# Process user arguments, or display usage message
+if [[ ! -z $1 ]]; then
+	for var in "$@"
+	do
+		[[ $var == "certs" ]] && BTK_CERTS=1
+		[[ $var == "wallet" ]] && BTK_WALLET=1
+		[[ $var == "wallet-app" ]] && BTK_WALLET_APP=1
+		[[ $var == "docker" ]] && BTK_DOCKER=1
+		if [[ $var == "all" ]]; then
+			BTK_CERTS=1
+			BTK_WALLET=1
+			BTK_WALLET_APP=1
+			BTK_DOCKER=1
+		fi
+	done
+else
+	echo "usage: clean [command]"
+	echo "- all: cleans every item of all other commands listed here"
+	echo "- certs: removes only the SSL certifications"
+	echo "- wallet-app: removes the Electron Cash SLP wallet folder"
+	echo "- wallet: removes both the application and its files in your home directory"
+	echo "- docker: removes the docker containers created by setup"
+fi
+
+if [[ -d "./cert" && $BTK_CERTS == 1 ]]; then
 	echo "Removing certificates directory."
 	rm -rf cert
 	DID_SOMETHING=1
 fi
 
-if [ -d "./Electron-Cash-SLP" ]; then
+if [[ -d "./Electron-Cash-SLP" && $BTK_WALLET_APP == 1 ]]; then
 	echo "Removing Electron-Cash-SLP directory."
 	rm -rf Electron-Cash-SLP
 	DID_SOMETHING=1
@@ -24,7 +52,7 @@ if [[ $BTK_ENV == "Linux" || $BTK_ENV == "FreeBSD" ]];then
 	ECW_DIR="/home/`whoami`/.electron-cash"
 fi
 
-if [ -d "$ECW_DIR" ]; then
+if [[ -d "$ECW_DIR" && $BTK_WALLET == 1 ]]; then
 	
 	while true; do
 		echo "This script is going to DELETE your electron-wallet directory in your home folder." 
@@ -37,7 +65,7 @@ if [ -d "$ECW_DIR" ]; then
 	done
 fi
 
-if [ -f "./Electron-Cash-SLP/merkle.txt" ]; then
+if [[ -f "./Electron-Cash-SLP/merkle.txt" && $BTK_DOCKER ]]; then
 	echo "Removing previous docker containers"
 	docker-compose down
 	rm ./Electron-Cash-SLP/merkle.txt
