@@ -26,8 +26,8 @@ else
 	echo "usage: clean [command]"
 	echo "- all: cleans every item of all other commands listed here"
 	echo "- certs: removes only the SSL certifications"
+	echo "- wallet: removes wallet files in your home directory"
 	echo "- wallet-app: removes the Electron Cash SLP wallet folder"
-	echo "- wallet: removes both the application and its files in your home directory"
 	echo "- docker: removes the docker containers created by setup"
 fi
 
