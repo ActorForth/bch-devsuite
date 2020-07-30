@@ -124,11 +124,10 @@ if [ ! -d "./cert" ]; then
 fi
 
 # Check and (if necessary) download+setup the Electron Cash SLP wallet
-echo "Downloading Electron Cash SLP wallet..."
-if [ -d "./Electron-Cash-SLP" ]
-then
+if [ -d "./Electron-Cash-SLP" ]; then
    echo "Electron Cash SLP already exists."
 else
+    echo "Downloading Electron Cash SLP wallet..."
     git clone https://github.com/simpleledger/Electron-Cash-SLP.git
 fi
 
