@@ -135,7 +135,9 @@ echo "Setting up python virtual environment..."
 if [ ! -d "./Electron-Cash-SLP/venv" ]; then
 	cd ./Electron-Cash-SLP
 	if [[ $BTK_CONDA == 1 ]]; then
-		conda create --name venv python=3.7 -y
+		echo "This script doesn't currently work with conda."
+		exit 1
+		# conda create --name venv python=3.7 -y
 	else
 		python3 -m virtualenv ./venv
 	fi
