@@ -46,24 +46,34 @@ fi
 
 BTK_ENV=`uname`
 if [[ $BTK_ENV == "Darwin" ]];then
-	ECW_DIR="/Users/`whoami`/.electron-cash"
+	ECW_HOME_DIR="/Users/`whoami`/.electron-cash"
 fi
 
 if [[ $BTK_ENV == "Linux" || $BTK_ENV == "FreeBSD" ]];then
-	ECW_DIR="/home/`whoami`/.electron-cash"
+	ECW_HOME_DIR="/home/`whoami`/.electron-cash"
 fi
 
-if [[ -d "$ECW_DIR" && $BTK_WALLET == 1 ]]; then
-	
-	while true; do
-		echo "This script is going to DELETE your electron-wallet directory in your home folder." 
-		read -p "Continue? [Y/n] " yn
-		case $yn in
-			[Yy]* ) echo "Removing Electron Cash SLP wallet directory in user's home folder" && rm -rf $ECW_DIR && DID_SOMETHING=1 && break;;
-			[Nn]* ) echo "Okay." && break;;
-			* ) echo "Please answer yes or no.";;
-		esac
-	done
+if [[ BTK_WALLET == 1 ]]; then
+
+	# This removes wallet from users home folder. Once users are switches over to the
+	# portable wallet, this part won't be necessary.
+	if [[ -d "$ECW_HOME_DIR" ]]; then
+		while true; do
+			echo "This script is going to DELETE your electron-wallet directory in your home folder." 
+			read -p "Continue? [Y/n] " yn
+			case $yn in
+				[Yy]* ) echo "Removing Electron Cash SLP wallet directory in user's home folder" && rm -rf $ECW_DIR && DID_SOMETHING=1 && break;;
+				[Nn]* ) echo "Okay." && break;;
+				* ) echo "Please answer yes or no.";;
+			esac
+		done
+	fi
+
+	if [[ -d "./Electron-Cash-SLP/electron_cash_data" ]]; then
+		echo "Removing portable electron wallet"
+		rm -rf "./Electron-Cash-SLP/electron_cash_data"
+		DID_SOMETHING=1
+	fi
 fi
 
 if [[ -d "./Electron-Cash-SLP/electron_cash_data" && $BTK_WALLET == 1 ]]; then
