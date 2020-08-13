@@ -223,9 +223,8 @@ if [ ! -f "./Electron-Cash-SLP/merkle.txt" ]; then
 		sed -i "102s|VERIFICATION_BLOCK_HEIGHT =.*$|VERIFICATION_BLOCK_HEIGHT = 200|" networks.py
 	fi
 
-	cd ..
+	cd ../..
 	touch "./.BTK-container-lock"
-	cd ..
 	docker-compose stop 
 fi
 

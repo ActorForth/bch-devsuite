@@ -1,4 +1,5 @@
 .DS_Store
+.BTK-container-lock
 
 Electron-Cash-SLP/*
 misc/*
