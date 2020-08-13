@@ -224,7 +224,7 @@ if [ ! -f "./Electron-Cash-SLP/merkle.txt" ]; then
 	fi
 
 	cd ..
-	echo "$BTK_VER_MERK" > merkle.txt
+	touch "./.BTK-container-lock"
 	cd ..
 	docker-compose stop 
 fi

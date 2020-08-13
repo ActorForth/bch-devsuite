@@ -76,7 +76,7 @@ if [[ BTK_WALLET == 1 ]]; then
 	fi
 fi
 
-if [[ $BTK_DOCKER == 1 ]]; then
+if [[ $BTK_DOCKER == 1 && -f "./.BTK-container-lock" ]]; then
 	echo "Removing previous docker containers"
 	docker-compose down
 	rm ./Electron-Cash-SLP/merkle.txt
