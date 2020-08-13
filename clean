@@ -29,7 +29,7 @@ else
 	echo "- wallet: removes wallet files in your home directory"
 	echo "- wallet-app: removes the Electron Cash SLP wallet folder"
 	echo "- docker: removes the docker containers created by setup"
-	exit
+	exit 0 
 fi
 
 if [[ -d "./cert" && $BTK_CERTS == 1 ]]; then
@@ -74,11 +74,6 @@ if [[ BTK_WALLET == 1 ]]; then
 		rm -rf "./Electron-Cash-SLP/electron_cash_data"
 		DID_SOMETHING=1
 	fi
-fi
-
-if [[ -d "./Electron-Cash-SLP/electron_cash_data" && $BTK_WALLET == 1 ]]; then
-	echo "Removing Electron Cash SLP portable wallet files"
-	rm -rf "./Electron-Cash-SLP/electron_cash_data"
 fi
 
 if [[ $BTK_DOCKER == 1 ]]; then
