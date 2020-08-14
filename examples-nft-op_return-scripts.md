@@ -112,7 +112,7 @@ SCRIPT BROKEN DOWN:
   <td>length of token_type (1 byte)</td>
  </tr>
  <tr>
-  <td>01</td>
+  <td>81</td>
   <td>token_type (81)</td>
  </tr>
  <tr>

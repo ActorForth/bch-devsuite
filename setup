@@ -229,3 +229,4 @@ if [ ! -f "./Electron-Cash-SLP/merkle.txt" ]; then
 fi
 
 echo "Done."
+
