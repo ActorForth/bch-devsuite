@@ -24,3 +24,11 @@ services:
           - ./cert/cert.key:/etc/nginx/cert.key
           - ./cert/cert.crt:/etc/nginx/cert.crt
 
+    bitcoin-restapi:
+        image: restapi
+        # build: .
+        # dockerfile: Dockerfile-restapi
+        container_name: bitcoin-restapi
+        ports:
+          - "12500:3000"
+      #        restart: always
