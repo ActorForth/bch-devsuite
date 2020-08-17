@@ -1,15 +1,44 @@
 #!/usr/bin/env bash
 set -e
 
+BTK_CERTS=0
+BTK_WALLET=0
+BTK_WALLET_APP=0
+BTK_DOCKER=0
 DID_SOMETHING=0
 
-if [ -d "./cert" ]; then
+# Process user arguments, or display usage message
+if [[ ! -z $1 ]]; then
+	for var in "$@"
+	do
+		[[ $var == "certs" ]] && BTK_CERTS=1
+		[[ $var == "wallet" ]] && BTK_WALLET=1
+		[[ $var == "wallet-app" ]] && BTK_WALLET_APP=1
+		[[ $var == "docker" ]] && BTK_DOCKER=1
+		if [[ $var == "all" ]]; then
+			BTK_CERTS=1
+			BTK_WALLET=1
+			BTK_WALLET_APP=1
+			BTK_DOCKER=1
+		fi
+	done
+else
+	echo "usage: clean [command]"
+	echo "- all: cleans every item of all other commands listed here"
+	echo "- certs: removes only the SSL certifications"
+	echo "- wallet: removes wallet files in your home directory"
+	echo "- wallet-app: removes the Electron Cash SLP wallet folder"
+	echo "- docker: removes the docker containers created by setup"
+	exit 0 
+fi
+
+if [[ -d "./cert" && $BTK_CERTS == 1 ]]; then
 	echo "Removing certificates directory."
 	rm -rf cert
 	DID_SOMETHING=1
 fi
 
-if [ -d "./Electron-Cash-SLP" ]; then
+if [[ -d "./Electron-Cash-SLP" && $BTK_WALLET_APP == 1 ]]; then
 	echo "Removing Electron-Cash-SLP directory."
 	rm -rf Electron-Cash-SLP
 	DID_SOMETHING=1
@@ -17,27 +46,37 @@ fi
 
 BTK_ENV=`uname`
 if [[ $BTK_ENV == "Darwin" ]];then
-	ECW_DIR="/Users/`whoami`/.electron-cash"
+	ECW_HOME_DIR="/Users/`whoami`/.electron-cash"
 fi
 
 if [[ $BTK_ENV == "Linux" || $BTK_ENV == "FreeBSD" ]];then
-	ECW_DIR="/home/`whoami`/.electron-cash"
+	ECW_HOME_DIR="/home/`whoami`/.electron-cash"
 fi
 
-if [ -d "$ECW_DIR" ]; then
-	
-	while true; do
-		echo "This script is going to DELETE your electron-wallet directory in your home folder." 
-		read -p "Continue? [Y/n] " yn
-		case $yn in
-			[Yy]* ) echo "Removing Electron-Cash wallet directory in home folder" && rm -rf $ECW_DIR && DID_SOMETHING=1 && break;;
-			[Nn]* ) echo "Okay." && break;;
-			* ) echo "Please answer yes or no.";;
-		esac
-	done
+if [[ BTK_WALLET == 1 ]]; then
+
+	# This removes wallet from users home folder. Once users are switches over to the
+	# portable wallet, this part won't be necessary.
+	if [[ -d "$ECW_HOME_DIR" ]]; then
+		while true; do
+			echo "This script is going to DELETE your electron-wallet directory in your home folder." 
+			read -p "Continue? [Y/n] " yn
+			case $yn in
+				[Yy]* ) echo "Removing Electron Cash SLP wallet directory in user's home folder" && rm -rf $ECW_DIR && DID_SOMETHING=1 && break;;
+				[Nn]* ) echo "Okay." && break;;
+				* ) echo "Please answer yes or no.";;
+			esac
+		done
+	fi
+
+	if [[ -d "./Electron-Cash-SLP/electron_cash_data" ]]; then
+		echo "Removing portable electron wallet"
+		rm -rf "./Electron-Cash-SLP/electron_cash_data"
+		DID_SOMETHING=1
+	fi
 fi
 
-if [ -f "./Electron-Cash-SLP/merkle.txt" ]; then
+if [[ $BTK_DOCKER == 1 && -f "./.BTK-container-lock" ]]; then
 	echo "Removing previous docker containers"
 	docker-compose down
 	rm ./Electron-Cash-SLP/merkle.txt
@@ -49,3 +88,4 @@ if [ $DID_SOMETHING -eq 1 ]; then
 else
 	echo "Nothing to do."
 fi
+
