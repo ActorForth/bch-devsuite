@@ -3,7 +3,7 @@
 # My DO Testnet Insight Server
 export PORT=3000 
 export BITCOINCOM_BASEURL=http://localhost:3000/api/
-export RPC_BASEURL=http://bitcoind-regtest:18444/
+export RPC_BASEURL=http://bitcoind-regtest:18332/
 export RPC_PASSWORD=regtest
 export RPC_USERNAME=regtest
 export ZEROMQ_URL=0

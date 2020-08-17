@@ -4,7 +4,7 @@ services:
         image: zquestz/bitcoin-unlimited
         container_name: bitcoind-regtest
         ports:
-#          - "18332:18332" 
+          - "18332:18332" 
           - "18444:18444"
 #          - "28332:28332"
           - "50001:50001"
