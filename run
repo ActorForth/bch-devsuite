@@ -13,7 +13,7 @@ else
 		for var in "$@"
 		do
 			[[ $var == "wallet" ]] && BTK_RUN_WALLET=1
-			[[ $var == "server" ]] $$ BTK_RUN_SERVER=1
+			[[ $var == "server" ]] && BTK_RUN_SERVER=1
 		done
 			else
 		echo "usage: run [command]"
