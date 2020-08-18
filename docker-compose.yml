@@ -31,4 +31,7 @@ services:
         container_name: bitcoin-restapi
         ports:
           - "12500:3000"
+        volumes:
+          - ./start-regtest.sh:/home/safeuser/rest.bitcoin.com/start-regtest.sh
+
       #        restart: always

@@ -8,6 +8,7 @@ LABEL Chris Troutner <chris.troutner@gmail.com>
 
 #Update the OS and install any OS packages needed.
 RUN apt-get update
+RUN apt-get upgrade
 
 #Set the working directory to be the home directory
 WORKDIR /home/safeuser
@@ -44,3 +45,4 @@ COPY config/start-regtest.sh /home/safeuser/rest.bitcoin.com/start-regtest.sh
 # CMD ["/home/safeuser/rest.bitcoin.com/start-mainnet.sh"]
 #CMD ["/home/safeuser/rest.bitcoin.com/start-testnet.sh"]
 CMD ["/home/safeuser/rest.bitcoin.com/start-regtest.sh"]
+
