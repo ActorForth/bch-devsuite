@@ -32,6 +32,6 @@ services:
         ports:
           - "12500:3000"
         volumes:
-          - ./start-regtest.sh:/home/safeuser/rest.bitcoin.com/start-regtest.sh
+          - ./restapi-config.sh:/home/safeuser/rest.bitcoin.com/start-regtest.sh
 
       #        restart: always

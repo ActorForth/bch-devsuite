@@ -8,7 +8,7 @@ LABEL Chris Troutner <chris.troutner@gmail.com>
 
 #Update the OS and install any OS packages needed.
 RUN apt-get update
-RUN apt-get upgrade
+RUN echo "y" | apt-get upgrade
 
 #Set the working directory to be the home directory
 WORKDIR /home/safeuser
