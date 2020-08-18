@@ -1,15 +1,38 @@
 #!/usr/bin/env bash
+set -e
+
+BTK_RUN_WALLET=0
+BTK_RUN_SERVER=0
 
 if [[ ! -d "./Electron-Cash-SLP" && ! -d "./Electron-Cash-SLP/venv" ]]; then
 	echo "Please execute the 'setup' script first."
 	exit 1
 else
+
+	if [[ ! -z $1 ]]; then
+		for var in "$@"
+		do
+			[[ $var == "wallet" ]] && BTK_RUN_WALLET=1
+			[[ $var == "server" ]] && BTK_RUN_SERVER=1
+		done
+			else
+		echo "usage: run [command]"
+		echo " - wallet: runs the Electron Cash SLP wallet"
+		echo " - server: runs only the local node and restAPI server"
+		exit 0
+	fi
+
 	# Check that we have docker-compose installed
 	if [ ! -x "$(command -v docker-compose)" ]; then
 		echo "Docker-compose not found. Please install docker-compose."
 		exit 1
 	fi
 
+
+fi
+
+if [[ $BTK_RUN_WALLET == 1 ]]; then
+		
 	echo "Running nodes and Electron Cash SLP wallet"
 
 	docker-compose up -d
@@ -22,3 +45,8 @@ else
 	
 	docker-compose stop
 fi
+
+if [[ $BTK_RUN_SERVER == 1 ]]; then
+	docker-compose up -d
+fi
+

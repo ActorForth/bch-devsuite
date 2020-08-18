@@ -4,7 +4,7 @@ services:
         image: zquestz/bitcoin-unlimited
         container_name: bitcoind-regtest
         ports:
-#          - "18332:18332" 
+          - "18332:18332" 
           - "18444:18444"
 #          - "28332:28332"
           - "50001:50001"
@@ -24,3 +24,14 @@ services:
           - ./cert/cert.key:/etc/nginx/cert.key
           - ./cert/cert.crt:/etc/nginx/cert.crt
 
+    bitcoin-restapi:
+        image: restapi
+        # build: .
+        # dockerfile: Dockerfile-restapi
+        container_name: bitcoin-restapi
+        ports:
+          - "12500:3000"
+        volumes:
+          - ./restapi-config.sh:/home/safeuser/rest.bitcoin.com/start-regtest.sh
+
+      #        restart: always
