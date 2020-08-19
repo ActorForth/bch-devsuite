@@ -123,6 +123,12 @@ if [ ! -d "./cert" ]; then
 	-subj "/C=no/ST=no/L=no/O=no/OU=no/CN=no/emailAddress=no"
 fi
 
+if [ ! -f "./.rest-lock" ]; then
+	echo "Bulding REST API docker image"
+	docker build -t restapi ./restapi
+	touch .rest-lock
+fi
+
 # Check and (if necessary) download+setup the Electron Cash SLP wallet
 if [ -d "./Electron-Cash-SLP" ]; then
    echo "Electron Cash SLP already exists."
