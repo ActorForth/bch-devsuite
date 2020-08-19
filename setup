@@ -123,6 +123,7 @@ if [ ! -d "./cert" ]; then
 	-subj "/C=no/ST=no/L=no/O=no/OU=no/CN=no/emailAddress=no"
 fi
 
+# Create the docker image for the REST API server, only if it wasn't already created
 if [ ! -f "./.rest-lock" ]; then
 	echo "Bulding REST API docker image"
 	docker build -t restapi ./restapi
