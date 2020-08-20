@@ -19,7 +19,7 @@ USER safeuser
 #RUN echo 'abcd8765' | sudo -S pwd
 
 # Clone the rest.bitcoin.com repository
-RUN git clone https://github.com/christroutner/rest.bitcoin.com
+RUN git clone https://github.com/ActorForth/rest.bitcoin.com
 
 # Switch to the desired branch. `master` is usually stable,
 # and `stage` has the most up-to-date changes.
