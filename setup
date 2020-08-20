@@ -13,10 +13,10 @@ if [ -x "$(command -v docker)" ]; then
 	# if A) Docker is not currently running, or B) permissions are not set correctly
 	# on Linux or FreeBSD host
 	BTK_DOCKER_STATUS=`docker ps`
-	echo "Docker found."
+	echo "Docker found."	
 else
 	echo "Docker not found. Please install docker."
-	exit 1
+	exit 1 
 fi
 
 echo "Looking for docker-compose..."
@@ -24,7 +24,7 @@ if [ -x "$(command -v docker-compose)" ]; then
 	echo "Docker-compose found."
 else
 	echo "Docker-compose not found. Please install docker-compose."
-	exit 1
+	exit 1 
 fi
 
 echo "Looking for openssl..."
@@ -43,9 +43,9 @@ else
 	exit 1
 fi
 
-if [ -x "$(command -v /Users/naach/opt/anaconda3/envs/pysand/bin/python3)" ]; then
-	echo "/Users/naach/opt/anaconda3/envs/pysand/bin/python3 found."
-else
+if [ -x "$(command -v python3)" ]; then
+	echo "Python3 found."
+else 
 	echo "Python (version 3) not found. Please install Python 3."
 	exit 1
 fi
@@ -63,7 +63,7 @@ if [ -z "$BTK_VENV_VER" ]; then
 	fi
 fi
 
-BTK_VENV_VER=`/Users/naach/opt/anaconda3/envs/pysand/bin/python3 -m virtualenv --version | grep -o 20`
+BTK_VENV_VER=`python3 -m virtualenv --version | grep -o 20`
 if [[ $BTK_VENV_VER == 20 || $BTK_CONDA == 1 ]]; then
 	echo "Virtualenv found."
 else
@@ -105,7 +105,7 @@ if [[ $BTK_ENV == "Linux" ]]; then
 fi
 
 # Create new SSL certificate/key pair to be used on nginx server
-if [ -d "./cert" ]; then
+if [ -d "./cert" ]; then 
 	if [[ -f "./cert/cert.key" && -f "./cert/cert.crt" ]]; then
 		echo "OpenSSL certificates already exist."
 	else
@@ -146,11 +146,11 @@ if [ ! -d "./Electron-Cash-SLP/venv" ]; then
 		exit 1
 		# conda create --name venv python=3.7 -y
 	else
-		/Users/naach/opt/anaconda3/envs/pysand/bin/python3 -m virtualenv ./venv
+		python3 -m virtualenv ./venv
 	fi
 	source ./venv/bin/activate
-	/Users/naach/opt/anaconda3/envs/pysand/bin/python3 ./setup.py build
-	/Users/naach/opt/anaconda3/envs/pysand/bin/python3 ./setup.py install
+	python3 ./setup.py build
+	python3 ./setup.py install
 	cd ..
 else
 	echo "Environment already exists."
@@ -218,7 +218,7 @@ if [ ! -f "./.BTK-container-lock" ]; then
 		networks.py
 
 	fi
-	if [[ $BTK_ENV == "Linux" ]]; then
+	if [[ $BTK_ENV == "Linux" ]]; then	
 		sed -i "91s|GENESIS.*$|GENESIS = \"${BTK_GEN_HASH}\"|" networks.py
 
 		sed -i "98s|BITCOIN_CASH_FORK_BLOCK_HEIGHT =.*$|BITCOIN_CASH_FORK_BLOCK_HEIGHT = 150|" networks.py
@@ -233,7 +233,7 @@ if [ ! -f "./.BTK-container-lock" ]; then
 	cd ..
 	echo $BTK_VER_MERK > merkle.txt
 	cd ..
-	docker-compose stop
+	docker-compose stop 
 fi
 
 echo "Done."
