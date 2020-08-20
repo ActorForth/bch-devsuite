@@ -79,6 +79,7 @@ fi
 if [[ $BTK_DOCKER == 1 && -f "./.BTK-container-lock" ]]; then
 	echo "Removing previous docker containers"
 	docker-compose down
+	rm "./.BTK-container-lock"
 	DID_SOMETHING=1
 fi
 
