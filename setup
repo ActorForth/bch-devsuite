@@ -123,6 +123,7 @@ if [ ! -d "./cert" ]; then
 	-subj "/C=no/ST=no/L=no/O=no/OU=no/CN=no/emailAddress=no"
 fi
 
+# Create the docker image for the REST API server, only if it wasn't already created
 if [ ! -f "./.rest-lock" ]; then
 	echo "Bulding REST API docker image"
 	docker build -t restapi ./restapi
@@ -157,11 +158,11 @@ fi
 
 
 # Start the servers and get the genesis & verification block, and merkle root
-if [ ! -f "./Electron-Cash-SLP/merkle.txt" ]; then
+if [ ! -f "./.BTK-container-lock" ]; then
 
 	echo "Starting local node servers..."
 	docker-compose up -d
-	sleep 4
+	sleep 5
 
 	# Generate some blocks, and get their hashes/merkle roots
 	docker-compose exec bitcoind-regtest bitcoin-cli generate 210
