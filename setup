@@ -93,17 +93,17 @@ if [[ $BTK_NODE == 1 ]]; then
     fi
 
     echo "Looking for virtualenv..."
-    set +e
-    BTK_VENV_VER=`/Users/naach/opt/anaconda3/envs/pysand/bin/python3 -m virtualenv --version | grep -o 20`
-    set -e
+    # set +e
+    # BTK_VENV_VER=`/Users/naach/opt/anaconda3/envs/pysand/bin/python3 -m virtualenv --version | grep -o 20`
+    # set -e
 
-    if [ -z "$BTK_VENV_VER" ]; then
-	echo "Looking for Anaconda instead..."
-	if [ -x "$(command -v conda)" ]; then
-	    BTK_CONDA=1
-	    echo "Anaconda found."
-	fi
-    fi
+    # if [ -z "$BTK_VENV_VER" ]; then
+    # 	echo "Looking for Anaconda instead..."
+    # 	if [ -x "$(command -v conda)" ]; then
+    # 	    BTK_CONDA=1
+    # 	    echo "Anaconda found."
+    # 	fi
+    # fi
 
     BTK_VENV_VER=`python3 -m virtualenv --version | grep -o 20`
     if [[ $BTK_VENV_VER == 20 || $BTK_CONDA == 1 ]]; then
