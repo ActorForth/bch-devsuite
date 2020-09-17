@@ -40,6 +40,12 @@ else
 fi
 
 
+# Check if network exists and create if it doesn't
+NETWORK_NAME=bitcoin-bridging
+if [ -z $(docker network ls --filter name=^${NETWORK_NAME}$ --format="{{ .Name }}") ] ; then 
+     docker network create ${NETWORK_NAME} ; 
+fi
+
 
 if [[ $BTK_NODE == 1 ]]; then
     
