@@ -26,7 +26,7 @@ Next, run the 'setup' script. This will check that the necessary software is ins
 __NOTE:__ If you wish to have any custom changes applied to the Bitcoin Unlimited, Nginx Reverse Proxy, or REST API services, be sure to apply those changes within the _bitcoin.conf_, _nginx.conf_, or _restapi-config.sh_ files, respectively, before executing the setup script.
 
 ```bash
-./setup
+./setup all
 ```
 
 Next, you should execute the 'run' script to start the node service and the Electron Cash SLP wallet.
@@ -39,6 +39,13 @@ _**Alternatively**, if you only want the Bitcoin Unlimited node and REST APIs wi
 ```bash
 ./run server
 ```
+
+
+_**JS stack bootup example**_
+```bash
+./run server slpdb js
+```
+
 
 Once the Electron Cash SLP wallet gui appears, it will ask you for "automatic" or "manually select a server". Either option is fine. After that, you'll go through the prompts to create a new wallet. Finally once the wallet is created, you'll be greated with the main interface.
 __Please note:__ you may notice the status bar in the lower left corner indicates "Not connected." In order to remedy this, please open another terminal, navigate to the **bch-toolkit** directory, and execute:
