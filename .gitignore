@@ -8,6 +8,7 @@ slpdb/*
 bch-api/*
 misc/*
 cert/*
+data/*
 
 *.txt
 *.swp

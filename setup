@@ -296,9 +296,9 @@ fi
 
 if [[ $BTK_JS_API == 1 ]]; then
 
-    git submodule update --init -- ./bch-api
-    cd ./bch-api
-    docker-compose build --no-cache
+    git submodule update --init -- bch-api
+    cd bch-api && 
+    docker-compose build --no-cache &&
     cd ..
 
 fi
@@ -307,9 +307,9 @@ fi
 
 if [[ $BTK_SLPDB == 1 ]]; then
 
-    git submodule update --init -- ./slpdb
-    cd ./slpdb
-    docker-compose build --no-cache
+    git submodule update --init -- slpdb
+    cd slpdb && 
+    docker-compose build --no-cache &&
     cd ..
 fi
 
