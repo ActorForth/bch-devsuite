@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # My DO Testnet Insight Server
-export PORT=3000 
-export BITCOINCOM_BASEURL=http://localhost:3000/api/
+export PORT=3000
+export BITCOINCOM_BASEURL=http://localhost:3001/api/
 export RPC_BASEURL=http://bitcoind-regtest:18332/
 export RPC_PASSWORD=regtest
 export RPC_USERNAME=regtest

@@ -4,34 +4,42 @@ services:
         image: zquestz/bitcoin-unlimited
         container_name: bitcoind-regtest
         ports:
-          - "18332:18332" 
+          - "18332:18332"
           - "18444:18444"
-#          - "28332:28332"
+          - "28332:28332"
           - "50001:50001"
-        volumes: 
+        volumes:
           - ./bitcoin.conf:/data/bitcoin.conf
           - ./bitcoin.conf:/root/.bitcoin/bitcoin.conf
-        entrypoint: "/entrypoint.sh" 
-        command: bitcoind 
+        entrypoint: "/entrypoint.sh"
+        command: bitcoind
+        networks:
+          - bitcoin-bridging
 
     nginx-regtest:
         image: nginx:latest
-        container_name: nginx-regtest 
+        container_name: nginx-regtest
         ports:
           - "50002:50002"
         volumes:
           - ./nginx.conf:/etc/nginx/nginx.conf
           - ./cert/cert.key:/etc/nginx/cert.key
           - ./cert/cert.crt:/etc/nginx/cert.crt
+        networks:
+          - bitcoin-bridging
 
-    bitcoin-restapi:
-        image: restapi
-        # build: .
-        # dockerfile: Dockerfile-restapi
-        container_name: bitcoin-restapi
-        ports:
-          - "12500:3000"
-        volumes:
-          - ./restapi-config.sh:/home/safeuser/rest.bitcoin.com/start-regtest.sh
+
+networks:
+  bitcoin-bridging:
+    external: true
+    # bitcoin-restapi:
+    #     image: restapi
+    #     # build: .
+    #     # dockerfile: Dockerfile-restapi
+    #     container_name: bitcoin-restapi
+    #     ports:
+    #       - "12500:3000"
+    #     volumes:
+    #       - ./restapi-config.sh:/home/safeuser/rest.bitcoin.com/start-regtest.sh
 
       #        restart: always

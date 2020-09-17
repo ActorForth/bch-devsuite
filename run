@@ -3,6 +3,9 @@ set -e
 
 BTK_RUN_WALLET=0
 BTK_RUN_SERVER=0
+BTK_RUN_SLPDB=0
+BTK_RUN_JS_API=0
+
 
 if [[ ! -d "./Electron-Cash-SLP" && ! -d "./Electron-Cash-SLP/venv" ]]; then
 	echo "Please execute the 'setup' script first."
@@ -14,11 +17,16 @@ else
 		do
 			[[ $var == "wallet" ]] && BTK_RUN_WALLET=1
 			[[ $var == "server" ]] && BTK_RUN_SERVER=1
+			[[ $var == "slpdb" ]] && BTK_RUN_SLPDB=1
+			[[ $var == "js" ]] && BTK_RUN_JS_API=1
 		done
 			else
 		echo "usage: run [command]"
 		echo " - wallet: runs the Electron Cash SLP wallet"
 		echo " - server: runs only the local node and restAPI server"
+		echo " - slpdb: runs an instanse of SLP DB and SLP serve API service"
+		echo " - js: runs an instance of JS API service"
+
 		exit 0
 	fi
 
@@ -50,3 +58,12 @@ if [[ $BTK_RUN_SERVER == 1 ]]; then
 	docker-compose up -d
 fi
 
+
+if [[ $BTK_RUN_SLPDB == 1 ]]; then
+    cd ./slpdb && docker-compose up -d && cd ..
+fi
+
+
+if [[ $BTK_RUN_JS_API == 1 ]]; then
+    cd ./bch-api && docker-compose up -d && cd ..
+fi
