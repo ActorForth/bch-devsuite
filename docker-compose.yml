@@ -18,11 +18,31 @@ services:
         image: nginx:latest
         container_name: nginx-regtest 
         ports:
-          - "50002:50002"
+         - "50002:50002"
         volumes:
-          - ./nginx.conf:/etc/nginx/nginx.conf
-          - ./cert/cert.key:/etc/nginx/cert.key
-          - ./cert/cert.crt:/etc/nginx/cert.crt
+         - ./nginx.conf:/etc/nginx/nginx.conf
+         - ./cert/cert.key:/etc/nginx/cert.key
+         - ./cert/cert.crt:/etc/nginx/cert.crt
+
+#    database:
+#        image: mongo:3.4-jessie
+#        ports:
+#         - 27017:20717
+#        volumes:
+#         - /data/db:/data/db
+
+#    insight-server:
+#        image: insight 
+#        links:
+#         - database
+#        ports:
+#         - 8100:8100
+#         - 3000:3000
+#        environment:
+#         - DB_HOST=database
+#        volumes:
+#         - ./bitcore.config.json:/bitcore/bitcore.config.json
+#    env_file: .env
 
     bitcoin-restapi:
         image: restapi

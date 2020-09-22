@@ -1,0 +1,23 @@
+{
+  "bitcoreNode": {
+    "chains": {
+      "BCH": {
+       "regtest": {
+          "chainSource": "p2p",
+          "trustedPeers": [
+            {
+              "host": "127.0.0.1",
+              "port": 18444 
+            }
+          ],
+          "rpc": {
+            "host": "127.0.0.1",
+            "port": 18444,
+            "username": "regtest",
+            "password": "regtest"
+          }
+        }
+      }
+    }
+  }
+}
