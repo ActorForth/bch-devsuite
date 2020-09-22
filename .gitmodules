@@ -1,0 +1,6 @@
+[submodule "slpdb"]
+	path = slpdb
+	url = git@github.com:ActorForth/slpdb.git
+[submodule "bch-api"]
+	path = bch-api
+	url = git@github.com:ActorForth/bch-api.git

@@ -2,9 +2,13 @@
 .BTK-container-lock
 .rest-lock
 
+Electron-Cash-SLP
 Electron-Cash-SLP/*
+slpdb/*
+bch-api/*
 misc/*
 cert/*
+data/*
 
 *.txt
 *.swp
