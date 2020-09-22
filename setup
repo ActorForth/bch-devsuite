@@ -90,9 +90,9 @@ if [[ $BTK_NODE == 1 ]]; then
     else 
 	echo "Python (version 3) not found. Please install Python 3."
 	exit 1
-fi
+    fi
 
-echo "Looking for virtualenv..."
+    echo "Looking for virtualenv..."
 ##
 ## Currently working on adding support for anaconda
 ##
@@ -110,8 +110,8 @@ echo "Looking for virtualenv..."
 
 # TODO: Add anaconda support
 # TODO: Throw error if virtualenv version too low
-BTK_VENV_VER=`python3 -m virtualenv --version | grep -o 20`
-if [[ $BTK_VENV_VER == 20 || $BTK_CONDA == 1 ]]; then
+    BTK_VENV_VER=`python3 -m virtualenv --version | grep -o 20`
+    if [[ $BTK_VENV_VER == 20 || $BTK_CONDA == 1 ]]; then
 	echo "Virtualenv found."
     else
 	echo "Neither virtualenv nor conda could be found. Please install virtualenv."
@@ -323,3 +323,4 @@ fi
 
 
 echo "Done."
+
