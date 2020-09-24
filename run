@@ -7,7 +7,7 @@ BTK_RUN_SLPDB=0
 BTK_RUN_JS_API=0
 
 
-if [[ ! -d "./Electron-Cash-SLP" && ! -d "./Electron-Cash-SLP/venv" ]]; then
+if [[ ! -d "./.BTK-Container-Lock" ]]; then
 	echo "Please execute the 'setup' script first."
 	exit 1
 else
@@ -22,21 +22,20 @@ else
 		done
 			else
 		echo "usage: run [command]"
-		echo " - wallet: runs the Electron Cash SLP wallet"
 		echo " - server: runs only the local node and restAPI server"
+		echo " - wallet: runs the Electron Cash SLP wallet"
+
 		echo " - slpdb: runs an instanse of SLP DB and SLP serve API service"
 		echo " - js: runs an instance of JS API service"
 
 		exit 0
 	fi
+fi
 
-	# Check that we have docker-compose installed
-	if [ ! -x "$(command -v docker-compose)" ]; then
-		echo "Docker-compose not found. Please install docker-compose."
-		exit 1
-	fi
-
-
+# Check that we have docker-compose installed
+if [ ! -x "$(command -v docker-compose)" ]; then
+	echo "Docker-compose not found. Please install docker-compose."
+	exit 1
 fi
 
 if [[ $BTK_RUN_WALLET == 1 ]]; then
