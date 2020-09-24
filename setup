@@ -177,6 +177,9 @@ if [[ $BTK_NODE == 1 ]]; then
 
 		# Stop the server(s)
 		docker-compose stop 
+
+		#
+		touch .BTK-container-lock
 fi
 
 if [[ $BTK_REST == 1 ]]; then
@@ -292,7 +295,6 @@ if [[ $BTK_WALLET == 1 ]]; then
 		cd ..
 	#	echo $BTK_VER_MERK > merkle.txt
 		cd ..
-		touch .BTK-container-lock
 		docker-compose stop 
 	fi
 

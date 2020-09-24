@@ -7,7 +7,7 @@ BTK_RUN_SLPDB=0
 BTK_RUN_JS_API=0
 
 
-if [[ ! -d "./.BTK-Container-Lock" ]]; then
+if [[ ! -f "./.BTK-container-lock" ]]; then
 	echo "Please execute the 'setup' script first."
 	exit 1
 else
