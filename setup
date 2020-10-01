@@ -108,15 +108,17 @@ if [[ $BTK_REST == 1 ]]; then
     if [ ! -f "./.rest-lock" ]; then
 		echo "Bulding REST API docker image..."
 		docker build -t restapi ./restapi
+		touch .rest-lock
+   fi
 
+   if [ ! -f "./.opensight-lock" ]; then
 		echo "Cloning OpenSight repository..."
 		git clone https://github.com/ActorForth/OpenSight.git
 
 		echo "Building OpenSight docker image..."
 		docker build -t opensight ./OpenSight
-
-		touch .rest-lock
-    fi
+		touch .opensight-lock
+   fi
 
 fi
 
