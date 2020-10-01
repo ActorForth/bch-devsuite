@@ -8,7 +8,8 @@ BTK_ENV=$(uname)
 BTK_JS_API=0
 BTK_SLP_DB=0
 BTK_NODE=0
-BTK_WALLET=0
+BTK_WALLET=0 # Under construction 
+
 BTK_REST=1 # must install until it's seperated from the docker-compose file
 # TODO: Edit the docker-compose file in such a way that REST isn't necessarily required 
 
@@ -77,12 +78,76 @@ else
 	exit 1
 fi
 
-if [ -x "$(command -v python3)" ]; then
-	echo "Python3 found."
-else 
-	echo "Python (version 3) not found. Please install Python 3."
-	exit 1
+# Check if network exists and create if it doesn't
+NETWORK_NAME=bitcoin-bridging
+if [ -z $(docker network ls --filter name=^${NETWORK_NAME}$ --format="{{ .Name }}") ] ; then 
+     docker network create ${NETWORK_NAME} ; 
 fi
+
+# Create new SSL certificate/key pair to be used on nginx server
+if [ -d "./cert" ]; then 
+	if [[ -f "./cert/cert.key" && -f "./cert/cert.crt" ]]; then
+	    echo "OpenSSL certificates already exist."
+	else
+	    echo "Removing previous certs directory"
+	    rm -rf ./cert
+	fi
+fi
+
+if [ ! -d "./cert" ]; then
+	mkdir ./cert
+	echo "Creating SSL certificate to use for nginx reverse proxy server."
+	openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+		-keyout ./cert/cert.key \
+		-out ./cert/cert.crt \
+		-subj "/C=no/ST=no/L=no/O=no/OU=no/CN=no/emailAddress=no"
+    fi
+fi
+
+if [[ $BTK_REST == 1 ]]; then
+    # Create the docker image for the REST API server, only if it wasn't already created
+    if [ ! -f "./.rest-lock" ]; then
+		echo "Bulding REST API docker image..."
+		echo "skipping..." # for dev purposes only
+		docker build -t restapi ./restapi
+
+		echo "Cloning OpenSight repository..."
+		git clone https://github.com/ActorForth/OpenSight.git
+
+		echo "Building OpenSight docker image..."
+		docker build -t opensight ./OpenSight
+
+		touch .rest-lock
+    fi
+
+fi
+
+if [[ $BTK_NODE == 1 ]]; then
+	echo "Starting local node servers..."
+		docker-compose up -d
+		sleep 5
+
+		# Generate some blocks
+		docker-compose exec bitcoind-regtest bitcoin-cli generate 210
+
+		# Stop the server(s)
+		docker-compose stop 
+
+		#
+		touch .BTK-container-lock
+fi
+
+
+if [[ $BTK_WALLET == 1 ]]; then
+
+	if [ -x "$(command -v python3)" ]; then
+		echo "Python3 found."
+	else 
+		echo "Python (version 3) not found. Please install Python 3."
+		exit 1
+	fi
+
+# This is ugly for now but should work, will clean up in next commit
 
 echo "Looking for virtualenv..."
 ##
@@ -141,67 +206,6 @@ if [[ $BTK_ENV == "Linux" ]]; then
 	fi
 fi
 
-# Check if network exists and create if it doesn't
-NETWORK_NAME=bitcoin-bridging
-if [ -z $(docker network ls --filter name=^${NETWORK_NAME}$ --format="{{ .Name }}") ] ; then 
-     docker network create ${NETWORK_NAME} ; 
-fi
-
-    # Create new SSL certificate/key pair to be used on nginx server
-if [ -d "./cert" ]; then 
-	if [[ -f "./cert/cert.key" && -f "./cert/cert.crt" ]]; then
-	    echo "OpenSSL certificates already exist."
-	else
-	    echo "Removing previous certs directory"
-	    rm -rf ./cert
-	fi
-fi
-
-if [ ! -d "./cert" ]; then
-	mkdir ./cert
-	echo "Creating SSL certificate to use for nginx reverse proxy server."
-	openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-		-keyout ./cert/cert.key \
-		-out ./cert/cert.crt \
-		-subj "/C=no/ST=no/L=no/O=no/OU=no/CN=no/emailAddress=no"
-    fi
-fi
-
-if [[ $BTK_REST == 1 ]]; then
-    # Create the docker image for the REST API server, only if it wasn't already created
-    if [ ! -f "./.rest-lock" ]; then
-		echo "Bulding REST API docker image..."
-		echo "skipping..." # for dev purposes only
-		docker build -t restapi ./restapi
-
-		echo "Cloning OpenSight repository..."
-		git clone https://github.com/ActorForth/OpenSight.git
-
-		echo "Building OpenSight docker image..."
-		docker build -t opensight ./OpenSight
-
-		touch .rest-lock
-    fi
-
-fi
-
-if [[ $BTK_NODE == 1 ]]; then
-	echo "Starting local node servers..."
-		docker-compose up -d
-		sleep 5
-
-		# Generate some blocks
-		docker-compose exec bitcoind-regtest bitcoin-cli generate 210
-
-		# Stop the server(s)
-		docker-compose stop 
-
-		#
-		touch .BTK-container-lock
-fi
-
-
-if [[ $BTK_WALLET == 1 ]]; then
 
     # Check and (if necessary) download+setup the Electron Cash SLP wallet
     if [ -d "./Electron-Cash-SLP" ]; then
