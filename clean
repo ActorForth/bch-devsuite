@@ -5,6 +5,7 @@ BTK_CERTS=0
 BTK_WALLET=0
 BTK_WALLET_APP=0
 BTK_DOCKER=0
+BTK_OPENSIGHT=0
 DID_SOMETHING=0
 
 # Process user arguments, or display usage message
@@ -15,11 +16,13 @@ if [[ ! -z $1 ]]; then
 		[[ $var == "wallet" ]] && BTK_WALLET=1
 		[[ $var == "wallet-app" ]] && BTK_WALLET_APP=1
 		[[ $var == "docker" ]] && BTK_DOCKER=1
+		[[ $var == "opensight" ]] && BTK_OPENSIGHT=1
 		if [[ $var == "all" ]]; then
 			BTK_CERTS=1
 			BTK_WALLET=1
 			BTK_WALLET_APP=1
 			BTK_DOCKER=1
+			BTK_OPENSIGHT=1
 		fi
 	done
 else
@@ -81,6 +84,12 @@ if [[ $BTK_DOCKER == 1 && -f "./.BTK-container-lock" ]]; then
 	docker-compose down
 	rm "./.BTK-container-lock"
 	DID_SOMETHING=1
+fi
+
+if [[ $BTK_OPENSIGHT == 1 && -f "./.opensight-lock" ]]; then
+	echo "Removing OpenSight..."
+	rm -rf "./OpenSight"
+	rm "./.opensight-lock"
 fi
 
 if [ $DID_SOMETHING -eq 1 ]; then
