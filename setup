@@ -107,7 +107,7 @@ if [[ $BTK_REST == 1 ]]; then
     # Create the docker image for the REST API server, only if it wasn't already created
     if [ ! -f "./.rest-lock" ]; then
 		echo "Bulding REST API docker image..."
-		#docker build -t restapi ./restapi
+		docker build -t restapi ./restapi
 
 		echo "Cloning OpenSight repository..."
 		git clone https://github.com/ActorForth/OpenSight.git
