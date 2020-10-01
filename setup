@@ -34,9 +34,9 @@ if [[ ! -z $1 ]]; then
 else
     echo "usage: setup [command]"
     echo "- node: BitcoinUnlimited node with electrs server"
-	echo "- rest: rest.bitcoin.com API service"
+    echo "- rest: rest.bitcoin.com API service"
     echo "- wallet: Electron Cash SLP wallet GUI application"
-	echo "- js: JavaScript stack ready for BCH JS development"
+    echo "- js: JavaScript stack ready for BCH JS development"
     echo "- all: all of the above"
     exit 0 
 fi
@@ -101,15 +101,13 @@ if [ ! -d "./cert" ]; then
 		-keyout ./cert/cert.key \
 		-out ./cert/cert.crt \
 		-subj "/C=no/ST=no/L=no/O=no/OU=no/CN=no/emailAddress=no"
-    fi
 fi
 
 if [[ $BTK_REST == 1 ]]; then
     # Create the docker image for the REST API server, only if it wasn't already created
     if [ ! -f "./.rest-lock" ]; then
 		echo "Bulding REST API docker image..."
-		echo "skipping..." # for dev purposes only
-		docker build -t restapi ./restapi
+		#docker build -t restapi ./restapi
 
 		echo "Cloning OpenSight repository..."
 		git clone https://github.com/ActorForth/OpenSight.git
@@ -124,17 +122,17 @@ fi
 
 if [[ $BTK_NODE == 1 ]]; then
 	echo "Starting local node servers..."
-		docker-compose up -d
-		sleep 5
+	docker-compose up -d
+	sleep 5
 
-		# Generate some blocks
-		docker-compose exec bitcoind-regtest bitcoin-cli generate 210
+	# Generate some blocks
+	docker-compose exec bitcoind-regtest bitcoin-cli generate 210
 
-		# Stop the server(s)
-		docker-compose stop 
+	# Stop the server(s)
+	docker-compose stop 
 
-		#
-		touch .BTK-container-lock
+	#
+	touch .BTK-container-lock
 fi
 
 
@@ -147,67 +145,68 @@ if [[ $BTK_WALLET == 1 ]]; then
 		exit 1
 	fi
 
-# This is ugly for now but should work, will clean up in next commit
+	# This is ugly for now but should work, will clean up in next commit
 
-echo "Looking for virtualenv..."
-##
-## Currently working on adding support for anaconda
-##
-# set +e
-# BTK_VENV_VER=`python3 -m virtualenv --version | grep -o 20`
-# set -e
-# 
-# if [ -z "$BTK_VENV_VER" ]; then
-# 	echo "Looking for Anaconda instead..."
-# 	if [ -x "$(command -v conda)" ]; then
-# 		BTK_CONDA=1
-# 		echo "Anaconda found."
-# 	fi
-# fi
-
-# TODO: Add anaconda support
-# TODO: Throw error if virtualenv version too low
-BTK_VENV_VER=`python3 -m virtualenv --version | grep -o 20`
-if [[ $BTK_VENV_VER == 20 || $BTK_CONDA == 1 ]]; then
-	echo "Virtualenv found."
-else
-	echo "Neither virtualenv nor conda could be found. Please install virtualenv."
-	exit 1
-fi
-
-# Linux hosts require qt5 library available
-if [[ $BTK_ENV == "Linux" ]]; then
-
-	BTK_QT_FOUND=0
-	BTK_DEB=0
-
-	if [[ -x "$(command -v dpkg-query)" ]]; then
-		BTK_DEB=1
-		if dpkg-query -s qtchooser ; then
-			BTK_QT_FOUND=1
-		fi
-	elif [[ -x "$(command -v /usr/bin/qmake)" ]]; then
-		BTK_QT_FOUND=1
-	fi
-
-	if [[ $BTK_QT_FOUND == 1 ]]; then
-		echo "(Linux Host) Qt5 library found."
+	echo "Looking for virtualenv..."
+	##
+	## Currently working on adding support for anaconda
+	##
+	# set +e
+	# BTK_VENV_VER=`python3 -m virtualenv --version | grep -o 20`
+	# set -e
+	# 
+	# if [ -z "$BTK_VENV_VER" ]; then
+	# 	echo "Looking for Anaconda instead..."
+	# 	if [ -x "$(command -v conda)" ]; then
+	# 		BTK_CONDA=1
+	# 		echo "Anaconda found."
+	# 	fi
+	# fi
+	
+	# TODO: Add anaconda support
+	# TODO: Throw error if virtualenv version too low
+	BTK_VENV_VER=`python3 -m virtualenv --version | grep -o 20`
+	if [[ $BTK_VENV_VER == 20 || $BTK_CONDA == 1 ]]; then
+		echo "Virtualenv found."
 	else
-		echo "(Linux Host) Your machine appears" \
-			"to be missing the Qt5 libraries necessary for" \
-			"running the Electrum Cash SLP wallet."
-
-		if [[ $BTK_DEB == 1 ]]; then
-			echo "On Ubuntu/Debian-based distributions," \
-				"it may be available in your package" \
-				"manager under the name 'qt5-default'."
-		
+		echo "Neither virtualenv nor conda could be found. Please install virtualenv."
 		exit 1
 	fi
-fi
+	
+	# Linux hosts require qt5 library available
+	if [[ $BTK_ENV == "Linux" ]]; then
+	
+		BTK_QT_FOUND=0
+		BTK_DEB=0
+
+		if [[ -x "$(command -v dpkg-query)" ]]; then
+			BTK_DEB=1
+			if dpkg-query -s qtchooser ; then
+				BTK_QT_FOUND=1
+			fi
+		elif [[ -x "$(command -v /usr/bin/qmake)" ]]; then
+			BTK_QT_FOUND=1
+		fi
+	
+		if [[ $BTK_QT_FOUND == 1 ]]; then
+			echo "(Linux Host) Qt5 library found."
+		else
+			echo "(Linux Host) Your machine appears" \
+				"to be missing the Qt5 libraries necessary for" \
+				"running the Electrum Cash SLP wallet."
+
+			if [[ $BTK_DEB == 1 ]]; then
+				echo "On Ubuntu/Debian-based distributions," \
+					"it may be available in your package" \
+					"manager under the name 'qt5-default'."
+			
+			exit 1
+			fi
+		fi
+	fi
 
 
-    # Check and (if necessary) download+setup the Electron Cash SLP wallet
+	    # Check and (if necessary) download+setup the Electron Cash SLP wallet
     if [ -d "./Electron-Cash-SLP" ]; then
 		echo "Electron Cash SLP already exists."
     else
@@ -229,7 +228,7 @@ fi
 		python3 ./setup.py build
 		python3 ./setup.py install
 		cd ..
-		else
+	else
 		echo "Environment already exists."
     fi
 
