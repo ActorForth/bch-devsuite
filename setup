@@ -167,6 +167,24 @@ if [ ! -d "./cert" ]; then
     fi
 fi
 
+if [[ $BTK_REST == 1 ]]; then
+    # Create the docker image for the REST API server, only if it wasn't already created
+    if [ ! -f "./.rest-lock" ]; then
+		echo "Bulding REST API docker image..."
+		echo "skipping..." # for dev purposes only
+		docker build -t restapi ./restapi
+
+		echo "Cloning OpenSight repository..."
+		git clone https://github.com/ActorForth/OpenSight.git
+
+		echo "Building OpenSight docker image..."
+		docker build -t opensight ./OpenSight
+
+		touch .rest-lock
+    fi
+
+fi
+
 if [[ $BTK_NODE == 1 ]]; then
 	echo "Starting local node servers..."
 		docker-compose up -d
@@ -182,14 +200,6 @@ if [[ $BTK_NODE == 1 ]]; then
 		touch .BTK-container-lock
 fi
 
-if [[ $BTK_REST == 1 ]]; then
-    # Create the docker image for the REST API server, only if it wasn't already created
-    if [ ! -f "./.rest-lock" ]; then
-		echo "Bulding REST API docker image"
-		docker build -t restapi ./restapi
-		touch .rest-lock
-    fi
-fi
 
 if [[ $BTK_WALLET == 1 ]]; then
 

@@ -26,7 +26,15 @@ services:
          - ./cert/cert.key:/etc/nginx/cert.key
          - ./cert/cert.crt:/etc/nginx/cert.crt
         networks:
-          - bitcoin-bridging
+         - bitcoin-bridging
+
+    opensight:
+         image: opensight
+         container_name: opensight
+         ports:
+           - "3001:3001"
+         networks:
+           - bitcoin-bridging
 
     bitcoin-restapi:
          image: restapi
