@@ -128,7 +128,7 @@ if [[ $BTK_NODE == 1 ]]; then
 	sleep 5
 
 	# Generate some blocks
-	docker-compose exec bitcoind-regtest bitcoin-cli generate 210
+	docker-compose exec -T bitcoind-regtest bitcoin-cli generate 210
 
 	# Stop the server(s)
 	docker-compose stop 
@@ -243,9 +243,9 @@ if [[ $BTK_WALLET == 1 ]]; then
 		sleep 5
 
 		# Generate some blocks, and get their hashes/merkle roots
-		docker-compose exec bitcoind-regtest bitcoin-cli getblock 0 > ./Electron-Cash-SLP/genesis.txt
-		docker-compose exec bitcoind-regtest bitcoin-cli getblock 150 > ./Electron-Cash-SLP/fork.txt
-		docker-compose exec bitcoind-regtest bitcoin-cli getblock 200 > ./Electron-Cash-SLP/verification.txt
+		docker-compose exec -T bitcoind-regtest bitcoin-cli getblock 0 > ./Electron-Cash-SLP/genesis.txt
+		docker-compose exec -T bitcoind-regtest bitcoin-cli getblock 150 > ./Electron-Cash-SLP/fork.txt
+		docker-compose exec -T bitcoind-regtest bitcoin-cli getblock 200 > ./Electron-Cash-SLP/verification.txt
 
 		# Push hashes into environmental variables
 		cd ./Electron-Cash-SLP
