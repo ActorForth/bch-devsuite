@@ -22,7 +22,7 @@ if [[ ! -z $1 ]]; then
 			BTK_WALLET=1
 			BTK_WALLET_APP=1
 			BTK_DOCKER=1
-			BTK_OPENSIGHT=1
+			BTK_OPENSIGHT=0
 		fi
 	done
 else

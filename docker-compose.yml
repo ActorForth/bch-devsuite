@@ -45,7 +45,6 @@ services:
            - "12500:3000"
          volumes:
            - ./restapi-config.sh:/home/safeuser/rest.bitcoin.com/start-regtest.sh
-         restart: always
          networks:
            - bitcoin-bridging
 

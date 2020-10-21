@@ -6,7 +6,7 @@ echo "Checking that necessary software is available: "
 
 BTK_ENV=$(uname)
 BTK_JS_API=0
-BTK_SLP_DB=0
+BTK_SLPDB=0
 BTK_NODE=0
 BTK_WALLET=0 # Under construction 
 
