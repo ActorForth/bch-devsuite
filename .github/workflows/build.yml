@@ -1,0 +1,16 @@
+name: Build Docker container
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest  # has Docker pre-installed
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install virtualenv
+        run: pip3 install virtualenv
+      - name: Install OpenSSL
+        run: sudo apt-get install openssl
+      - name: Run build
+        run: export COMPOSE_INTERACTIVE_NO_CLI=1; ./setup node rest
