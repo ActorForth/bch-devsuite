@@ -4,7 +4,7 @@ set -e
 if [ -f "./.BTK-container-lock" ]; then
 	if [[ ! -z $1 ]]; then
 		# This will run the user's command, and also generate 5 blocks
-		docker-compose exec bitcoind-regtest bitcoin-cli $@
+		docker-compose exec -T bitcoind-regtest bitcoin-cli $@
 		
 		## Commented this line out for now: it causes more confusion than it helps
 		# docker-compose exec bitcoind-regtest bitcoin-cli generate 1

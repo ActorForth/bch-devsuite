@@ -1,9 +1,6 @@
 .DS_Store
 .BTK-container-lock
-.rest-lock
-.opensight-lock
 
-OpenSight/
 Electron-Cash-SLP
 Electron-Cash-SLP/*
 slpdb/*
