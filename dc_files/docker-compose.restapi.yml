@@ -1,0 +1,11 @@
+version: "3"
+services:
+    bitcoin-restapi:
+         image: actorforth/rest.bitcoin.com:latest
+         container_name: bitcoin-restapi
+         ports:
+           - "12500:3000"
+         volumes:
+           - ../configs/restapi-config.sh:/home/safeuser/rest.bitcoin.com/start.sh
+         networks:
+           - bitcoin-bridging

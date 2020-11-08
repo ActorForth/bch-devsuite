@@ -1,0 +1,15 @@
+version: "3"
+services:
+    fulcrum:
+         image: cculianu/fulcrum
+         container_name: fulcrum 
+         #         depends_on:
+         #  - bitcoind-regtest
+         ports:
+           - "50001:50001"
+         volumes:
+           - ../data/fulcrum:/data
+           - ../configs/fulcrum-config.conf:/config.conf
+         command: ["Fulcrum", "/config.conf"]
+         networks:
+           - bitcoin-bridging

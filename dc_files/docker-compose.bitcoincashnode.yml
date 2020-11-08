@@ -1,0 +1,16 @@
+version: "3"
+services:
+    bitcoind-regtest:
+        image: zquestz/bitcoin-cash-node
+        container_name: bitcoind-regtest
+        ports:
+          - "18443:18443"
+          - "28332:28332"
+        volumes:
+          - ../data/bitcoind:/data
+          - ../configs/bitcoin.conf:/data/bitcoin.conf
+          - ../configs/bitcoin.conf:/root/.bitcoin/bitcoin.conf
+        entrypoint: "/entrypoint.sh"
+        command: bitcoind
+        networks:
+          - bitcoin-bridging

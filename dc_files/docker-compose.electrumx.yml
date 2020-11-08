@@ -1,0 +1,19 @@
+version: "3"
+services:
+    electrumx:
+      image: buzzkillb/docker-electrumx:latest
+      container_name: electrumx
+      ports:
+        - "50001:50001"
+        - "50002:50002"
+        - "50004:50004"
+      volumes:
+        - ../data/electrumx:/data
+      environment:
+        - DAEMON_URL=http://regtest:regtest@bitcoind-regtest:18332
+        - COIN=BitcoinSV
+        - NET=regtest
+        - LOG_LEVEL=debug
+        - DB_DIRECTORY=/data
+      networks:
+        - bitcoin-bridging
