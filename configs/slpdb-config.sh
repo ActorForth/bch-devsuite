@@ -16,7 +16,7 @@ echo "Finished DB migrations."
 # Set the full node IP address and port
 export rpc_protocol='http'
 export rpc_host=bitcoind-regtest
-export rpc_port=18332
+export rpc_port=18443
 export rpc_user=regtest
 export rpc_pass=regtest
 export core_from=543375

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Full node
-export RPC_BASEURL=http://localhost:18332/
+export RPC_BASEURL=http://localhost:18443/
 export RPC_USERNAME=regtest
 export RPC_PASSWORD=regtest
 export NETWORK=regtest
