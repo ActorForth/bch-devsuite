@@ -5,6 +5,8 @@ BTK_SERVICES_RUN=0
 BTK_SERVICES_STOP=0
 BTK_RUN_WALLET=0
 
+BTK_SLEEP_TIME=6
+
 if [[ ! -f "./.env" ]]; then
 	echo "Please execute the 'setup' script first."
 	exit 1
@@ -58,6 +60,8 @@ if [[ $BTK_SERVICES_RUN == 1 ]]; then
 	docker-compose up -d
 fi
 
-if [[ $BTK_SERVICES_STOP ==1 ]]; then
+if [[ $BTK_SERVICES_STOP == 1 ]]; then
+    docker-compose exec -T bitcoind-regtest bitcoin-cli stop
+    sleep $BTK_SLEEP_TIME
     docker-compose stop
 fi

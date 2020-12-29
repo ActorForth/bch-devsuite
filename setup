@@ -95,8 +95,8 @@ fi
 
 # Configure docker-compose files for the selected stack
 if [[ $BTK_NODE == 1 ]]; then
-    # export COMPOSE_FILE="./dc_files/docker-compose.bitcoinunlimited.yml"
-    export COMPOSE_FILE="./dc_files/docker-compose.bitcoincashnode.yml"
+    export COMPOSE_FILE="./dc_files/docker-compose.bitcoinunlimited.yml"
+    # export COMPOSE_FILE="./dc_files/docker-compose.bitcoincashnode.yml"
 	
     # export COMPOSE_FILE="$COMPOSE_FILE:./dc_files/docker-compose.electrumx.yml"
     
@@ -122,6 +122,9 @@ if [[ $BTK_NODE == 1 ]]; then
     echo $BTK_GENERATE_ADDRESS
 
     docker-compose exec -T bitcoind-regtest bitcoin-cli generatetoaddress $BTK_BLOCKS $BTK_GENERATE_ADDRESS > /dev/null
+    
+    # docker-compose exec -T bitcoind-regtest bitcoin-cli generate $BTK_BLOCKS 
+
     sleep $BTK_SLEEP_TIME
     #docker-compose exec -T bitcoind-regtest bitcoin-cli generate $BTK_BLOCKS > /dev/null
     
@@ -133,7 +136,7 @@ if [[ $BTK_NODE == 1 ]]; then
 
 	# Reset the compose_file
 	export COMPOSE_FILE="$PRE_NETWORK_FILE"
-    export COMPOSE_FILE="$COMPOSE_FILE:./dc_files/docker-compose.fulcrum.yml"
+    # export COMPOSE_FILE="$COMPOSE_FILE:./dc_files/docker-compose.fulcrum.yml"
 
 fi
 
