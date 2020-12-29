@@ -1,0 +1,95 @@
+version: "3"
+services:
+    bitcoind-regtest:
+        image: zquestz/bitcoin-cash-node
+        container_name: bitcoind-regtest
+        ports:
+          - "18443:18443"
+          - "28332:28332"
+        volumes:
+          - ./data/bitcoind:/data
+          - ./configs/bitcoin.conf:/data/bitcoin.conf
+          - ./configs/bitcoin.conf:/root/.bitcoin/bitcoin.conf
+        entrypoint: "/entrypoint.sh"
+        command: bitcoind
+        networks:
+          - bitcoin-bridging
+
+    fulcrum:
+        image: cculianu/fulcrum
+        container_name: fulcrum 
+        depends_on:
+         - bitcoind-regtest
+        ports:
+          - "50001:50001"
+        volumes:
+          - ./data/fulcrum:/data
+          - ./configs/fulcrum-config.conf:/config.conf
+        command: ["Fulcrum", "/config.conf"]
+        networks:
+          - bitcoin-bridging
+
+    opensight:
+        image: actorforth/opensight:latest
+        container_name: opensight
+        ports:
+          - "3001:3001"
+        environment:
+          - ELECTRUM_HOST=fulcrum
+          - ELECTRUM_PORT=50001
+          - NODE_RPC_PORT=18443
+        networks:
+          - bitcoin-bridging
+
+    bitcoin-restapi:
+        image: actorforth/rest.bitcoin.com:latest
+        container_name: bitcoin-restapi
+        ports:
+          - "12500:3000"
+        volumes:
+          - ./configs/restapi-config.sh:/home/safeuser/rest.bitcoin.com/start.sh
+        networks:
+          - bitcoin-bridging
+
+    mongodb:
+        image: mongo:4.2-bionic
+        container_name: mongo-slpdb
+        ports:
+          - "27017:27017"
+        volumes:
+          - ./data/mongodb:/data/db
+        command: mongod
+        networks:
+          - bitcoin-bridging
+
+    slpdb:
+        image: actorforth/slpdb:latest
+        container_name: slpdb
+        links:
+          - mongodb
+        volumes:
+          - ./configs/slpdb-config.sh:/home/safeuser/SLPDB-src/start.sh
+          - ./data/leveldb:/home/safeuser/SLPDB/_leveldb
+        depends_on:
+          - mongodb
+        networks:
+          - bitcoin-bridging
+
+    slpserve:
+        image: actorforth/slpserve:latest
+        container_name: slpserve
+        volumes:
+          - ./configs/slpserve:/home/safeuser/config
+          - ./configs/slpserve-config.sh:/home/safeuser/slpserve/start.sh
+        links:
+          - mongodb
+        ports:
+          - "12300:4000"
+        depends_on:
+          - mongodb
+        networks:
+          - bitcoin-bridging
+
+networks:
+  bitcoin-bridging:
+    external: true
