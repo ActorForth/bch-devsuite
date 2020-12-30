@@ -7,7 +7,7 @@ BTK_RUN_WALLET=0
 
 BTK_SLEEP_TIME=6
 
-if [[ ! -f "./.env" ]]; then
+if [[ ! -f "./.lock" ]]; then
 	echo "Please execute the 'setup' script first."
 	exit 1
 else

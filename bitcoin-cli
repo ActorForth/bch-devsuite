@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-if [ -f "./.env" ]; then
+if [ -f "./.lock" ]; then
 	if [[ ! -z $1 ]]; then
 		# This will run the user's command, and also generate 5 blocks
 		docker-compose exec -T bitcoind-regtest bitcoin-cli $@
@@ -15,6 +15,6 @@ if [ -f "./.env" ]; then
 		echo "Blocks generated."
 	fi
 else
-	echo "Use this fix script AFTER ./setup and ./run"
+	echo "Use this fix script AFTER ./setup and ./services start"
 	echo "Please note, the wallet should be actively running when you use this script."
 fi

@@ -1,33 +1,49 @@
 version: "3"
 services:
     bitcoind-regtest:
-        image: zquestz/bitcoin-cash-node
+        image: zquestz/bitcoin-unlimited
         container_name: bitcoind-regtest
         ports:
           - "18443:18443"
           - "28332:28332"
+          - "50001:50001"
         volumes:
           - ./data/bitcoind:/data
-          - ./configs/bitcoin.conf:/data/bitcoin.conf
-          - ./configs/bitcoin.conf:/root/.bitcoin/bitcoin.conf
+          - ./configs/bitcoin-unlimited.conf:/data/bitcoin.conf
+          - ./configs/bitcoin-unlimited.conf:/root/.bitcoin/bitcoin.conf
         entrypoint: "/entrypoint.sh"
         command: bitcoind
         networks:
           - bitcoin-bridging
 
-    fulcrum:
-        image: cculianu/fulcrum
-        container_name: fulcrum 
-        depends_on:
-         - bitcoind-regtest
-        ports:
-          - "50001:50001"
-        volumes:
-          - ./data/fulcrum:/data
-          - ./configs/fulcrum-config.conf:/config.conf
-        command: ["Fulcrum", "/config.conf"]
-        networks:
-          - bitcoin-bridging
+    # bitcoind-regtest:
+    #     image: zquestz/bitcoin-cash-node
+    #     container_name: bitcoind-regtest
+    #     ports:
+    #       - "18443:18443"
+    #       - "28332:28332"
+    #     volumes:
+    #       - ./data/bitcoind:/data
+    #       - ./configs/bitcoin.conf:/data/bitcoin.conf
+    #       - ./configs/bitcoin.conf:/root/.bitcoin/bitcoin.conf
+    #     entrypoint: "/entrypoint.sh"
+    #     command: bitcoind
+    #     networks:
+    #       - bitcoin-bridging
+
+    # fulcrum:
+    #     image: cculianu/fulcrum
+    #     container_name: fulcrum 
+    #     depends_on:
+    #      - bitcoind-regtest
+    #     ports:
+    #       - "50001:50001"
+    #     volumes:
+    #       - ./data/fulcrum:/data
+    #       - ./configs/fulcrum-config.conf:/config.conf
+    #     command: ["Fulcrum", "/config.conf"]
+    #     networks:
+    #       - bitcoin-bridging
 
     opensight:
         image: actorforth/opensight:latest
@@ -35,7 +51,7 @@ services:
         ports:
           - "3001:3001"
         environment:
-          - ELECTRUM_HOST=fulcrum
+          - ELECTRUM_HOST=bitcoind-regtest
           - ELECTRUM_PORT=50001
           - NODE_RPC_PORT=18443
         networks:
@@ -69,7 +85,7 @@ services:
           - mongodb
         volumes:
           - ./configs/slpdb-config.sh:/home/safeuser/SLPDB-src/start.sh
-          - ./data/leveldb:/home/safeuser/SLPDB/_leveldb
+        restart: always
         depends_on:
           - mongodb
         networks:
@@ -85,6 +101,7 @@ services:
           - mongodb
         ports:
           - "12300:4000"
+        restart: always
         depends_on:
           - mongodb
         networks:

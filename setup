@@ -2,7 +2,7 @@
 set -e
 
 # Ensure working directory is clean before setup
-if [[ -f ".env" ]]; then
+if [[ -f ".lock" ]]; then
 	echo "It appears you've already run this setup script before."
 	echo "Please run the ./clean script before trying to setup again."
 	exit 1
@@ -95,7 +95,7 @@ fi
 
 # Configure docker-compose files for the selected stack
 if [[ $BTK_NODE == 1 ]]; then
-    export COMPOSE_FILE="./dc_files/docker-compose.bitcoinunlimited.yml"
+    # export COMPOSE_FILE="./dc_files/docker-compose.bitcoinunlimited.yml"
     # export COMPOSE_FILE="./dc_files/docker-compose.bitcoincashnode.yml"
 	
     # export COMPOSE_FILE="$COMPOSE_FILE:./dc_files/docker-compose.electrumx.yml"
@@ -104,38 +104,37 @@ if [[ $BTK_NODE == 1 ]]; then
 	# final configurations (which includes REST, OpenSight, Wallet, etc)
 
 	# Save state of compose_file (before initilizing node)
-	export PRE_NETWORK_FILE="$COMPOSE_FILE"
+	# export PRE_NETWORK_FILE="$COMPOSE_FILE"
 
 	# Temporarily add network to docker-compose file
-	export COMPOSE_FILE="$COMPOSE_FILE:./dc_files/docker-compose.network.yml"
+	# export COMPOSE_FILE="$COMPOSE_FILE:./dc_files/docker-compose.network.yml"
 
 	# Create temporary env file
-	echo "COMPOSE_FILE=$COMPOSE_FILE" >> ".env"
+	# echo "COMPOSE_FILE=$COMPOSE_FILE" >> ".env"
 
 	# Initailze regtest node
+	docker pull zquestz/bitcoin-unlimited:latest
+
 	echo "Starting local node servers..."
-	docker-compose up -d
+	docker-compose up -d bitcoind-regtest
 	sleep $BTK_SLEEP_TIME
 
 	# Generate N blocks
-    echo "Generating $BTK_BLOCKS blocks for regtest to address"
-    echo $BTK_GENERATE_ADDRESS
+	echo "Generating $BTK_BLOCKS initial blocks for regtest..."
+    # echo "Generating $BTK_BLOCKS blocks for regtest to address"
+    # echo $BTK_GENERATE_ADDRESS
 
-    docker-compose exec -T bitcoind-regtest bitcoin-cli generatetoaddress $BTK_BLOCKS $BTK_GENERATE_ADDRESS > /dev/null
-    
-    # docker-compose exec -T bitcoind-regtest bitcoin-cli generate $BTK_BLOCKS 
-
+    docker-compose exec -T bitcoind-regtest bitcoin-cli generate $BTK_BLOCKS > /dev/null
     sleep $BTK_SLEEP_TIME
-    #docker-compose exec -T bitcoind-regtest bitcoin-cli generate $BTK_BLOCKS > /dev/null
     
 	# Stop the server(s)
-	docker-compose stop 
+	docker-compose stop
 
 	# Remove temporary env file
-	rm ".env"
+	# rm ".env"
 
 	# Reset the compose_file
-	export COMPOSE_FILE="$PRE_NETWORK_FILE"
+	# export COMPOSE_FILE="$PRE_NETWORK_FILE"
     # export COMPOSE_FILE="$COMPOSE_FILE:./dc_files/docker-compose.fulcrum.yml"
 
 fi
@@ -175,8 +174,10 @@ if [[ $BTK_NGINX == 1 ]]; then
 fi
 
 if [[ $BTK_REST == 1 ]]; then
-	export COMPOSE_FILE="$COMPOSE_FILE:./dc_files/docker-compose.opensight.yml"
-	export COMPOSE_FILE="$COMPOSE_FILE:./dc_files/docker-compose.restapi.yml"
+	# export COMPOSE_FILE="$COMPOSE_FILE:./dc_files/docker-compose.opensight.yml"
+	# export COMPOSE_FILE="$COMPOSE_FILE:./dc_files/docker-compose.restapi.yml"
+	docker pull actorforth/opensight:latest
+	docker pull actorforth/rest.bitcoin.com:latest
 fi
 
 if [[ $BTK_JS_API == 1 ]]; then
@@ -184,15 +185,19 @@ if [[ $BTK_JS_API == 1 ]]; then
 fi
 
 if [[ $BTK_SLPDB == 1 ]]; then
-	export COMPOSE_FILE="$COMPOSE_FILE:./dc_files/docker-compose.mongodb.yml"
-	export COMPOSE_FILE="$COMPOSE_FILE:./dc_files/docker-compose.slpdb.yml"
-	export COMPOSE_FILE="$COMPOSE_FILE:./dc_files/docker-compose.slpserve.yml"
+	# export COMPOSE_FILE="$COMPOSE_FILE:./dc_files/docker-compose.mongodb.yml"
+	# export COMPOSE_FILE="$COMPOSE_FILE:./dc_files/docker-compose.slpdb.yml"
+	# export COMPOSE_FILE="$COMPOSE_FILE:./dc_files/docker-compose.slpserve.yml"
+	docker pull mongo:4.2-bionic
+	docker pull actorforth/slpdb:latest
+	docker pull actorforth/slpserve:latest
 fi
 
 # Add network to docker-compose file
-export COMPOSE_FILE="$COMPOSE_FILE:./dc_files/docker-compose.network.yml"
+# export COMPOSE_FILE="$COMPOSE_FILE:./dc_files/docker-compose.network.yml"
 
-echo "COMPOSE_FILE=$COMPOSE_FILE" >> ".env"
+# echo "COMPOSE_FILE=$COMPOSE_FILE" >> ".env"
+touch ".lock"
 
 if [[ $BTK_WALLET == 1 ]]; then
 

@@ -77,7 +77,7 @@ if [[ BTK_WALLET == 1 ]]; then
 	fi
 fi
 
-if [[ $BTK_DOCKER == 1 && -f "./.env" ]]; then
+if [[ $BTK_DOCKER == 1 && -f "./.lock" ]]; then
 	
 	echo "Removing previous docker containers"
 	docker-compose down
@@ -86,11 +86,15 @@ if [[ $BTK_DOCKER == 1 && -f "./.env" ]]; then
     echo "Deleting node data... (./data/bitcoind)"
 	rm -rf "./data/bitcoind"
 
-	# Remove indexer data files
-    echo "Deleting indexer data... (./data/fulcrum)"
-	rm -rf "./data/fulcrum"
+	# Remove SLPDB data files
+    echo "Deleting SLPDB data... (./data/mongodb)"
+	rm -rf "./data/mongodb"
 
-	rm ".env"
+	# Remove indexer data files
+ #    echo "Deleting indexer data... (./data/fulcrum)"
+	# rm -rf "./data/fulcrum"
+
+	rm ".lock"
 	DID_SOMETHING=1
 fi
 
