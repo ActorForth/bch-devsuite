@@ -1,6 +1,7 @@
 .DS_Store
 .BTK-container-lock
 .env
+.lock
 
 Electron-Cash-SLP
 Electron-Cash-SLP/*

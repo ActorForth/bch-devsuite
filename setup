@@ -9,7 +9,7 @@ if [[ -f ".lock" ]]; then
 fi
 
 BTK_SLEEP_TIME=6
-BTK_BLOCKS=100
+BTK_BLOCKS=200
 BTK_GENERATE_ADDRESS=bchreg:qzerfrqkvsclmrlx3hzl0j2ac2eh0k88wqa0efygtm
 BTK_WIF=cUDjy47QLpAUyv1beivDPoYCHjCRVqwRMwCuSnkdF4teVFBDD1ip
 BTK_ENV=$(uname)
@@ -128,7 +128,8 @@ if [[ $BTK_NODE == 1 ]]; then
     sleep $BTK_SLEEP_TIME
     
 	# Stop the server(s)
-	docker-compose stop
+	docker-compose exec -T bitcoind-regtest bitcoin-cli stop
+	# docker-compose stop
 
 	# Remove temporary env file
 	# rm ".env"

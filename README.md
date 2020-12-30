@@ -1,6 +1,6 @@
 # About
 
-This repo intends to be a toolkit for running a local version of a Bitcoin Cash Node for development and testing purposes. Currently it provides a self-hosted local node, indexer (Fulcrum), a drop-in Ninsight replacement (Opensight), a regtest version of the rest.bitcoin.com REST APIs, an instance of SLPDB for token querying, and a regtest-patched version of Electron Cash SLP.
+This repo intends to be a toolkit for running a local version of a Bitcoin Unlimited for development and testing purposes. Currently it provides a self-hosted local node, indexer (Electrs), a drop-in Ninsight replacement (Opensight), a regtest version of the rest.bitcoin.com REST APIs, an instance of SLPDB for token querying, and a regtest-patched version of Electron Cash SLP.
 
 # Prerequisites
 
@@ -23,10 +23,10 @@ cd ./bch-toolkit
 
 Next, run the 'setup' script. This will check that the necessary software is installed, and then it will download and prepare the docker containers. For a full list of options, run ./setup with no arguments to see its usage. 
 
-__NOTE:__ If you wish to have any custom changes applied to the Bitcoin Cash Node, Fulcrum, or REST API services, be sure to apply those changes within the _bitcoin.conf_, _fulcrum-config.conf_, or _restapi-config.sh_ files, respectively, before executing the setup script.
+__NOTE:__ If you wish to have any custom changes applied to the Bitcoin Unlimited, or REST API services, be sure to apply those changes within the _bitcoin.conf_, _fulcrum-config.conf_, or _restapi-config.sh_ files, respectively, before executing the setup script.
 
 ```bash
-./setup node rest
+./setup default
 ```
 
 Next, you should execute the _services_ script to start the node, indexer, rest API, and/or SLPDB (depending which ones chose in the _setup_ script).
