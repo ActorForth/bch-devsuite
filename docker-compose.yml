@@ -11,7 +11,7 @@ services:
           - ./data/bitcoind:/data
           - ./configs/bitcoin-unlimited.conf:/data/bitcoin.conf
           - ./configs/bitcoin-unlimited.conf:/root/.bitcoin/bitcoin.conf
-        entrypoint: "/entrypoint.sh"
+            #entrypoint: "/entrypoint.sh"
         command: bitcoind
         networks:
           - bitcoin-bridging
@@ -67,6 +67,31 @@ services:
         networks:
           - bitcoin-bridging
 
+    bch-api-regtest:
+        image: actorforth/bch-api
+        container_name: bch-api-regtest
+        ports:
+          - "3000:3000"
+          # volumes:
+          #   - ./:/home/safeuser/bch-api/
+        restart: always
+        environment:
+          - RPC_BASEURL=http://bitcoind-regtest:18443/
+          - RPC_USERNAME=regtest
+          - RPC_PASSWORD=regtest
+          - NETWORK=regtest
+          - SLPDB_URL=http://slpserve:4000/
+          # - BLOCKBOOK_URL=https://<Blockbook IP>:9131/
+          - NODE_TLS_REJECT_UNAUTHORIZED=0
+          - FULCRUM_URL=nginx-regtest
+          - FULCRUM_PORT=50002
+          - SECURITY=false
+          - TOKENSECRET=somelongpassword
+          # - REDIS_HOST=6379
+          # - REDIS_PORT=127.0.0.1
+        networks:
+          - bitcoin-bridging
+
     mongodb:
         image: mongo:4.2-bionic
         container_name: mongo-slpdb
@@ -95,7 +120,7 @@ services:
         image: actorforth/slpserve:latest
         container_name: slpserve
         volumes:
-          - ./configs/slpserve:/home/safeuser/config
+            #          - ./configs/slpserve:/home/safeuser/config
           - ./configs/slpserve-config.sh:/home/safeuser/slpserve/start.sh
         links:
           - mongodb
