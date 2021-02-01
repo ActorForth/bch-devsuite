@@ -1,7 +1,7 @@
 version: "3"
 services:
     bitcoind-regtest:
-        image: zquestz/bitcoin-unlimited
+        image: xcindall/propose-regtest:firsttry
         container_name: bitcoind-regtest
         ports:
           - "18443:18443"
@@ -12,7 +12,7 @@ services:
           - ./configs/bitcoin-unlimited.conf:/data/bitcoin.conf
           - ./configs/bitcoin-unlimited.conf:/root/.bitcoin/bitcoin.conf
             #entrypoint: "/entrypoint.sh"
-        command: bitcoind
+        command: /home/safeuser/bu/src/bitcoind
         networks:
           - bitcoin-bridging
 
@@ -33,7 +33,7 @@ services:
 
     # fulcrum:
     #     image: cculianu/fulcrum
-    #     container_name: fulcrum 
+    #     container_name: fulcrum
     #     depends_on:
     #      - bitcoind-regtest
     #     ports:
@@ -46,7 +46,7 @@ services:
     #       - bitcoin-bridging
 
     opensight:
-        image: actorforth/opensight:latest
+        image: actorforth/opensight-test:latest
         container_name: opensight
         ports:
           - "3001:3001"
@@ -70,6 +70,7 @@ services:
     bch-api-regtest:
         image: actorforth/bch-api
         container_name: bch-api-regtest
+        command: "node ./src/app.js"
         ports:
           - "3000:3000"
           # volumes:
@@ -83,8 +84,8 @@ services:
           - SLPDB_URL=http://slpserve:4000/
           # - BLOCKBOOK_URL=https://<Blockbook IP>:9131/
           - NODE_TLS_REJECT_UNAUTHORIZED=0
-          - FULCRUM_URL=nginx-regtest
-          - FULCRUM_PORT=50002
+          - FULCRUM_URL=bitcoind-regtest
+          - FULCRUM_PORT=50001
           - SECURITY=false
           - TOKENSECRET=somelongpassword
           # - REDIS_HOST=6379

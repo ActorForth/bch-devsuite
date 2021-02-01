@@ -15,8 +15,8 @@ export BLOCKBOOK_URL=https://<Blockbook IP>:9131/
 export NODE_TLS_REJECT_UNAUTHORIZED=0
 
 # Mainnet Fulcrum / ElectrumX
-export FULCRUM_URL=localhost
-export FULCRUM_PORT=50002
+export FULCRUM_URL=bitcoind-regtest
+export FULCRUM_PORT=50001
 
 export SECURITY=false
 ### require if SECURITY=true ###
