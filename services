@@ -42,7 +42,7 @@ if [[ $BTK_SERVICES_RUN == 1 && $BTK_SERVICES_STOP == 1 ]]; then
 fi
 
 if [[ $BTK_RUN_WALLET == 1 ]]; then
-		
+
 	echo "Running nodes and Electron Cash SLP wallet"
 
 	docker-compose up -d
@@ -52,7 +52,7 @@ if [[ $BTK_RUN_WALLET == 1 ]]; then
 	cd ./Electron-Cash-SLP
 	source ./venv/bin/activate
 	./electron-cash --testnet -v
-	
+
 	docker-compose stop
 fi
 
@@ -61,7 +61,7 @@ if [[ $BTK_SERVICES_RUN == 1 ]]; then
 fi
 
 if [[ $BTK_SERVICES_STOP == 1 ]]; then
-    docker-compose exec -T bitcoind-regtest bitcoin-cli stop
+    docker-compose exec -T bitcoind-regtest /home/safeuser/bu/src/bitcoin-cli stop
     sleep $BTK_SLEEP_TIME
     docker-compose stop
 fi
