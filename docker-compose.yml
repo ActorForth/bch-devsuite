@@ -33,7 +33,7 @@ services:
 
     # fulcrum:
     #     image: cculianu/fulcrum
-    #     container_name: fulcrum 
+    #     container_name: fulcrum
     #     depends_on:
     #      - bitcoind-regtest
     #     ports:
