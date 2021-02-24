@@ -36,12 +36,13 @@ if [[ ! -z $1 ]]; then
 		fi
 		if [[ $var == "js" ]]; then
 			BTK_JS_API=1
-			# BTK_NGINX=1
+			BTK_NGINX=1
 		fi
 		if [[ $var == "default" ]]; then
 			BTK_NODE=1
 			BTK_REST=1
 			BTK_SLPDB=1
+			BTK_NGINX=1
 		fi
 		if [[ $var == "all" ]]; then
 			BTK_NODE=1
@@ -49,6 +50,8 @@ if [[ ! -z $1 ]]; then
 			BTK_SLPDB=1
 			BTK_JS_API=1
 			BTK_WALLET=1
+			BTK_NGINX=1
+			echo "settingup all infrastructures"
 		fi
     done
 else
@@ -312,7 +315,7 @@ if [[ $BTK_WALLET == 1 ]]; then
 
 		echo "Starting local node servers..."
 		docker-compose up -d
-		sleep 5
+		sleep $BTK_SLEEP_TIME
 
 		# Generate some blocks, and get their hashes/merkle roots
 		docker-compose exec -T bitcoind-regtest bitcoin-cli getblock 0 > ./Electron-Cash-SLP/genesis.txt
