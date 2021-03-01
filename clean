@@ -33,7 +33,7 @@ else
 	exit 0 
 fi
 
-if [[ -d "./cert" && $BTK_CERTS == 1 ]]; then
+if [[ -d "./configs/cert" && $BTK_CERTS == 1 ]]; then
 	echo "Removing certificates directory."
 	rm -rf cert
 	DID_SOMETHING=1
@@ -77,10 +77,24 @@ if [[ BTK_WALLET == 1 ]]; then
 	fi
 fi
 
-if [[ $BTK_DOCKER == 1 && -f "./.BTK-container-lock" ]]; then
+if [[ $BTK_DOCKER == 1 && -f "./.lock" ]]; then
+	
 	echo "Removing previous docker containers"
 	docker-compose down
-	rm "./.BTK-container-lock"
+
+	# Remove node data files
+    echo "Deleting node data... (./data/bitcoind)"
+	rm -rf "./data/bitcoind"
+
+	# Remove SLPDB data files
+    echo "Deleting SLPDB data... (./data/mongodb)"
+	rm -rf "./data/mongodb"
+
+	# Remove indexer data files
+ #    echo "Deleting indexer data... (./data/fulcrum)"
+	# rm -rf "./data/fulcrum"
+
+	rm ".lock"
 	DID_SOMETHING=1
 fi
 

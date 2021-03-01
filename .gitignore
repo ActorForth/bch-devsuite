@@ -1,5 +1,7 @@
 .DS_Store
 .BTK-container-lock
+.env
+.lock
 
 Electron-Cash-SLP
 Electron-Cash-SLP/*
@@ -8,7 +10,6 @@ bch-api/*
 misc/*
 cert/*
 data/*
-
+configs/cert
 *.txt
 *.swp
-
