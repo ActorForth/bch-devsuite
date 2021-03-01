@@ -19,7 +19,7 @@ BTK_SLPDB=0
 BTK_JS_API=0
 BTK_NGINX=0
 
-BTK_WALLET=0 # Under construction 
+BTK_WALLET=0 # Under construction
 
 BTK_NETWORK="bitcoin-bridging"
 
@@ -36,12 +36,13 @@ if [[ ! -z $1 ]]; then
 		fi
 		if [[ $var == "js" ]]; then
 			BTK_JS_API=1
-			# BTK_NGINX=1
+			BTK_NGINX=1
 		fi
 		if [[ $var == "default" ]]; then
 			BTK_NODE=1
 			BTK_REST=1
 			BTK_SLPDB=1
+			BTK_NGINX=1
 		fi
 		if [[ $var == "all" ]]; then
 			BTK_NODE=1
@@ -49,6 +50,8 @@ if [[ ! -z $1 ]]; then
 			BTK_SLPDB=1
 			BTK_JS_API=1
 			BTK_WALLET=1
+			BTK_NGINX=1
+			echo "settingup all infrastructures"
 		fi
     done
 else
@@ -59,7 +62,7 @@ else
     echo "- js: JavaScript stack ready for BCH JS development"
 	echo "- wallet: Electron Cash SLP wallet GUI application"
     echo "- all: all of the above"
-    exit 0 
+    exit 0
 fi
 
 echo "Setting up bch-toolkit..."
@@ -68,16 +71,16 @@ echo "Checking that necessary software is available: "
 # Check that Docker and docker-compose are installed
 echo "Looking for Docker..."
 if [[ -x "$(command -v docker)" ]]; then
-	# Note: The following line may seem useless, 
+	# Note: The following line may seem useless,
 	# however it causes the scirpt to error
-	# if A) Docker is not currently running, or 
+	# if A) Docker is not currently running, or
 	# B) permissions are not set correctly
 	# on Linux or FreeBSD host
 	BTK_DOCKER_STATUS=`docker ps`
-	echo "Docker found."	
+	echo "Docker found."
 else
 	echo "Docker not found. Please install docker."
-	exit 1 
+	exit 1
 fi
 
 echo "Looking for docker-compose..."
@@ -85,7 +88,7 @@ if [[ -x "$(command -v docker-compose)" ]]; then
 	echo "Docker-compose found."
 else
 	echo "Docker-compose not found. Please install docker-compose."
-	exit 1 
+	exit 1
 fi
 
 # Check and (if needed) create docker network for bch-toolkit
@@ -97,9 +100,9 @@ fi
 if [[ $BTK_NODE == 1 ]]; then
     # export COMPOSE_FILE="./dc_files/docker-compose.bitcoinunlimited.yml"
     # export COMPOSE_FILE="./dc_files/docker-compose.bitcoincashnode.yml"
-	
+
     # export COMPOSE_FILE="$COMPOSE_FILE:./dc_files/docker-compose.electrumx.yml"
-    
+
 	# The next steps initiate the regtest node before proceeding to the
 	# final configurations (which includes REST, OpenSight, Wallet, etc)
 
@@ -126,7 +129,7 @@ if [[ $BTK_NODE == 1 ]]; then
 
     docker-compose exec -T bitcoind-regtest bitcoin-cli generate $BTK_BLOCKS > /dev/null
     sleep $BTK_SLEEP_TIME
-    
+
 	# Stop the server(s)
 	docker-compose exec -T bitcoind-regtest bitcoin-cli stop
 	# docker-compose stop
@@ -152,7 +155,7 @@ if [[ $BTK_NGINX == 1 ]]; then
 	fi
 
 	# Create new SSL certificate/key pair to be used on nginx server
-	if [[ -d "./configs/cert" ]]; then 
+	if [[ -d "./configs/cert" ]]; then
 		if [[ -f "./configs/cert/cert.key" && -f "./configs/cert/cert.crt" ]]; then
 			echo "OpenSSL certificates already exist."
 		else
@@ -214,7 +217,7 @@ if [[ $BTK_WALLET == 1 ]]; then
 	# Check that python3 is installed
 	if [ -x "$(command -v python3)" ]; then
 		echo "Python3 found."
-	else 
+	else
 		echo "Python (version 3) not found. Please install Python 3."
 		exit 1
 	fi
@@ -228,7 +231,7 @@ if [[ $BTK_WALLET == 1 ]]; then
 	# set +e
 	# BTK_VENV_VER=`python3 -m virtualenv --version | grep -o 20`
 	# set -e
-	# 
+	#
 	# if [ -z "$BTK_VENV_VER" ]; then
 	# 	echo "Looking for Anaconda instead..."
 	# 	if [ -x "$(command -v conda)" ]; then
@@ -236,7 +239,7 @@ if [[ $BTK_WALLET == 1 ]]; then
 	# 		echo "Anaconda found."
 	# 	fi
 	# fi
-	
+
 	# TODO: Add anaconda support
 	# TODO: Throw error if virtualenv version too low
 	BTK_VENV_VER=`python3 -m virtualenv --version | grep -o 20`
@@ -246,10 +249,10 @@ if [[ $BTK_WALLET == 1 ]]; then
 		echo "Neither virtualenv nor conda could be found. Please install virtualenv."
 		exit 1
 	fi
-	
+
 	# Linux hosts require qt5 library available
 	if [[ $BTK_ENV == "Linux" ]]; then
-	
+
 		BTK_QT_FOUND=0
 		BTK_DEB=0
 
@@ -261,7 +264,7 @@ if [[ $BTK_WALLET == 1 ]]; then
 		elif [[ -x "$(command -v /usr/bin/qmake)" ]]; then
 			BTK_QT_FOUND=1
 		fi
-	
+
 		if [[ $BTK_QT_FOUND == 1 ]]; then
 			echo "(Linux Host) Qt5 library found."
 		else
@@ -273,7 +276,7 @@ if [[ $BTK_WALLET == 1 ]]; then
 				echo "On Ubuntu/Debian-based distributions," \
 					"it may be available in your package" \
 					"manager under the name 'qt5-default'."
-			
+
 			exit 1
 			fi
 		fi
@@ -312,7 +315,7 @@ if [[ $BTK_WALLET == 1 ]]; then
 
 		echo "Starting local node servers..."
 		docker-compose up -d
-		sleep 5
+		sleep $BTK_SLEEP_TIME
 
 		# Generate some blocks, and get their hashes/merkle roots
 		docker-compose exec -T bitcoind-regtest bitcoin-cli getblock 0 > ./Electron-Cash-SLP/genesis.txt
@@ -367,7 +370,7 @@ if [[ $BTK_WALLET == 1 ]]; then
 			networks.py
 
 		fi
-		if [[ $BTK_ENV == "Linux" ]]; then	
+		if [[ $BTK_ENV == "Linux" ]]; then
 			sed -i "91s|GENESIS.*$|GENESIS = \"${BTK_GEN_HASH}\"|" networks.py
 
 			sed -i "98s|BITCOIN_CASH_FORK_BLOCK_HEIGHT =.*$|BITCOIN_CASH_FORK_BLOCK_HEIGHT = 150|" networks.py
@@ -382,7 +385,7 @@ if [[ $BTK_WALLET == 1 ]]; then
 		cd ..
 	#	echo $BTK_VER_MERK > merkle.txt
 		cd ..
-		docker-compose stop 
+		docker-compose stop
 	fi
 
 fi

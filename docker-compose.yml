@@ -33,7 +33,7 @@ services:
 
     # fulcrum:
     #     image: cculianu/fulcrum
-    #     container_name: fulcrum 
+    #     container_name: fulcrum
     #     depends_on:
     #      - bitcoind-regtest
     #     ports:
@@ -44,6 +44,18 @@ services:
     #     command: ["Fulcrum", "/config.conf"]
     #     networks:
     #       - bitcoin-bridging
+
+    nginx-regtest:
+        image: nginx:latest
+        container_name: nginx-regtest
+        ports:
+         - "50002:50002"
+        volumes:
+         - ./configs/nginx.conf:/etc/nginx/nginx.conf
+         - ./configs/cert/cert.key:/etc/nginx/cert.key
+         - ./configs/cert/cert.crt:/etc/nginx/cert.crt
+        networks:
+         - bitcoin-bridging
 
     opensight:
         image: actorforth/opensight:latest
@@ -70,6 +82,7 @@ services:
     bch-api-regtest:
         image: actorforth/bch-api
         container_name: bch-api-regtest
+        command: "node ./src/app.js"
         ports:
           - "3000:3000"
           # volumes:

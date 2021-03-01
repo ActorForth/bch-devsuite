@@ -10,7 +10,6 @@ bch-api/*
 misc/*
 cert/*
 data/*
-
+configs/cert
 *.txt
 *.swp
-
