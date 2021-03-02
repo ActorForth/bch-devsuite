@@ -12,16 +12,17 @@ To run this node, you must have the follow software installed on your local mach
 * Openssl
 * Git
 
-# Installation
+# Getting start
 
-Begin by cloning this repository.
+### 1. Cloning this repository.
 
 ```bash
-git clone https://github.com/ActorForth/bch-toolkit.git 
+git clone https://github.com/ActorForth/bch-toolkit.git
 cd ./bch-toolkit
 ```
 
-Next, run the 'setup' script. This will check that the necessary software is installed, and then it will download and prepare the docker containers. For a full list of options, run ./setup with no arguments to see its usage. 
+### 2. Setup infrastructure.
+This will check that the necessary software is installed, and then it will download and prepare the docker containers. For a full list of options, run ./setup with no arguments to see its usage.
 
 __NOTE:__ If you wish to have any custom changes applied to the Bitcoin Unlimited, or REST API services, be sure to apply those changes within the _bitcoin.conf_, _fulcrum-config.conf_, or _restapi-config.sh_ files, respectively, before executing the setup script.
 
@@ -29,11 +30,64 @@ __NOTE:__ If you wish to have any custom changes applied to the Bitcoin Unlimite
 ./setup default
 ```
 
-Next, you should execute the _services_ script to start the node, indexer, rest API, and/or SLPDB (depending which ones chose in the _setup_ script).
+### 3. Running infrastructure.
+
+Execute the _services_ script to start the node, indexer, rest API, and/or SLPDB (depending which ones chose in the _setup_ script).
 
 ```bash
 ./services run
 ```
+
+### 4. Testing.
+
+```bash
+./bitcoin-cli getblockchaininfo
+```
+Expected result
+```
+{
+  "chain": "regtest",
+  "blocks": 200,
+  "headers": 200,
+  "bestblockhash": "0714183b15ac3757e35152fadbc0fd2d73ec97c4d9e1ee486882b18da8b256ca",
+  "difficulty": 4.656542373906925e-10,
+  "mediantime": 1614598375,
+  "verificationprogress": 1,
+  "initialblockdownload": false,
+  "chainwork": "0000000000000000000000000000000000000000000000000000000000000192",
+  "size_on_disk": 48350,
+  "pruned": false,
+  "softforks": [
+    {
+      "id": "bip34",
+      "version": 2,
+      "reject": {
+        "status": false
+      }
+    },
+    {
+      "id": "bip66",
+      "version": 3,
+      "reject": {
+        "status": false
+      }
+    },
+    {
+      "id": "bip65",
+      "version": 4,
+      "reject": {
+        "status": false
+      }
+    }
+  ],
+  "bip9_softforks": {
+  },
+  "bip135_forks": {
+  }
+}
+```
+
+### 5. Stop infrastructure.
 
 Once you decide to call it a day, you can shut down your local environment by executing:
 
@@ -64,6 +118,69 @@ If you experience any issues, or would like to completely erase the current wall
 
 __WARNING:__ The 'clean' script is very destructive, so make sure you only use it when you want to _completely erase_ the entire current instance of nodes and the wallet.
 
+
+# Geting start with bch-js
+
+### Prerequisites
+node and npm
+
+### 1. Cloning example repository.
+
+```bash
+git clone https://github.com/ActorForth/bch-js-example.git && cd bch-js-example
+```
+### 2. Install dependency.
+```bash
+npm install
+```
+### 3. Created wallet.
+```bash
+cd applications
+
+node ./slp/create-wallet/create-wallet.js
+```
+Expected to see `wallet-info-regtest-mywallet.json` and `wallet-info-regtest-mywallet.txt` in /applications
+
+### 4. Funding wallet.
+```bash
+cd bch-toolkit
+```
+
+Generate Bitcoin cash from mining 100 blocks. Coinbase will be in the node generated wallet.
+```bash
+./bitcoin-cli generate 100
+```
+
+Send coin from node generated wallet to the wallet you just created (you can find the address in wallet-info-regtest-pat.json)
+```bash
+./bitcoin-cli sendtoaddress  bchreg:qpfg9kg3swcg0tln747hprcgtj5k80q7dcd0perd4t 100
+```
+
+Mine another 100 blocks to matures the coin base (https://coinguides.org/immature-confirmed-cleared/)
+```bash
+./bitcoin-cli generate 100
+```
+### 5. check wallet balance.
+```bash
+cd bch-js-example
+cd applications
+node ./slp/check-balance/check-balance.js
+
+```
+Expected to see
+
+```
+WALLET_NAME wallet-info-regtest-mywallet
+CASHADDRESS bchreg:qpfg9kg3swcg0tln747hprcgtj5k80q7dcd0perd4t
+SLPADDRESS slpreg:qpfg9kg3swcg0tln747hprcgtj5k80q7dcs0mggpvz
+BCH Balance information for slpreg:qpfg9kg3swcg0tln747hprcgtj5k80q7dcs0mggpvz:
+{
+  "confirmed": 0,
+  "unconfirmed": 10000000000
+}
+SLP Token information:
+"No balance for this address"
+```
 # Known Issues
 
 There are a few issues with this setup that could use improvement in the future.
@@ -71,8 +188,3 @@ There are a few issues with this setup that could use improvement in the future.
 * Currently, this setup relies on the built-in Electrscash indexing server included in the Bitcoin Unlimited node. This isn't an issue per se, but to test with other nodes (such as Bitcoin ABC, Bitcoin Cash Node, or bchd) it will be necessary to seperate the indexing server into a seperate container.
 
 * Currently blocks must be generated manually after transactions are made in order to mine them into blocks. The possibility of adding an automation to generate a block every few minutes could be a consideration to look into.
-
-
-
-
-
