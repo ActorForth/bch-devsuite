@@ -5,8 +5,19 @@ services:
         container_name: bchrest
         ports:
           - "12500:3000"
+        restart: always
+        environment:
+          - PORT=3000 
+          - BITCOINCOM_BASEURL=http://opensight:3001/api/
+          - RPC_BASEURL=http://bitcoind-regtest:18443/
+          - RPC_PASSWORD=regtest
+          - RPC_USERNAME=regtest
+          - ZEROMQ_URL=0
+          - ZEROMQ_PORT=0
+          - NETWORK=regtest
         volumes:
           - ./configs/bchrest-config.sh:/home/safeuser/rest.bitcoin.com/start.sh
+        command: ["npm", "start"]
         networks:
           - bitcoin-bridging
 

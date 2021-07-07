@@ -6,6 +6,12 @@ services:
         volumes:
             #          - ./configs/slpserve:/home/safeuser/config
           - ./configs/slpserve-config.sh:/home/safeuser/slpserve/start.sh
+        environment:
+          - db_name=slpdb_test
+          - db_url=mongodb://mongo-slpdb:27017
+          - slpserve_port=4000
+          - slpserve_timeout=30000
+          - slpserve_log=true
         links:
           - mongodb
         ports:
@@ -13,6 +19,7 @@ services:
         restart: always
         depends_on:
           - mongodb
+        command: ["npm", "start"]
         networks:
           - bitcoin-bridging
 
