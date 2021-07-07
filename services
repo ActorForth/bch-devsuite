@@ -1,30 +1,33 @@
 #!/usr/bin/env bash
-set -e
+set -u
 
-BTK_SERVICES_RUN=0
+abort() {
+    printf "%s" "$@"
+    exit 1
+}
+
+greentext() {
+    printf "\x1B[32m%b\e[0m\n" "$1"
+}
+
+BTK_SERVICES_START=0
 BTK_SERVICES_STOP=0
-BTK_RUN_WALLET=0
-
-BTK_SLEEP_TIME=6
+BTK_SLEEP_TIME=${SLEEP:-6}
 
 if [[ ! -f "./.lock" ]]; then
-	echo "Please execute the 'setup' script first."
-	exit 1
+	abort "Please execute the './setup' script first."
 else
-
 	if [[ ! -z $1 ]]; then
+        source .lock
 		for var in "$@"
-		do
-			[[ $var == "run" || $var == "start" ]] && BTK_SERVICES_RUN=1
-            [[ $var == "stop" ]] && BTK_SERVICES_STOP=1
-			[[ $var == "run-wallet" ]] && BTK_RUN_WALLET=1
-		done
-			else
-		echo "usage: run [command]"
-		echo " - start: start the services specific during setup (i.e. node, rest, slpdb)"
+            do
+                [[ $var == "run" || $var == "start" ]] && BTK_SERVICES_START=1
+                [[ $var == "stop" ]] && BTK_SERVICES_STOP=1
+            done
+    else
+		echo "usage: services [command]"
+		echo " - start: start the services specified during setup (i.e. node, rest, slp)"
         echo " - stop: stops the services that are currently running"
-		echo " - run-wallet: start the Electron Cash SLP wallet"
-
 		exit 0
 	fi
 fi
@@ -36,32 +39,17 @@ if [ ! -x "$(command -v docker-compose)" ]; then
 fi
 
 # Ensure only one of two exclusive commands are chosen
-if [[ $BTK_SERVICES_RUN == 1 && $BTK_SERVICES_STOP == 1 ]]; then
+if [[ $BTK_SERVICES_START == 1 && $BTK_SERVICES_STOP == 1 ]]; then
     echo "You can't start and stop services at the same time..."
     exit 1
 fi
 
-if [[ $BTK_RUN_WALLET == 1 ]]; then
-		
-	echo "Running nodes and Electron Cash SLP wallet"
-
-	docker-compose up -d
-
-	sleep 6
-
-	cd ./Electron-Cash-SLP
-	source ./venv/bin/activate
-	./electron-cash --testnet -v
-	
-	docker-compose stop
-fi
-
-if [[ $BTK_SERVICES_RUN == 1 ]]; then
-	docker-compose up -d
+if [[ $BTK_SERVICES_START == 1 ]]; then
+	eval "docker-compose $DOCKER_ARGS up -d"
 fi
 
 if [[ $BTK_SERVICES_STOP == 1 ]]; then
-    docker-compose exec -T bitcoind-regtest bitcoin-cli stop
+    eval "docker-compose $DOCKER_ARGS exec -T bch-node bitcoin-cli -conf=/bitcoin.conf stop"
     sleep $BTK_SLEEP_TIME
-    docker-compose stop
+    eval "docker-compose $DOCKER_ARGS stop"
 fi
