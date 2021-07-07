@@ -24,8 +24,8 @@ services:
           # - REDIS_PORT=127.0.0.1
         command: ["node", "./src/app.js"]
         networks:
-          - bitcoin-bridging
+          - bch-toolkit-network
 
 networks:
-  bitcoin-bridging:
+  bch-toolkit-network:
     external: true

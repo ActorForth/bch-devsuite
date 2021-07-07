@@ -11,8 +11,8 @@ services:
         depends_on:
           - mongodb
         networks:
-          - bitcoin-bridging
+          - bch-toolkit-network
 
 networks:
-  bitcoin-bridging:
+  bch-toolkit-network:
     external: true

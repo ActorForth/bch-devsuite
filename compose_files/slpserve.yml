@@ -21,8 +21,8 @@ services:
           - mongodb
         command: ["npm", "start"]
         networks:
-          - bitcoin-bridging
+          - bch-toolkit-network
 
 networks:
-  bitcoin-bridging:
+  bch-toolkit-network:
     external: true

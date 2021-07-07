@@ -10,8 +10,8 @@ services:
          - ./configs/cert/cert.key:/etc/nginx/cert.key
          - ./configs/cert/cert.crt:/etc/nginx/cert.crt
         networks:
-         - bitcoin-bridging
+         - bch-toolkit-network
 
 networks:
-  bitcoin-bridging:
+  bch-toolkit-network:
     external: true

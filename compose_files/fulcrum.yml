@@ -12,8 +12,8 @@ services:
           - ./configs/fulcrum-config.conf:/config.conf
         command: ["Fulcrum", "/config.conf"]
         networks:
-          - bitcoin-bridging
+          - bch-toolkit-network
 
 networks:
-  bitcoin-bridging:
+  bch-toolkit-network:
     external: true

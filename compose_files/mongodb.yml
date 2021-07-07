@@ -9,8 +9,8 @@ services:
           - ./data/mongodb:/data/db
         command: mongod
         networks:
-          - bitcoin-bridging
+          - bch-toolkit-network
 
 networks:
-  bitcoin-bridging:
+  bch-toolkit-network:
     external: true

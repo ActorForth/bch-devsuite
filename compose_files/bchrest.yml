@@ -19,8 +19,8 @@ services:
           - ./configs/bchrest-config.sh:/home/safeuser/rest.bitcoin.com/start.sh
         command: ["npm", "start"]
         networks:
-          - bitcoin-bridging
+          - bch-toolkit-network
 
 networks:
-  bitcoin-bridging:
+  bch-toolkit-network:
     external: true

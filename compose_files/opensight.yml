@@ -10,8 +10,8 @@ services:
           - ELECTRUM_PORT=50001
           - NODE_RPC_PORT=18443
         networks:
-          - bitcoin-bridging
+          - bch-toolkit-network
 
 networks:
-  bitcoin-bridging:
+  bch-toolkit-network:
     external: true
