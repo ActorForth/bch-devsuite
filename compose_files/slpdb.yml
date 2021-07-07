@@ -1,0 +1,18 @@
+version: "3"
+services:
+    slpdb:
+        image: actorforth/slpdb:latest
+        container_name: slpdb
+        links:
+          - mongodb
+        volumes:
+          - ./configs/slpdb-config.sh:/home/safeuser/SLPDB-src/start.sh
+        restart: always
+        depends_on:
+          - mongodb
+        networks:
+          - bitcoin-bridging
+
+networks:
+  bitcoin-bridging:
+    external: true

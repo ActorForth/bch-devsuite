@@ -1,0 +1,21 @@
+version: "3"
+services:
+    bitcoind-regtest:
+        image: zquestz/bitcoin-unlimited
+        container_name: bitcoind-regtest
+        ports:
+          - "18443:18443"
+          - "28332:28332"
+          - "50001:50001"
+        volumes:
+          - ./data/bitcoind:/data
+          - ./configs/bitcoin-unlimited.conf:/data/bitcoin.conf
+          - ./configs/bitcoin-unlimited.conf:/root/.bitcoin/bitcoin.conf
+            #entrypoint: "/entrypoint.sh"
+        command: bitcoind
+        networks:
+          - bitcoin-bridging
+
+networks:
+  bitcoin-bridging:
+    external: true

@@ -1,0 +1,15 @@
+version: "3"
+services:
+    bchrest:
+        image: actorforth/rest.bitcoin.com:latest
+        container_name: bchrest
+        ports:
+          - "12500:3000"
+        volumes:
+          - ./configs/bchrest-config.sh:/home/safeuser/rest.bitcoin.com/start.sh
+        networks:
+          - bitcoin-bridging
+
+networks:
+  bitcoin-bridging:
+    external: true

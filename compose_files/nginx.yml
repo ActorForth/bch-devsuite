@@ -1,0 +1,17 @@
+version: "3"
+services:
+  nginx-regtest:
+        image: nginx:latest
+        container_name: nginx-regtest
+        ports:
+         - "50002:50002"
+        volumes:
+         - ./configs/nginx.conf:/etc/nginx/nginx.conf
+         - ./configs/cert/cert.key:/etc/nginx/cert.key
+         - ./configs/cert/cert.crt:/etc/nginx/cert.crt
+        networks:
+         - bitcoin-bridging
+
+networks:
+  bitcoin-bridging:
+    external: true

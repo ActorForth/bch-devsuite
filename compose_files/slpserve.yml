@@ -1,0 +1,21 @@
+version: "3"
+services:
+    slpserve:
+        image: actorforth/slpserve:latest
+        container_name: slpserve
+        volumes:
+            #          - ./configs/slpserve:/home/safeuser/config
+          - ./configs/slpserve-config.sh:/home/safeuser/slpserve/start.sh
+        links:
+          - mongodb
+        ports:
+          - "12300:4000"
+        restart: always
+        depends_on:
+          - mongodb
+        networks:
+          - bitcoin-bridging
+
+networks:
+  bitcoin-bridging:
+    external: true
