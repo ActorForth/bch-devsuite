@@ -1,15 +1,15 @@
 version: "3"
 services:
     fulcrum:
-        image: cculianu/fulcrum
+        image: cculianu/fulcrum:${TAG_FULCRUM:-latest}
         container_name: fulcrum
         depends_on:
-         - bitcoind-regtest
+         - bch-node
         ports:
           - "50001:50001"
         volumes:
-          - ./data/fulcrum:/data
-          - ./configs/fulcrum-config.conf:/config.conf
+          - ../data/fulcrum:/data
+          - ../configs/fulcrum-config.conf:/config.conf
         command: ["Fulcrum", "/config.conf"]
         networks:
           - bch-toolkit-network

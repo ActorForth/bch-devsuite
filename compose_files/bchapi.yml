@@ -1,6 +1,6 @@
 version: "3"
 services:
-    bch-api-regtest:
+    bch-api:
         image: actorforth/bch-api:${TAG_BCHAPI:-latest}
         container_name: bch-api
         ports:
@@ -9,14 +9,14 @@ services:
           #   - ./:/home/safeuser/bch-api/
         restart: always
         environment:
-          - RPC_BASEURL=http://bitcoind-regtest:18443/
+          - RPC_BASEURL=http://bch-node:18443/
           - RPC_USERNAME=regtest
           - RPC_PASSWORD=regtest
           - NETWORK=regtest
           - SLPDB_URL=http://slpserve:4000/
           # - BLOCKBOOK_URL=https://<Blockbook IP>:9131/
           - NODE_TLS_REJECT_UNAUTHORIZED=0
-          - FULCRUM_URL=nginx-regtest
+          - FULCRUM_URL=bch-nginx
           - FULCRUM_PORT=50002
           - SECURITY=false
           - TOKENSECRET=somelongpassword

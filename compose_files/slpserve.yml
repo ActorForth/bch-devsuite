@@ -1,24 +1,24 @@
 version: "3"
 services:
     slpserve:
-        image: actorforth/slpserve:latest
+        image: actorforth/slpserve:${TAG_SLPSERVE:-latest}
         container_name: slpserve
         volumes:
             #          - ./configs/slpserve:/home/safeuser/config
-          - ./configs/slpserve-config.sh:/home/safeuser/slpserve/start.sh
+          - ../configs/slpserve-config.sh:/home/safeuser/slpserve/start.sh
         environment:
           - db_name=slpdb_test
-          - db_url=mongodb://mongo-slpdb:27017
+          - db_url=mongodb://mongodb-slpdb:27017
           - slpserve_port=4000
           - slpserve_timeout=30000
           - slpserve_log=true
         links:
-          - mongodb
+          - mongodb-slpdb
         ports:
           - "12300:4000"
         restart: always
         depends_on:
-          - mongodb
+          - mongodb-slpdb
         command: ["npm", "start"]
         networks:
           - bch-toolkit-network

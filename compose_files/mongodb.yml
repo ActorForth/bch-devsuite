@@ -1,12 +1,12 @@
 version: "3"
 services:
-    mongodb:
-        image: mongo:4.2-bionic
-        container_name: mongo-slpdb
+    mongodb-slpdb:
+        image: mongo:${TAG_MONGODB:-latest}
+        container_name: mongodb-slpdb
         ports:
           - "27017:27017"
         volumes:
-          - ./data/mongodb:/data/db
+          - ../data/mongodb:/data/db
         command: mongod
         networks:
           - bch-toolkit-network
