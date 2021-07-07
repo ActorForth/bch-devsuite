@@ -3,16 +3,10 @@ services:
     slpdb:
         image: actorforth/slpdb:${TAG_SLPDB:-latest}
         container_name: slpdb
-        links:
+        depends_on:
           - mongodb-slpdb
         volumes:
           - ../configs/slpdb-config.sh:/home/safeuser/SLPDB/start.sh
         restart: always
-        depends_on:
-          - mongodb-slpdb
         networks:
-          - bch-toolkit-network
-
-networks:
-  bch-toolkit-network:
-    external: true
+          - ${BTK_DOCKER_NETWORK:-bch-toolkit-network}

@@ -3,17 +3,14 @@ services:
     fulcrum:
         image: cculianu/fulcrum:${TAG_FULCRUM:-latest}
         container_name: fulcrum
-        depends_on:
-         - bch-node
         ports:
           - "50001:50001"
+        depends_on:
+          - bch-node
         volumes:
           - ../data/fulcrum:/data
           - ../configs/fulcrum-config.conf:/config.conf
+        restart: always
         command: ["Fulcrum", "/config.conf"]
         networks:
-          - bch-toolkit-network
-
-networks:
-  bch-toolkit-network:
-    external: true
+          - ${BTK_DOCKER_NETWORK:-bch-toolkit-network}

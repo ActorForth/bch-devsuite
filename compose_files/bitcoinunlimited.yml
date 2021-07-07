@@ -9,12 +9,8 @@ services:
           - "50001:50001"
         volumes:
           - ../data/bitcoind:/data
-          - ../configs/bitcoin-unlimited.conf:/data/bitcoin.conf
-          - ../configs/bitcoin-unlimited.conf:/root/.bitcoin/bitcoin.conf
-        command: bitcoind
+          - ../configs/bitcoin-unlimited.conf:/bitcoin.conf
+        restart: always
+        command: ["bitcoind", "-conf=/bitcoin.conf"]
         networks:
-          - bch-toolkit-network
-
-networks:
-  bch-toolkit-network:
-    external: true
+          - ${BTK_DOCKER_NETWORK:-bch-toolkit-network}

@@ -5,7 +5,6 @@ services:
         container_name: bchrest
         ports:
           - "12500:3000"
-        restart: always
         environment:
           - PORT=3000
           - BITCOINCOM_BASEURL=http://opensight:3001/api/
@@ -15,10 +14,7 @@ services:
           - ZEROMQ_URL=0
           - ZEROMQ_PORT=0
           - NETWORK=regtest
+        restart: always
         command: ["npm", "start"]
         networks:
-          - bch-toolkit-network
-
-networks:
-  bch-toolkit-network:
-    external: true
+          - ${BTK_DOCKER_NETWORK:-bch-toolkit-network}

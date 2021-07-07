@@ -13,9 +13,6 @@ services:
           - NODE_RPC_USER=regtest
           - NODE_RPC_PASS=regtest
           - OPENSIGHT_PORT=3001
+        restart: always
         networks:
-          - bch-toolkit-network
-
-networks:
-  bch-toolkit-network:
-    external: true
+          - ${BTK_DOCKER_NETWORK:-bch-toolkit-network}

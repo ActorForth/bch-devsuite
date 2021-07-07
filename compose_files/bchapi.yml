@@ -5,9 +5,6 @@ services:
         container_name: bch-api
         ports:
           - "3000:3000"
-          # volumes:
-          #   - ./:/home/safeuser/bch-api/
-        restart: always
         environment:
           - RPC_BASEURL=http://bch-node:18443/
           - RPC_USERNAME=regtest
@@ -22,10 +19,7 @@ services:
           - TOKENSECRET=somelongpassword
           # - REDIS_HOST=6379
           # - REDIS_PORT=127.0.0.1
+        restart: always
         command: ["node", "./src/app.js"]
         networks:
-          - bch-toolkit-network
-
-networks:
-  bch-toolkit-network:
-    external: true
+          - ${BTK_DOCKER_NETWORK:-bch-toolkit-network}

@@ -7,10 +7,7 @@ services:
           - "27017:27017"
         volumes:
           - ../data/mongodb:/data/db
+        restart: always
         command: mongod
         networks:
-          - bch-toolkit-network
-
-networks:
-  bch-toolkit-network:
-    external: true
+          - ${BTK_DOCKER_NETWORK:-bch-toolkit-network}

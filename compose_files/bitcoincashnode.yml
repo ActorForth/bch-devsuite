@@ -8,13 +8,8 @@ services:
           - "28332:28332"
         volumes:
           - ../data/bitcoind:/data
-          - ../configs/bitcoincashnode.conf:/data/bitcoin.conf
-          - ../configs/bitcoincashnode.conf:/root/.bitcoin/bitcoin.conf
-        entrypoint: "/entrypoint.sh"
-        command: bitcoind
+          - ../configs/bitcoincashnode.conf:/bitcoin.conf
+        restart: always
+        command: ["bitcoind", "-conf=/bitcoin.conf"]
         networks:
-          - bch-toolkit-network
-
-networks:
-  bch-toolkit-network:
-    external: true
+          - ${BTK_DOCKER_NETWORK:-bch-toolkit-network}
