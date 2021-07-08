@@ -7,18 +7,36 @@ abort() {
 }
 
 lookingfor() {
-    printf "Looking for %s\t... " "$1"
+    printf "Looking for %s\t... " "$@"
 }
 
 greentext() {
-    printf "\x1B[32m%b\e[0m\n" "$1"
+    for var in "$@"
+    do
+        printf "\x1B[32m%b\e[0m" "$@"
+    done
+    printf "\n"
 }
 
-found() {
-    greentext "found"
+redtext() {
+    for var in "$@"
+    do
+        printf "\x1B[31m%b\e[0m " "$var"
+    done
+    printf "\n"
 }
 
-if [ -z "${BASH_VERSION:-}" ]; then
+successOrFail() {
+    if [[ $1 == 0 ]]; then
+        greentext $2
+    else
+        redtext $3
+        echo $4
+        exit 1
+    fi
+}
+
+if [[ -z "${BASH_VERSION:-}" ]]; then
     abort "Bash is required to interpret this script."
 fi
 
@@ -32,8 +50,8 @@ fi
 
 # Ensure working directory is clean before setup
 if [[ -f ".lock" || -f "config.json" ]]; then
-	echo "It appears you've already run this setup script before."
-	echo "Please run the ./clean script before trying to setup again."
+	printf "It appears you've already run this setup script before.\n"
+	printf "Please run the ./clean script before trying to setup again.\n"
 	abort
 fi
 
@@ -42,8 +60,8 @@ fi
 BTK_GENERATE_ADDRESS=bchreg:qzerfrqkvsclmrlx3hzl0j2ac2eh0k88wqa0efygtm
 BTK_WIF=cUDjy47QLpAUyv1beivDPoYCHjCRVqwRMwCuSnkdF4teVFBDD1ip
 
-BTK_SLEEP_TIME=${SLEEP:-6}
-BTK_BLOCKS=${BLOCKS:-200}
+BTK_SLEEP_TIME=${sleep:-6}
+BTK_BLOCKS=${blocks:-200}
 BTK_ENV=$(uname)
 BTK_UNLIMITED=0 # Default incl ElectrsCash
 BTK_CASHNODE=0 # Default incl Fulcrum
@@ -57,6 +75,9 @@ BTK_DOCKER_NETWORK=${BTK_DOCKER_NETWORK:-"bch-toolkit-network"}
 if [[ ! -z "${1:-}" ]]; then
     for var in "$@"
     do
+        if [[ $var == "bcnh" ]]; then
+            abort "No command 'bcnh'. Did you mean 'bchn' ?"
+        fi
 		[[ $var == "bu" ]] && BTK_UNLIMITED=1
         [[ $var == "bchn" ]] && BTK_CASHNODE=1
 		[[ $var == "bchrest" ]] && BTK_BCHREST=1
@@ -98,55 +119,51 @@ else
 fi
 
 ### Catch exceptions
+# User cannot have more than one node
 if [[ $BTK_UNLIMITED == 1 && $BTK_CASHNODE == 1 ]]; then
     echo "bch-toolkit cannot run both Bitcoin Unlimited and BitcoinCashNode at the same time."
     echo "Please select only one."
+    abort
+fi
+
+# User must have at least one node
+if [[ $BTK_UNLIMITED == 0 && $BTK_CASHNODE == 0 ]]; then
+    echo "Please select at least 1 node (bu or bchn) to set up."
     abort
 fi
 ### End exception catching
 
 # Check that Python3 is installed
 lookingfor "Python 3"
-if [[ -x "$(command -v python3)" ]]; then
-	found
-else
-	abort "Python 3 not found. Please install Python 3."
-fi
+[[ -x "$(command -v python3)" ]]
+successOrFail $? 'found' 'not found' 'Python 3 not found. Please install Python 3.'
 
 # Check that openssl is installed and available
 if [[ $BTK_BCHAPI == 1 ]]; then
-	lookingfor "openssl"
-	if [[ -x "$(command -v openssl)" ]]; then
-        found
-	else
-		abort "Openssl not found. Please install openssl."
-	fi
+	lookingfor "OpenSSL"
+	[[ -x "$(command -v openssl)" ]]
+    successOrFail $? 'found' 'not found' 'OpenSSL not found. Please install OpenSSL.'
 fi
 
 # Check that Docker and docker-compose are installed
 lookingfor "Docker"
-if [[ -x "$(command -v docker)" ]]; then
-	# Note: The following line may seem useless,
-	# however it causes the scirpt to error
-	# if A) Docker is not currently running, or
-	# B) permissions are not set correctly
-	# on Linux or FreeBSD host
-	BTK_DOCKER_STATUS=`docker ps`
-    found
-else
-	abort "Docker not found. Please install docker."
-fi
+[[ -x "$(command -v docker)" ]];
+successOrFail $? 'found' 'not found' 'Docker not found. Please install docker.'
+# Note: The following line may seem useless,
+# however it causes the scirpt to error if 
+# A) Docker is not currently running, or
+# B) permissions are not set correctly on Linux
+printf "Checking that Docker is running\t... "
+BTK_DOCKER_STATUS=`docker ps`
+successOrFail $? 'done' 'error' ''
 
 lookingfor "docker-compose"
-if [[ -x "$(command -v docker-compose)" ]]; then
-    found
-else
-	abort "Docker-compose not found. Please install docker-compose."
-fi
+[[ -x "$(command -v docker-compose)" ]]
+successOrFail $? 'found' 'not found' 'Docker-compose not found. Please install docker-compose.'
 
 # Create Docker network if it doesn't exist
 if [[ -z $(docker network ls --filter name=^${BTK_DOCKER_NETWORK}$ --format="{{ .Name }}") ]]; then
-	docker network create ${BTK_DOCKER_NETWORK}
+	eval "docker network create ${BTK_DOCKER_NETWORK} &> /dev/null"
 fi
 
 # Create new SSL certificate/key pair to be used on nginx server
@@ -155,19 +172,22 @@ if [[ $BTK_BCHAPI == 1 ]]; then
 		if [[ -f "./configs/cert/cert.key" && -f "./configs/cert/cert.crt" ]]; then
 			printf "OpenSSL certificates already exist.\n"
 		else
-			printf "Removing previous certs directory\n"
+			printf "Removing previous certs directory\t... "
 			rm -rf ./configs/cert
+            successOrFail $? 'done' 'error' 'Could not delete certificate directory.'
 		fi
 	fi
 
 	if [[ ! -d "./configs/cert" ]]; then
+		printf "Creating SSL certificate directory\t... "
 		mkdir ./configs/cert
-		printf "Creating SSL certificate ... "
+        successOrFail $? 'done' 'error' 'Could not create certificate directory.'
+        printf "Creating SSL certificate\t... "
 		eval "openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
 			-keyout ./configs/cert/cert.key \
 			-out ./configs/cert/cert.crt \
 			-subj \"/C=no/ST=no/L=no/O=no/OU=no/CN=no/emailAddress=no\"" &> /dev/null
-        greentext "done"
+        successOrFail $? 'done' 'error' 'Could not create SSL certificate.'
 	fi
 fi
 
@@ -229,7 +249,7 @@ with open('config.json', 'w') as config_file:
 with open('.lock', 'w') as lock_file:
     lock_file.write(docker_compose_args)
 EOF
-greentext "done"
+successOrFail $? 'done' 'error' 'Could not create config files.'
 
 # Pull the Docker images
 source .lock
@@ -244,12 +264,12 @@ sleep $BTK_SLEEP_TIME
 # Generate N blocks
 printf "Generating $BTK_BLOCKS initial blocks for regtest ... "
     eval "docker-compose $DOCKER_ARGS exec -T bch-node bitcoin-cli -conf=/bitcoin.conf generate $BTK_BLOCKS > /dev/null"
-    sleep $BTK_SLEEP_TIME
-greentext "done"
+successOrFail $? 'done' 'error' 'Could not create blocks.'
 
 printf "Stopping local node ... "
+    sleep $BTK_SLEEP_TIME
     eval "docker-compose $DOCKER_ARGS exec -T bch-node bitcoin-cli -conf=/bitcoin.conf stop > /dev/null"
-greentext "done"
+successOrFail $? 'done' 'error' 'Could not stop local node.'
 
 printf "\nFinished. Please use './services start' to run your new regtest node."
 
