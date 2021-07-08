@@ -13,9 +13,6 @@ services:
           - slpserve_port=4000
           - slpserve_timeout=30000
           - slpserve_log=true
-        volumes:
-          # - ../configs/slpserve:/home/safeuser/config
-          - ../configs/slpserve-config.sh:/home/safeuser/slpserve/start.sh
         restart: always
         command: ["npm", "start"]
         networks:
