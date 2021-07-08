@@ -262,11 +262,11 @@ eval "docker-compose $DOCKER_ARGS up -d bch-node"
 sleep $BTK_SLEEP_TIME
 
 # Generate N blocks
-printf "Generating $BTK_BLOCKS initial blocks for regtest ... "
+printf "Generating $BTK_BLOCKS initial blocks for regtest\t... "
     eval "docker-compose $DOCKER_ARGS exec -T bch-node bitcoin-cli -conf=/bitcoin.conf generate $BTK_BLOCKS > /dev/null"
 successOrFail $? 'done' 'error' 'Could not create blocks.'
 
-printf "Stopping local node ... "
+printf "Stopping local node\t... "
     sleep $BTK_SLEEP_TIME
     eval "docker-compose $DOCKER_ARGS exec -T bch-node bitcoin-cli -conf=/bitcoin.conf stop > /dev/null"
 successOrFail $? 'done' 'error' 'Could not stop local node.'
