@@ -70,7 +70,7 @@ services:
           - bitcoin-bridging
 
     bitcoin-restapi:
-        image: actorforth/rest.bitcoin.com:latest
+        image: actorforth/bchrest:latest-dev
         container_name: bitcoin-restapi
         ports:
           - "12500:3000"
@@ -80,7 +80,7 @@ services:
           - bitcoin-bridging
 
     bch-api-regtest:
-        image: actorforth/bch-api
+        image: actorforth/bch-api:latest-dev
         container_name: bch-api-regtest
         command: "node ./src/app.js"
         ports:
@@ -100,6 +100,7 @@ services:
           - FULCRUM_PORT=50002
           - SECURITY=false
           - TOKENSECRET=somelongpassword
+          - DO_NOT_USE_RATE_LIMITS=true
           # - REDIS_HOST=6379
           # - REDIS_PORT=127.0.0.1
         networks:
@@ -117,7 +118,7 @@ services:
           - bitcoin-bridging
 
     slpdb:
-        image: actorforth/slpdb:latest
+        image: actorforth/slpdb:latest-dev
         container_name: slpdb
         links:
           - mongodb
