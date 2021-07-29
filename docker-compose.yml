@@ -70,12 +70,20 @@ services:
           - bitcoin-bridging
 
     bitcoin-restapi:
-        image: actorforth/bchrest:latest-dev
+        image: rest5:latest
         container_name: bitcoin-restapi
         ports:
           - "12500:3000"
+        environment: 
+          - BITCOINCOM_BASEURL=http://opensight:3001/api/
+          - RPC_BASEURL=http://bitcoind-regtest:18443/
+          - RPC_PASSWORD=regtest
+          - RPC_USERNAME=regtest
+          - ZEROMQ_URL=0
+          - ZEROMQ_PORT=0
+          - NETWORK=regtest
         volumes:
-          - ./configs/restapi-config.sh:/home/safeuser/rest.bitcoin.com/start.sh
+          - ./configs/restapi-config.sh:/home/node/app/start.sh
         networks:
           - bitcoin-bridging
 

@@ -14,4 +14,5 @@ export NETWORK=regtest # for use with regtest mode
 #export BITCOINCOM_BASEURL=http://<insight server IP>:<insight port>/api/
 # the BITCOINCOM_BASEURL doesn't work on regtest
 
-npm start
+# npm start
+yarn start
