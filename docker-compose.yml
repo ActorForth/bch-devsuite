@@ -58,7 +58,7 @@ services:
          - bitcoin-bridging
 
     opensight:
-        image: actorforth/opensight:latest
+        image: actorforth/opensight:latest-dev
         container_name: opensight
         ports:
           - "3001:3001"
@@ -74,6 +74,14 @@ services:
         container_name: bitcoin-restapi
         ports:
           - "12500:3000"
+        environment: 
+          - BITCOINCOM_BASEURL=http://opensight:3001/api/
+          - RPC_BASEURL=http://bitcoind-regtest:18443/
+          - RPC_PASSWORD=regtest
+          - RPC_USERNAME=regtest
+          - ZEROMQ_URL=0
+          - ZEROMQ_PORT=0
+          - NETWORK=regtest
         volumes:
           - ./configs/restapi-config.sh:/home/safeuser/rest.bitcoin.com/start.sh
         networks:
