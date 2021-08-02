@@ -95,19 +95,6 @@ Once you decide to call it a day, you can shut down your local environment by ex
 ./services stop
 ```
 
-**If you selected the Electron Cash SLP wallet:**
-
-Once the Electron Cash SLP wallet GUI appears, it will ask you for "automatic" or "manually select a server". Either option is fine. After that, you'll go through the prompts to create a new wallet. Finally once the wallet is created, you'll be greated with the main interface.
-__Please note:__ you may notice the status bar in the lower left corner indicates "Not connected." In order to remedy this, please open another terminal, navigate to the **bch-toolkit** directory, and execute:
-
-```bash
-./bitcoin-cli generatetoaddress bchreg:xxxx
-```
-
-where "xxxx" is a bitcoin cash address whose private keys you control. (It can be an address from the "Addresses" tab in Electron Cash SLP's main window.)
-
-This script gives you easy access to the bitcoin-cli that communicates with the running node. When executed with no parameters, this script will simply generate 1 block on your regtest blockchain. After generating a block or two, you should open the "Networks" dialog in the Electron Cash SLP main window, navigate to the "Servers" tab, and un-ban the 'localhost' server. For some reason, the first time blocks are generated, the localhost server gets banned. This does only happen the first time, after which you shouldn't need to repeat this step in the future (at least until you run the './clean' script, which completely removes everything and starts you back from scratch.)
-
 # Cleaning Up
 
 If you experience any issues, or would like to completely erase the current wallet and node containers, run the following script:

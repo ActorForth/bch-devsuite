@@ -1,7 +1,7 @@
 version: "3"
 services:
     bchrest:
-        image: actorforth/bchrest:${TAG_BCHREST:-latest}
+        image: actorforth/bchrest:${TAG_BCHREST:-latest-dev}
         container_name: bchrest
         ports:
           - "12500:3000"
@@ -14,6 +14,7 @@ services:
           - ZEROMQ_URL=0
           - ZEROMQ_PORT=0
           - NETWORK=regtest
+          - DO_NOT_USE_RATE_LIMITS=true
         restart: always
         command: ["npm", "start"]
         networks:
