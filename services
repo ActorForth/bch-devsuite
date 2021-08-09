@@ -9,6 +9,8 @@ abort() {
 greentext() {
     printf "\x1B[32m%b\e[0m\n" "$1"
 }
+source ./configs/pass.conf
+source ./configs/env.env
 
 BTK_SERVICES_START=0
 BTK_SERVICES_STOP=0

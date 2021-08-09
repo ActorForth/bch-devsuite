@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 set -u
+if [[ -f "./configs/env.env" ]]; then
+    source ./configs/env.env
+fi 
+source ./configs/pass.conf
 
 greentext() {
     printf "\x1B[32m%b\e[0m\n" "$1"
@@ -51,6 +55,8 @@ deleteIfExists "indexer data" "./data/fulcrum"
 
 # Remove config file and lock
 deleteIfExists "config file" "./config.json"
+deleteIfExists "config file" "./configs/bitcoin-unlimited.conf"
+deleteIfExists "config file" "./configs/env.env"
 deleteIfExists "lock" "./.lock"
 
 deleteIfExists "openssl certificate" "./configs/cert"
