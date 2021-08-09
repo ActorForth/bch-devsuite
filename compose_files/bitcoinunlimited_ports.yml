@@ -3,6 +3,10 @@ services:
     bch-node:
         image: actorforth/bitcoin-unlimited:${TAG_BITCOINUNLIMITED:-latest}
         container_name: bch-node
+        ports:
+          - "${RPC_PORTS}:${RPC_PORTS}"
+          - "28332:28332"
+          - "50001:50001"
         volumes:
           - ../data/bitcoind:/data
           - ../configs/bitcoin-unlimited.conf:/bitcoin.conf

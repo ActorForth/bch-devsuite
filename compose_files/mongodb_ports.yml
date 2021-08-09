@@ -3,6 +3,8 @@ services:
     mongodb-slpdb:
         image: mongo:${TAG_MONGODB:-latest}
         container_name: mongodb-slpdb
+        ports:
+          - "27017:27017"
         volumes:
           - ../data/mongodb:/data/db
         environment:

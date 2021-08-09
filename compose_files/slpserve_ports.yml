@@ -3,6 +3,8 @@ services:
     slpserve:
         image: actorforth/slpserve:${TAG_SLPSERVE:-latest}
         container_name: slpserve
+        ports:
+          - "12300:4000"
         depends_on:
           - mongodb-slpdb
         environment:

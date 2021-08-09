@@ -3,6 +3,8 @@ services:
     fulcrum:
         image: cculianu/fulcrum:${TAG_FULCRUM:-latest}
         container_name: fulcrum
+        ports:
+          - "50001:50001"
         depends_on:
           - bch-node
         volumes:

@@ -3,6 +3,8 @@ services:
     bchrest:
         image: actorforth/bchrest:${TAG_BCHREST:-latest-dev}
         container_name: bchrest
+        ports:
+          - "12500:3000"
         environment:
           - PORT=3000
           - BITCOINCOM_BASEURL=http://opensight:3001/api/

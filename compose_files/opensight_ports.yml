@@ -3,6 +3,8 @@ services:
     opensight:
         image: actorforth/opensight:${TAG_OPENSIGHT:-latest-dev}
         container_name: opensight
+        ports:
+          - "3001:3001"
         environment:
           - ELECTRUM_HOST=${ELECTRUM_INDEXER:-fulcrum}
           - ELECTRUM_PORT=50001

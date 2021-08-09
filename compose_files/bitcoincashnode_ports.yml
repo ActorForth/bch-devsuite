@@ -1,11 +1,14 @@
 version: "3"
 services:
     bch-node:
-        image: actorforth/bitcoin-unlimited:${TAG_BITCOINUNLIMITED:-latest}
+        image: actorforth/bitcoin-cash-node:${TAG_BITCOINCASHNODE:-latest}
         container_name: bch-node
+        ports:
+          - ${RPC_PORTS}:${RPC_PORTS}
+          - "28332:28332"
         volumes:
           - ../data/bitcoind:/data
-          - ../configs/bitcoin-unlimited.conf:/bitcoin.conf
+          - ../configs/bitcoincashnode.conf:/bitcoin.conf
         restart: always
         command: ["bitcoind", "-conf=/bitcoin.conf"]
         networks:

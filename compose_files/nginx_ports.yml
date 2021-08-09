@@ -3,6 +3,8 @@ services:
   bch-nginx:
         image: nginx:${TAG_NGINX:-latest}
         container_name: bch-nginx
+        ports:
+          - "50002:50002"
         volumes:
           - ../configs/nginx.conf:/etc/nginx/nginx.conf
           - ../configs/cert/cert.key:/etc/nginx/cert.key
