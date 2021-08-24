@@ -115,7 +115,7 @@ services:
           - bitcoin-bridging
 
     mongodb:
-        image: mongo:4.2-bionic
+        image: mongo:4.4.2-bionic
         container_name: mongo-slpdb
         ports:
           - "27017:27017"
