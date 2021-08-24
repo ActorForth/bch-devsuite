@@ -29,6 +29,7 @@ export enable_graph_search=0
 
 # Turn off ZMQ output port
 export zmq_outgoing_enable=0
+export telemetry_enable=0
 
 # Set the telemtry name for this node
 export telemetry_advertised_host=trout-docker-unedited
