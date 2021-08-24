@@ -273,6 +273,7 @@ if [[ $BTK_MAINNET == 1 ]]; then
     # Config env file for ./services
     echo "export RPC_PORTS=8332">>$ENV_FILE
     echo "export NETWORK=mainnet">>$ENV_FILE
+    echo "export DB_NAME=slpdb">>$ENV_FILE
 fi
 
 if [[ $BTK_TESTNET == 1 ]]; then
@@ -303,11 +304,14 @@ if [[ $BTK_TESTNET == 1 ]]; then
     # Config env file for ./services
     echo "export RPC_PORTS=18332">>$ENV_FILE
     echo "export NETWORK=testnet">>$ENV_FILE
+    echo "export DB_NAME=slpdb_test">>$ENV_FILE
+
 fi
 
 if [[ $BTK_REGTEST == 1 ]]; then
     if [[ $BTK_UNLIMITED == 1 ]]; then
         echo "regtest=1">>$NODE_CONFIG_FILE
+        echo "export ELECTRUM_INDEXER=bch-node">>$ENV_FILE
     else
         echo "[regtest]">>$NODE_CONFIG_FILE
     fi
@@ -330,11 +334,12 @@ if [[ $BTK_REGTEST == 1 ]]; then
     fi
     echo "rpcport=18443">>$NODE_CONFIG_FILE
     echo "rpcbind=0.0.0.0:18443">>$NODE_CONFIG_FILE
-    echo "maxconnections=0">>$NODE_CONFIG_FILE
+    echo "maxconnections=1">>$NODE_CONFIG_FILE
 
     # Config env file for ./services
     echo "export RPC_PORTS=18443">>$ENV_FILE
     echo "export NETWORK=regtest">>$ENV_FILE
+    echo "export DB_NAME=slpdb_test">>$ENV_FILE
 
 fi
 

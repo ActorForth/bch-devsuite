@@ -6,7 +6,7 @@ services:
         depends_on:
           - mongodb-slpdb
         environment:
-          - db_name=slpdb_test
+          - db_name=${DB_NAME}
           - db_url=mongodb://${MONGO_USER}:${MONGO_PASS}@mongodb-slpdb:27017
           - slpserve_port=4000
           - slpserve_timeout=30000
