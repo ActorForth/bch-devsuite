@@ -2,7 +2,6 @@ version: "3"
 services:
     slpdb:
         image: actorforth/slpdb:${TAG_SLPDB:-latest}
-        # image: slpdb-testers2
         container_name: slpdb
         depends_on:
           - mongodb-slpdb
