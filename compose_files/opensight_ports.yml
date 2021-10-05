@@ -1,18 +1,5 @@
 version: "3"
 services:
     opensight:
-        image: actorforth/opensight:${TAG_OPENSIGHT:-latest-dev}
-        container_name: opensight
         ports:
           - "3001:3001"
-        environment:
-          - ELECTRUM_HOST=${ELECTRUM_INDEXER:-fulcrum}
-          - ELECTRUM_PORT=50001
-          - NODE_RPC_HOST=bch-node
-          - NODE_RPC_PORT=${RPC_PORTS}
-          - NODE_RPC_USER=${RPC_USERNAME}
-          - NODE_RPC_PASS=${RPC_PASSWORD}
-          - OPENSIGHT_PORT=3001
-        restart: always
-        networks:
-          - ${BTK_DOCKER_NETWORK:-bch-toolkit-network}

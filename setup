@@ -356,8 +356,8 @@ import json, os
 
 PREFIX = "./compose_files/"
 config = {
-    "node": "",
-    "indexer": "",
+    "node": [],
+    "indexer": [],
     "rest": [],
     "slp": [],
     "network": ""
@@ -365,43 +365,43 @@ config = {
 
 if ${BTK_UNLIMITED}:
     if ${EXPOSE_PORTS}:
-        config["node"] = "bitcoinunlimited_ports"
-    else:
-        config["node"] = "bitcoinunlimited"
+        config["node"] += ["bitcoinunlimited_ports"]
+
+    config["node"] += ["bitcoinunlimited"]
 
 if ${BTK_CASHNODE}:
     if ${EXPOSE_PORTS}:
-        config["node"] = "bitcoincashnode_ports"
-        config["indexer"] = "fulcrum_ports"
-    else:
-        config["node"] = "bitcoincashnode"
-        config["indexer"] = "fulcrum"
+        config["node"] += ["bitcoincashnode_ports"]
+        config["indexer"] += ["fulcrum_ports"]
+    
+    config["node"] += ["bitcoincashnode"]
+    config["indexer"] += ["fulcrum"]
 
 if ${BTK_BCHREST}:
     if ${EXPOSE_PORTS}:
         config["rest"] += ["opensight_ports"]
         config["rest"] += ["bchrest_ports"]
-    else:
-        config["rest"] += ["opensight"]
-        config["rest"] += ["bchrest"]
+
+    config["rest"] += ["opensight"]
+    config["rest"] += ["bchrest"]
 
 if ${BTK_BCHAPI}:
     if ${EXPOSE_PORTS}:
         config["rest"] += ["nginx_ports"]
         config["rest"] += ["bchapi_ports"]
-    else:
-        config["rest"] += ["nginx"]
-        config["rest"] += ["bchapi"]
+    
+    config["rest"] += ["nginx"]
+    config["rest"] += ["bchapi"]
 
 if ${BTK_SLP}:
     if ${EXPOSE_PORTS}:
         config["slp"] += ["mongodb_ports"]
         config["slp"] += ["slpdb"]
         config["slp"] += ["slpserve_ports"]
-    else:
-        config["slp"] += ["mongodb"]
-        config["slp"] += ["slpdb"]
-        config["slp"] += ["slpserve"]
+
+    config["slp"] += ["mongodb"]
+    config["slp"] += ["slpdb"]
+    config["slp"] += ["slpserve"]
 
 config["network"] = "network"
 

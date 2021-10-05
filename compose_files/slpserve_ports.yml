@@ -1,19 +1,5 @@
 version: "3"
 services:
     slpserve:
-        image: actorforth/slpserve:${TAG_SLPSERVE:-latest}
-        container_name: slpserve
         ports:
           - "12300:4000"
-        depends_on:
-          - mongodb-slpdb
-        environment:
-          - db_name=slpdb_test
-          - db_url=mongodb://${MONGO_USER}:${MONGO_PASS}@mongodb-slpdb:27017
-          - slpserve_port=4000
-          - slpserve_timeout=30000
-          - slpserve_log=true
-        restart: always
-        command: ["npm", "start"]
-        networks:
-          - ${BTK_DOCKER_NETWORK:-bch-toolkit-network}

@@ -12,6 +12,7 @@ services:
           - ZEROMQ_URL=0
           - ZEROMQ_PORT=0
           - NETWORK=${NETWORK}
+          - SLPDB_URL=http://slpserve:4000/
           - DO_NOT_USE_RATE_LIMITS=true
         restart: always
         command: ["npm", "start"]

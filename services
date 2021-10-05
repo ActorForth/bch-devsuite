@@ -12,6 +12,7 @@ greentext() {
 source ./configs/pass.conf
 source ./configs/env.env
 
+BTK_SERVICES_UPGRADE=0
 BTK_SERVICES_START=0
 BTK_SERVICES_STOP=0
 BTK_SLEEP_TIME=${SLEEP:-6}
@@ -22,7 +23,8 @@ else
 	if [[ ! -z $1 ]]; then
         source .lock
 		for var in "$@"
-            do
+            do  
+                [[ $var == "upgrade" ]] && BTK_SERVICES_UPGRADE=1
                 [[ $var == "run" || $var == "start" ]] && BTK_SERVICES_START=1
                 [[ $var == "stop" ]] && BTK_SERVICES_STOP=1
             done
@@ -46,8 +48,16 @@ if [[ $BTK_SERVICES_START == 1 && $BTK_SERVICES_STOP == 1 ]]; then
     exit 1
 fi
 
-if [[ $BTK_SERVICES_START == 1 ]]; then
+if [[ $BTK_SERVICES_START == 1 && $BTK_SERVICES_UPGRADE == 1 ]]; then
+    eval "docker-compose $DOCKER_ARGS pull && docker-compose $DOCKER_ARGS up -d"
+fi
+
+if [[ $BTK_SERVICES_START == 1 && $BTK_SERVICES_UPGRADE == 0 ]]; then
 	eval "docker-compose $DOCKER_ARGS up -d"
+fi
+
+if [[ $BTK_SERVICES_START == 0 && $BTK_SERVICES_UPGRADE == 1 ]]; then
+	eval "docker-compose $DOCKER_ARGS pull"
 fi
 
 if [[ $BTK_SERVICES_STOP == 1 ]]; then
