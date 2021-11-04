@@ -19,3 +19,5 @@ config.json
 /configs/pass.conf
 /configs/env.env
 /configs/bitcoin-unlimited.conf
+
+venv/
