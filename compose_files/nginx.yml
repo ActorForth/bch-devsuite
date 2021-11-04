@@ -1,0 +1,12 @@
+version: "3"
+services:
+  bch-nginx:
+        image: nginx:${TAG_NGINX:-latest}
+        container_name: bch-nginx
+        volumes:
+          - ../configs/nginx.conf:/etc/nginx/nginx.conf
+          - ../configs/cert/cert.key:/etc/nginx/cert.key
+          - ../configs/cert/cert.crt:/etc/nginx/cert.crt
+        restart: always
+        networks:
+          - ${BTK_DOCKER_NETWORK:-bch-toolkit-network}

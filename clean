@@ -1,106 +1,68 @@
 #!/usr/bin/env bash
-set -e
+set -u
+if [[ -f "./configs/env.env" ]]; then
+    source ./configs/env.env
+fi 
+source ./configs/pass.conf
 
-BTK_CERTS=0
-BTK_WALLET=0
-BTK_WALLET_APP=0
-BTK_DOCKER=0
-BTK_OPENSIGHT=0
+greentext() {
+    printf "\x1B[32m%b\e[0m\n" "$1"
+}
+
+successOrFail() {
+    if [[ $1 == 0 ]]; then
+        greentext $2
+    else
+        redtext $3
+        echo $4
+        exit 1
+    fi
+}
+
+deleteIfExists() {
+    if [[ -f "$2" || -d "$2" ]]; then
+        printf "Removing $1 ... "
+            rm -rf $2
+        successOrFail $? 'done' 'error' 'Could not remove file.'
+        DID_SOMETHING=1
+    fi
+}
+
 DID_SOMETHING=0
+for var in "$@"
+do
+    if [[ $var == "all" ]]; then
+        echo "Psst.. Btw, no need to type 'all' anymore. The ./clean script is magically smart =)"
+    fi
+done
 
-# Process user arguments, or display usage message
-if [[ ! -z $1 ]]; then
-	for var in "$@"
-	do
-		[[ $var == "certs" ]] && BTK_CERTS=1
-		[[ $var == "wallet" ]] && BTK_WALLET=1
-		[[ $var == "wallet-app" ]] && BTK_WALLET_APP=1
-		[[ $var == "docker" ]] && BTK_DOCKER=1
-		if [[ $var == "all" ]]; then
-			BTK_CERTS=1
-			BTK_WALLET=1
-			BTK_WALLET_APP=1
-			BTK_DOCKER=1
-		fi
-	done
+if [[ -f "./.lock" ]]; then
+	source .lock
+    printf "docker-compose down\t... "
+	eval "docker-compose $DOCKER_ARGS down"
+    successOrFail $? 'done' 'error' 'Could not docker-compose down.'
+	DID_SOMETHING=1
+fi
+
+# Remove node data files
+deleteIfExists "noda data" "./data/bitcoind"
+
+# Remove SLPDB data files
+deleteIfExists "SLPDB data" "./data/mongodb"
+
+# Remove indexer data files
+deleteIfExists "indexer data" "./data/fulcrum"
+
+# Remove config file and lock
+deleteIfExists "config file" "./config.json"
+deleteIfExists "config file" "./configs/bitcoin-unlimited.conf"
+deleteIfExists "config file" "./configs/env.env"
+deleteIfExists "lock" "./.lock"
+
+deleteIfExists "openssl certificate" "./configs/cert"
+
+if [[ $DID_SOMETHING == 1 ]]; then
+    printf "Finished\n"
 else
-	echo "usage: clean [command]"
-	echo "- all: cleans every item of all other commands listed here"
-	echo "- certs: removes only the SSL certifications"
-	echo "- wallet: removes wallet files in your home directory"
-	echo "- wallet-app: removes the Electron Cash SLP wallet folder"
-	echo "- docker: removes the docker containers created by setup"
-	exit 0 
+    printf "Nothing to do.\n"
 fi
-
-if [[ -d "./configs/cert" && $BTK_CERTS == 1 ]]; then
-	echo "Removing certificates directory."
-	rm -rf cert
-	DID_SOMETHING=1
-fi
-
-if [[ -d "./Electron-Cash-SLP" && $BTK_WALLET_APP == 1 ]]; then
-	echo "Removing Electron-Cash-SLP directory."
-	rm -rf Electron-Cash-SLP
-	DID_SOMETHING=1
-fi
-
-BTK_ENV=`uname`
-if [[ $BTK_ENV == "Darwin" ]];then
-	ECW_HOME_DIR="/Users/`whoami`/.electron-cash"
-fi
-
-if [[ $BTK_ENV == "Linux" || $BTK_ENV == "FreeBSD" ]];then
-	ECW_HOME_DIR="/home/`whoami`/.electron-cash"
-fi
-
-if [[ BTK_WALLET == 1 ]]; then
-
-	# This removes wallet from users home folder. Once users are switches over to the
-	# portable wallet, this part won't be necessary.
-	if [[ -d "$ECW_HOME_DIR/testnet" ]]; then
-		while true; do
-			echo "This script is going to DELETE your electron-wallet directory in your home folder." 
-			read -p "Continue? [Y/n] " yn
-			case $yn in
-				[Yy]* ) echo "Removing Electron Cash SLP wallet directory in user's home folder" && rm -rf "$ECW_HOME_DIR/testnet" && DID_SOMETHING=1 && break;;
-				[Nn]* ) echo "Okay." && break;;
-				* ) echo "Please answer yes or no.";;
-			esac
-		done
-	fi
-
-	if [[ -d "./Electron-Cash-SLP/electron_cash_data" ]]; then
-		echo "Removing portable electron wallet"
-		rm -rf "./Electron-Cash-SLP/electron_cash_data"
-		DID_SOMETHING=1
-	fi
-fi
-
-if [[ $BTK_DOCKER == 1 && -f "./.lock" ]]; then
-	
-	echo "Removing previous docker containers"
-	docker-compose down
-
-	# Remove node data files
-    echo "Deleting node data... (./data/bitcoind)"
-	rm -rf "./data/bitcoind"
-
-	# Remove SLPDB data files
-    echo "Deleting SLPDB data... (./data/mongodb)"
-	rm -rf "./data/mongodb"
-
-	# Remove indexer data files
- #    echo "Deleting indexer data... (./data/fulcrum)"
-	# rm -rf "./data/fulcrum"
-
-	rm ".lock"
-	DID_SOMETHING=1
-fi
-
-if [ $DID_SOMETHING -eq 1 ]; then
-	echo "Done."
-else
-	echo "Nothing to do."
-fi
-

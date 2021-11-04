@@ -3,6 +3,7 @@
 .env
 .lock
 
+node_modules/*
 Electron-Cash-SLP
 Electron-Cash-SLP/*
 slpdb/*
@@ -11,5 +12,12 @@ misc/*
 cert/*
 data/*
 configs/cert
+config.json
 *.txt
 *.swp
+
+/configs/pass.conf
+/configs/env.env
+/configs/bitcoin-unlimited.conf
+
+venv/

@@ -1,0 +1,7 @@
+version: "3"
+services:
+    bch-node:
+        ports:
+          - "${RPC_PORTS}:${RPC_PORTS}"
+          - "28332:28332"
+          - "50001:50001"
