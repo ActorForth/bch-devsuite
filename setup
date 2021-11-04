@@ -1,323 +1,457 @@
 #!/usr/bin/env bash
-set -e
+# set -u
 
-echo "Setting up Bitcoin Unlimited node."
-echo "Checking that necessary software is available: "
+abort() {
+    printf "%s" "$@"
+    exit 1
+}
 
-BTK_ENV=$(uname)
-BTK_JS_API=0
-BTK_SLPDB=0
-BTK_NODE=0
-BTK_WALLET=0 # Under construction 
+lookingfor() {
+    printf "Looking for %s\t... " "$@"
+}
 
-BTK_REST=1 # must install until it's seperated from the docker-compose file
-# TODO: Edit the docker-compose file in such a way that REST isn't necessarily required 
-
-# Process user arguments, or display usage message
-if [[ ! -z $1 ]]; then
+greentext() {
     for var in "$@"
     do
-		[[ $var == "js" ]] && BTK_JS_API=1
-		[[ $var == "slpdb" ]] && BTK_SLPDB=1
-		[[ $var == "node" ]] && BTK_NODE=1
-		[[ $var == "wallet" ]] && BTK_WALLET=1
-		[[ $var == "rest" ]] && BTK_REST=1
+        printf "\x1B[32m%b\e[0m" "$@"
+    done
+    printf "\n"
+}
 
+redtext() {
+    for var in "$@"
+    do
+        printf "\x1B[31m%b\e[0m " "$var"
+    done
+    printf "\n"
+}
+
+successOrFail() {
+    if [[ $1 == 0 ]]; then
+        greentext $2
+    else
+        redtext $3
+        echo $4
+        exit 1
+    fi
+}
+
+if [[ -z "${BASH_VERSION:-}" ]]; then
+    abort "Bash is required to interpret this script."
+fi
+
+# First check OS.
+OS="$(uname)"
+if [[ "$OS" == "Linux" ]]; then
+    BCH_TOOLKIT_ON_LINUX=1
+elif [[ "$OS" != "Darwin" ]]; then
+    abort "bch-toolkit is only supported on macOS and Linux."
+fi
+
+# Ensure working directory is clean before setup
+if [[ -f ".lock" || -f "config.json" ]]; then
+	printf "It appears you've already run this setup script before.\n"
+	printf "Please run the ./clean script before trying to setup again.\n"
+	abort
+fi
+
+# This default address makes it easy to generate funds to
+# an address you have access to.
+BTK_GENERATE_ADDRESS=bchreg:qzerfrqkvsclmrlx3hzl0j2ac2eh0k88wqa0efygtm
+BTK_WIF=cUDjy47QLpAUyv1beivDPoYCHjCRVqwRMwCuSnkdF4teVFBDD1ip
+
+BTK_REGTEST=0
+BTK_TESTNET=0
+BTK_MAINNET=0
+BTK_SLEEP_TIME=${sleep:-6}
+BTK_BLOCKS=${blocks:-200}
+BTK_ENV=$(uname)
+BTK_UNLIMITED=0 # Default incl ElectrsCash
+BTK_CASHNODE=0 # Default incl Fulcrum
+BTK_BCHREST=0
+BTK_BCHAPI=0 # Default incl NGINX
+BTK_SLP=0 # Default incl SLPDB, slpserve
+
+BTK_DOCKER_NETWORK=${BTK_DOCKER_NETWORK:-"bch-toolkit-network"}
+ENV_FILE=./configs/env.env
+EXPOSE_PORTS=0
+
+# Process user arguments, or display usage message
+if [[ ! -z "${1:-}" ]]; then
+    for var in "$@"
+    do
+        if [[ $var == "bcnh" ]]; then
+            abort "No command 'bcnh'. Did you mean 'bchn' ?"
+        fi
+        [[ $var == "regtest" ]] && BTK_REGTEST=1
+        [[ $var == "testnet" ]] && BTK_TESTNET=1
+        [[ $var == "mainnet" ]] && BTK_MAINNET=1
+        [[ $var == "expose-ports" ]] && EXPOSE_PORTS=1
+		[[ $var == "bu" ]] && BTK_UNLIMITED=1
+        [[ $var == "bchn" ]] && BTK_CASHNODE=1
+		[[ $var == "bchrest" ]] && BTK_BCHREST=1
+        [[ $var == "bchapi" ]] && BTK_BCHAPI=1
+		[[ $var == "slp" ]] && BTK_SLP=1
+		if [[ $var == "wallet" ]]; then
+			abort "Deprecated: Electron Cash SLP wallet no longer part of bch-toolkit"
+		fi
 		if [[ $var == "all" ]]; then
-			BTK_JS_API=1
-			BTK_SLPDB=1
-			BTK_NODE=1
-			BTK_WALLET=1
-			BTK_REST=1
+			BTK_CASHNODE=1 # Default to BitcoinCashNode
+			BTK_BCHREST=1
+            BTK_BCHAPI=1
+			BTK_SLP=1
 		fi
     done
 else
-    echo "usage: setup [command]"
-    echo "- node: BitcoinUnlimited node with electrs server"
-    echo "- rest: rest.bitcoin.com API service"
-    echo "- wallet: Electron Cash SLP wallet GUI application"
-    echo "- js: JavaScript stack ready for BCH JS development"
-    echo "- all: all of the above"
-    exit 0 
+    TAB="\t"
+    normal() {
+        printf "$1\n"
+    }
+    option() {
+        if [[ ${#1} -lt 3 ]]; then
+            T="\t\t"
+        else
+            T="\t"
+        fi
+        printf "    $1 $T- $2\n"
+    }
+    normal "usage: setup [options]"
+    normal "options:"
+    option "dev" "Use the latest cutting edge version of each component"
+    option "bu" "Bitcoin Unlimited node"
+    option "bchn" "Bitcoin Cash Node"
+    option "bchrest" "A rest.bitcoin.com-compatible REST service"
+    option "bchapi" "Bch-API REST service from Fullstack.cash"
+	option "slp" "SLP services (SLPDB, slpserve)"
+    option "all" "all of the above"
+    exit 0
 fi
 
-# Check that Docker, docker-compose, openssl, git, python3, and virtualenv are installed
-echo "Looking for Docker..."
-if [ -x "$(command -v docker)" ]; then
-	# Note: The following line may seem useless, however it causes the scirpt to error
-	# if A) Docker is not currently running, or B) permissions are not set correctly
-	# on Linux or FreeBSD host
-	BTK_DOCKER_STATUS=`docker ps`
-	echo "Docker found."	
-else
-	echo "Docker not found. Please install docker."
-	exit 1 
+### Catch exceptions
+#Only one network may be selected
+if [[ $BTK_REGTEST == 1 && $BTK_TESTNET == 1 ]]; then
+    echo "Only one network may be selected at a time."
+    echo "Please select only one."
+    abort
 fi
 
-echo "Looking for docker-compose..."
-if [ -x "$(command -v docker-compose)" ]; then
-	echo "Docker-compose found."
-else
-	echo "Docker-compose not found. Please install docker-compose."
-	exit 1 
+if [[ $BTK_REGTEST == 1 && $BTK_MAINNET == 1 ]]; then
+    echo "Only one network may be selected at a time."
+    echo "Please select only one."
+    abort
 fi
 
-echo "Looking for openssl..."
-if [ -x "$(command -v openssl)" ]; then
-	echo "Openssl found."
-else
-	echo "Openssl not found. Please install openssl."
-	exit 1
+if [[ $BTK_MAINNET == 1 && $BTK_TESTNET == 1 ]]; then
+    echo "Only one network may be selected at a time."
+    echo "Please select only one."
+    abort
 fi
 
-echo "Looking for git..."
-if [ -x "$(command -v git)" ]; then
-	echo "Git found."
-else
-	echo "Git not found. Please install git."
-	exit 1
+# User cannot have more than one node
+if [[ $BTK_UNLIMITED == 1 && $BTK_CASHNODE == 1 ]]; then
+    echo "bch-toolkit cannot run both Bitcoin Unlimited and BitcoinCashNode at the same time."
+    echo "Please select only one."
+    abort
 fi
 
-# Check if network exists and create if it doesn't
-NETWORK_NAME=bitcoin-bridging
-if [ -z $(docker network ls --filter name=^${NETWORK_NAME}$ --format="{{ .Name }}") ] ; then 
-     docker network create ${NETWORK_NAME} ; 
+# User must have at least one node
+if [[ $BTK_UNLIMITED == 0 && $BTK_CASHNODE == 0 ]]; then
+    echo "Please select at least 1 node (bu or bchn) to set up."
+    abort
+fi
+### End exception catching
+
+
+# Check that Python3 is installed
+lookingfor "Python 3"
+[[ -x "$(command -v python3)" ]]
+successOrFail $? 'found' 'not found' 'Python 3 not found. Please install Python 3.'
+
+# Check that openssl is installed and available
+if [[ $BTK_BCHAPI == 1 ]]; then
+	lookingfor "OpenSSL"
+	[[ -x "$(command -v openssl)" ]]
+    successOrFail $? 'found' 'not found' 'OpenSSL not found. Please install OpenSSL.'
+fi
+
+# Check that Docker and docker-compose are installed
+lookingfor "Docker"
+[[ -x "$(command -v docker)" ]];
+successOrFail $? 'found' 'not found' 'Docker not found. Please install docker.'
+# Note: The following line may seem useless,
+# however it causes the scirpt to error if 
+# A) Docker is not currently running, or
+# B) permissions are not set correctly on Linux
+printf "Checking that Docker is running\t... "
+BTK_DOCKER_STATUS=`docker ps`
+successOrFail $? 'done' 'error' ''
+
+lookingfor "docker-compose"
+[[ -x "$(command -v docker-compose)" ]]
+successOrFail $? 'found' 'not found' 'Docker-compose not found. Please install docker-compose.'
+
+# Create Docker network if it doesn't exist
+if [[ -z $(docker network ls --filter name=^${BTK_DOCKER_NETWORK}$ --format="{{ .Name }}") ]]; then
+	eval "docker network create ${BTK_DOCKER_NETWORK} &> /dev/null"
 fi
 
 # Create new SSL certificate/key pair to be used on nginx server
-if [ -d "./cert" ]; then 
-	if [[ -f "./cert/cert.key" && -f "./cert/cert.crt" ]]; then
-	    echo "OpenSSL certificates already exist."
-	else
-	    echo "Removing previous certs directory"
-	    rm -rf ./cert
-	fi
-fi
-
-if [ ! -d "./cert" ]; then
-	mkdir ./cert
-	echo "Creating SSL certificate to use for nginx reverse proxy server."
-	openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-		-keyout ./cert/cert.key \
-		-out ./cert/cert.crt \
-		-subj "/C=no/ST=no/L=no/O=no/OU=no/CN=no/emailAddress=no"
-fi
-
-
-if [[ $BTK_NODE == 1 ]]; then
-	echo "Starting local node servers..."
-	docker-compose up -d
-	sleep 5
-
-	# Generate some blocks
-	docker-compose exec -T bitcoind-regtest bitcoin-cli generate 210
-
-	# Stop the server(s)
-	docker-compose stop 
-
-	#
-	touch .BTK-container-lock
-fi
-
-
-if [[ $BTK_WALLET == 1 ]]; then
-
-	if [ -x "$(command -v python3)" ]; then
-		echo "Python3 found."
-	else 
-		echo "Python (version 3) not found. Please install Python 3."
-		exit 1
-	fi
-
-	# This is ugly for now but should work, will clean up in next commit
-
-	echo "Looking for virtualenv..."
-	##
-	## Currently working on adding support for anaconda
-	##
-	# set +e
-	# BTK_VENV_VER=`python3 -m virtualenv --version | grep -o 20`
-	# set -e
-	# 
-	# if [ -z "$BTK_VENV_VER" ]; then
-	# 	echo "Looking for Anaconda instead..."
-	# 	if [ -x "$(command -v conda)" ]; then
-	# 		BTK_CONDA=1
-	# 		echo "Anaconda found."
-	# 	fi
-	# fi
-	
-	# TODO: Add anaconda support
-	# TODO: Throw error if virtualenv version too low
-	BTK_VENV_VER=`python3 -m virtualenv --version | grep -o 20`
-	if [[ $BTK_VENV_VER == 20 || $BTK_CONDA == 1 ]]; then
-		echo "Virtualenv found."
-	else
-		echo "Neither virtualenv nor conda could be found. Please install virtualenv."
-		exit 1
-	fi
-	
-	# Linux hosts require qt5 library available
-	if [[ $BTK_ENV == "Linux" ]]; then
-	
-		BTK_QT_FOUND=0
-		BTK_DEB=0
-
-		if [[ -x "$(command -v dpkg-query)" ]]; then
-			BTK_DEB=1
-			if dpkg-query -s qtchooser ; then
-				BTK_QT_FOUND=1
-			fi
-		elif [[ -x "$(command -v /usr/bin/qmake)" ]]; then
-			BTK_QT_FOUND=1
-		fi
-	
-		if [[ $BTK_QT_FOUND == 1 ]]; then
-			echo "(Linux Host) Qt5 library found."
+if [[ $BTK_BCHAPI == 1 ]]; then
+	if [[ -d "./configs/cert" ]]; then
+		if [[ -f "./configs/cert/cert.key" && -f "./configs/cert/cert.crt" ]]; then
+			printf "OpenSSL certificates already exist.\n"
 		else
-			echo "(Linux Host) Your machine appears" \
-				"to be missing the Qt5 libraries necessary for" \
-				"running the Electrum Cash SLP wallet."
-
-			if [[ $BTK_DEB == 1 ]]; then
-				echo "On Ubuntu/Debian-based distributions," \
-					"it may be available in your package" \
-					"manager under the name 'qt5-default'."
-			
-			exit 1
-			fi
+			printf "Removing previous certs directory\t... "
+			rm -rf ./configs/cert
+            successOrFail $? 'done' 'error' 'Could not delete certificate directory.'
 		fi
 	fi
 
+	if [[ ! -d "./configs/cert" ]]; then
+		printf "Creating SSL certificate directory\t... "
+		mkdir ./configs/cert
+        successOrFail $? 'done' 'error' 'Could not create certificate directory.'
+        printf "Creating SSL certificate\t... "
+		eval "openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+			-keyout ./configs/cert/cert.key \
+			-out ./configs/cert/cert.crt \
+			-subj \"/C=no/ST=no/L=no/O=no/OU=no/CN=no/emailAddress=no\"" &> /dev/null
+        successOrFail $? 'done' 'error' 'Could not create SSL certificate.'
+	fi
+fi
 
-	    # Check and (if necessary) download+setup the Electron Cash SLP wallet
-    if [ -d "./Electron-Cash-SLP" ]; then
-		echo "Electron Cash SLP already exists."
+source ./configs/pass.conf
+
+if [[ $BTK_UNLIMITED == 1 ]]; then
+    cp ./configs/default_bu.conf ./configs/bitcoin-unlimited.conf
+    NODE_CONFIG_FILE=./configs/bitcoin-unlimited.conf
+else
+    cp ./configs/default_bitcoincashnode.conf ./configs/bitcoincashnode.conf
+    NODE_CONFIG_FILE=./configs/bitcoincashnode.conf
+fi
+
+if [[ $BTK_SLP == 1 ]]; then
+    if [[ -z ${MONGO_USER} ]]; then
+        printf "SLPDB uses mongodb, a username and password is recommended."
+        printf "\n Please enter a username for mongodb:\n"
+        read MONGO_USER
+        echo "export MONGO_USER=$MONGO_USER">>./configs/pass.conf
+    fi
+    if [[ -z ${MONGO_PASS}  ]]; then
+        printf "\n Please enter a password for mongodb:"
+        read MONGO_PASS
+        echo "export MONGO_PASS=$MONGO_PASS">>./configs/pass.conf
+    fi
+fi
+
+
+if [[ $BTK_MAINNET == 1 ]]; then
+    # Check if password already set
+    if [[ -z ${RPC_PASSWORD} ]]; then
+        printf "\n Please enter a username for the node RPC connection:\n"
+        read NEW_RPC_USERNAME
+        printf "\n Please enter a password for the RPC connection on the node.\n This will be stored in the pass.conf file in the configs directory.\n"
+        read NEW_RPC_PASSWORD
+        printf $NEW_RPC_PASSWORD
+        
+        echo "rpcuser=$NEW_RPC_USERNAME">>$NODE_CONFIG_FILE
+        echo "rpcpassword=$NEW_RPC_PASSWORD">>$NODE_CONFIG_FILE
+
+        # Add to pass.conf
+        echo "export RPC_USERNAME=$NEW_RPC_USERNAME">>./configs/pass.conf
+        echo "export RPC_PASSWORD=$NEW_RPC_PASSWORD">>./configs/pass.conf
     else
-		echo "Downloading Electron Cash SLP wallet..."
-		git clone https://github.com/simpleledger/Electron-Cash-SLP.git
+        printf "Password found\n"
+        echo "rpcuser=$RPC_USERNAME">>$NODE_CONFIG_FILE
+        echo "rpcpassword=$RPC_PASSWORD">>$NODE_CONFIG_FILE    
+    fi
+    
+    echo "rpcport=8332">>$NODE_CONFIG_FILE
+    echo "rpcbind=0.0.0.0:8332">>$NODE_CONFIG_FILE
+    echo "maxconnections=10">>$NODE_CONFIG_FILE
+
+    # Config env file for ./services
+    echo "export RPC_PORTS=8332">>$ENV_FILE
+    echo "export NETWORK=mainnet">>$ENV_FILE
+    echo "export DB_NAME=slpdb">>$ENV_FILE
+fi
+
+if [[ $BTK_TESTNET == 1 ]]; then
+    if [[ -z ${RPC_PASSWORD} ]];then
+        printf "\n Please enter a username for the node RPC connection:\n"
+        read NEW_RPC_USERNAME
+        printf "\n Please enter a password for the RPC connection on the node.\n This will be stored in the pass.conf file in the configs directory.\n"
+        read NEW_RPC_PASSWORD
+        printf $NEW_RPC_PASSWORD
+    
+        echo "rpcuser=$NEW_RPC_USERNAME">>$NODE_CONFIG_FILE
+        echo "rpcpassword=$NEW_RPC_PASSWORD">>$NODE_CONFIG_FILE
+
+        # Add to pass.conf
+        echo "export RPC_USERNAME=$NEW_RPC_USERNAME">>./configs/pass.conf
+        echo "export RPC_PASSWORD=$NEW_RPC_PASSWORD">>./configs/pass.conf
+    else
+        printf "Password found\n"
+        echo "rpcuser=$RPC_USERNAME">>$NODE_CONFIG_FILE
+        echo "rpcpassword=$RPC_PASSWORD">>$NODE_CONFIG_FILE    
     fi
 
-    echo "Setting up python virtual environment..."
-    if [ ! -d "./Electron-Cash-SLP/venv" ]; then
-		cd ./Electron-Cash-SLP
-		if [[ $BTK_CONDA == 1 ]]; then
-			echo "This script doesn't currently work with conda."
-			exit 1
-			# conda create --name venv python=3.7 -y
-		else
-			python3 -m virtualenv ./venv
-		fi
-		source ./venv/bin/activate
-		python3 ./setup.py build
-		python3 ./setup.py install
-		cd ..
-	else
-		echo "Environment already exists."
+    echo "testnet=1">>$NODE_CONFIG_FILE
+    echo "maxconnections=10">>$NODE_CONFIG_FILE
+    echo "rpcport=18332">>$NODE_CONFIG_FILE
+    echo "rpcbind=0.0.0.0:18332">>$NODE_CONFIG_FILE
+
+    # Config env file for ./services
+    echo "export RPC_PORTS=18332">>$ENV_FILE
+    echo "export NETWORK=testnet">>$ENV_FILE
+    echo "export DB_NAME=slpdb_test">>$ENV_FILE
+
+fi
+
+if [[ $BTK_REGTEST == 1 ]]; then
+    if [[ $BTK_UNLIMITED == 1 ]]; then
+        echo "regtest=1">>$NODE_CONFIG_FILE
+        echo "export ELECTRUM_INDEXER=bch-node">>$ENV_FILE
+    else
+        echo "[regtest]">>$NODE_CONFIG_FILE
     fi
 
+    if [[ -z "${RPC_PASSWORD}" ]]; then
+        printf "\n Please enter a username for the node RPC connection:\n"
+        read NEW_RPC_USERNAME
+        printf "\n Please enter a password for the RPC connection on the node.\n This will be stored in the pass.conf file in the configs directory.\n"
+        read NEW_RPC_PASSWORD
+    
+        echo "rpcuser=$NEW_RPC_USERNAME">>$NODE_CONFIG_FILE
+        echo "rpcpassword=$NEW_RPC_PASSWORD">>$NODE_CONFIG_FILE
 
-    # Start the servers and get the genesis & verification block, and merkle root
-    if [ ! -f "./.BTK-container-lock" ]; then
+        # Add to pass.conf
+        echo "export RPC_USERNAME=$NEW_RPC_USERNAME">>./configs/pass.conf
+        echo "export RPC_PASSWORD=$NEW_RPC_PASSWORD">>./configs/pass.conf
+    else
+        echo "rpcuser=$RPC_USERNAME">>$NODE_CONFIG_FILE
+        echo "rpcpassword=$RPC_PASSWORD">>$NODE_CONFIG_FILE    
+    fi
+    echo "rpcport=18443">>$NODE_CONFIG_FILE
+    echo "rpcbind=0.0.0.0:18443">>$NODE_CONFIG_FILE
+    echo "maxconnections=1">>$NODE_CONFIG_FILE
 
-		echo "Starting local node servers..."
-		docker-compose up -d
-		sleep 5
-
-		# Generate some blocks, and get their hashes/merkle roots
-		docker-compose exec -T bitcoind-regtest bitcoin-cli getblock 0 > ./Electron-Cash-SLP/genesis.txt
-		docker-compose exec -T bitcoind-regtest bitcoin-cli getblock 150 > ./Electron-Cash-SLP/fork.txt
-		docker-compose exec -T bitcoind-regtest bitcoin-cli getblock 200 > ./Electron-Cash-SLP/verification.txt
-
-		# Push hashes into environmental variables
-		cd ./Electron-Cash-SLP
-		BTK_GEN_HASH=$(grep \"hash\" genesis.txt | \
-				awk '{ print substr(substr($2, 2), 1, length($2)-3) }')
-		BTK_FOR_HASH=$(grep \"hash\" fork.txt | \
-				awk '{ print substr(substr($2, 2), 1, length($2)-3) }')
-		BTK_VER_MERK=$(grep merkle verification.txt | \
-				awk '{ print substr(substr($2, 2), 1, length($2)-3) }')
-		rm genesis.txt fork.txt verification.txt
-
-		# Patch the Electron-SLP-Cash files
-		echo "Patching Electon Cash SLP wallet files to work with regtest network..."
-		cd ./lib
-		rm ./servers_testnet.json
-		cat <<-EOF > "./servers_testnet.json"
-		{
-			"127.0.0.1": {
-				"s": "50002"
-			}
-		}
-		EOF
-		rm ./servers_slpdb_testnet.json
-		cat <<-EOF > "./servers_slpdb_testnet.json"
-		{
-			"127.0.0.1": {}
-		}
-		EOF
-
-		if [[ $BTK_ENV == "Darwin" || $BTK_ENV == "FreeBSD" ]]; then
-			sed -i "" "91s|GENESIS.*$|GENESIS = \"${BTK_GEN_HASH}|" networks.py
-
-			sed -i "" \
-			"98s|BITCOIN_CASH_FORK_BLOCK_HEIGHT =.*$|BITCOIN_CASH_FORK_BLOCK_HEIGHT = 150|" \
-			networks.py
-
-			sed -i "" \
-			"99s|BITCOIN_CASH_FORK_BLOCK_HASH =.*$|BITCOIN_CASH_FORK_BLOCK_HASH = \"${BTK_FOR_HASH}|" \
-			networks.py
-
-			sed -i "" \
-			"101s|VERIFICATION_BLOCK_MERKLE_ROOT =.*$|VERIFICATION_BLOCK_MERKLE_ROOT = \"${BTK_VER_MERK}|" \
-			networks.py
-
-			sed -i "" \
-			"102s|VERIFICATION_BLOCK_HEIGHT =.*$|VERIFICATION_BLOCK_HEIGHT = 200|" \
-			networks.py
-
-		fi
-		if [[ $BTK_ENV == "Linux" ]]; then	
-			sed -i "91s|GENESIS.*$|GENESIS = \"${BTK_GEN_HASH}\"|" networks.py
-
-			sed -i "98s|BITCOIN_CASH_FORK_BLOCK_HEIGHT =.*$|BITCOIN_CASH_FORK_BLOCK_HEIGHT = 150|" networks.py
-
-			sed -i "99s|BITCOIN_CASH_FORK_BLOCK_HASH =.*$|BITCOIN_CASH_FORK_BLOCK_HASH = \"${BTK_FOR_HASH}|" networks.py
-
-			sed -i "101s|VERIFICATION_BLOCK_MERKLE_ROOT =.*$|VERIFICATION_BLOCK_MERKLE_ROOT = \"${BTK_VER_MERK}|" networks.py
-
-			sed -i "102s|VERIFICATION_BLOCK_HEIGHT =.*$|VERIFICATION_BLOCK_HEIGHT = 200|" networks.py
-		fi
-
-		cd ..
-	#	echo $BTK_VER_MERK > merkle.txt
-		cd ..
-		docker-compose stop 
-	fi
+    # Config env file for ./services
+    echo "export RPC_PORTS=18443">>$ENV_FILE
+    echo "export NETWORK=regtest">>$ENV_FILE
+    echo "export DB_NAME=slpdb_test">>$ENV_FILE
 
 fi
 
-if [[ $BTK_JS_API == 1 ]]; then
+# Here we need to copy the conf and append based on network and values before
+# echo "RPC_PASSWORD=$NEW_RPC_PASSWORD">>./configs/pass.conf
 
-    git submodule update --init -- bch-api
-    cd bch-api && 
-    docker-compose build --no-cache &&
-    cd ..
+source ./configs/pass.conf
+source ./configs/env.env
 
+# Set up the config file based on user input
+printf "Creating config files ... "
+python3 - << EOF
+import json, os
+
+PREFIX = "./compose_files/"
+config = {
+    "node": [],
+    "indexer": [],
+    "rest": [],
+    "slp": [],
+    "network": ""
+}
+
+if ${BTK_UNLIMITED}:
+    if ${EXPOSE_PORTS}:
+        config["node"] += ["bitcoinunlimited_ports"]
+
+    config["node"] += ["bitcoinunlimited"]
+
+if ${BTK_CASHNODE}:
+    if ${EXPOSE_PORTS}:
+        config["node"] += ["bitcoincashnode_ports"]
+        config["indexer"] += ["fulcrum_ports"]
+    
+    config["node"] += ["bitcoincashnode"]
+    config["indexer"] += ["fulcrum"]
+
+if ${BTK_BCHREST}:
+    if ${EXPOSE_PORTS}:
+        config["rest"] += ["opensight_ports"]
+        config["rest"] += ["bchrest_ports"]
+
+    config["rest"] += ["opensight"]
+    config["rest"] += ["bchrest"]
+
+if ${BTK_BCHAPI}:
+    if ${EXPOSE_PORTS}:
+        config["rest"] += ["nginx_ports"]
+        config["rest"] += ["bchapi_ports"]
+    
+    config["rest"] += ["nginx"]
+    config["rest"] += ["bchapi"]
+
+if ${BTK_SLP}:
+    if ${EXPOSE_PORTS}:
+        config["slp"] += ["mongodb_ports"]
+        config["slp"] += ["slpdb"]
+        config["slp"] += ["slpserve_ports"]
+
+    config["slp"] += ["mongodb"]
+    config["slp"] += ["slpdb"]
+    config["slp"] += ["slpserve"]
+
+config["network"] = "network"
+
+def iterdict(d):
+    s = "DOCKER_ARGS=\""
+    for k,v in d.items():        
+        if isinstance(v, dict):
+            iterdict(v)
+        elif isinstance(v, list):
+            for item in v:
+                if item:
+                    s += "-f {}{}.yml ".format(PREFIX,item)
+        else:
+            if v:            
+                s += "-f {}{}.yml ".format(PREFIX, v)
+    return "{}\"\n".format(s.strip())
+
+docker_compose_args = iterdict(config)
+
+with open('config.json', 'w') as config_file:
+    json.dump(config, config_file)
+
+with open('.lock', 'w') as lock_file:
+    lock_file.write(docker_compose_args)
+EOF
+successOrFail $? 'done' 'error' 'Could not create config files.'
+
+# Pull the Docker images
+source .lock
+eval "docker-compose -p bch-toolkit $DOCKER_ARGS pull"
+#TODO: Find a way to only run this if the images
+# aren't already pulled.
+
+# Initailze regtest node
+eval "docker-compose $DOCKER_ARGS up -d bch-node"
+sleep $BTK_SLEEP_TIME
+
+
+if [[ $BTK_REGTEST == 1 ]]; then
+    # Generate N blocks
+    printf "Generating $BTK_BLOCKS initial blocks for regtest\t... "
+        eval "docker-compose $DOCKER_ARGS exec -T bch-node bitcoin-cli -conf=/bitcoin.conf generate $BTK_BLOCKS > /dev/null"
+    successOrFail $? 'done' 'error' 'Could not create blocks.'
 fi
 
+printf "Stopping local node\t... "
+    sleep $BTK_SLEEP_TIME
+    eval "docker-compose $DOCKER_ARGS exec -T bch-node bitcoin-cli -conf=/bitcoin.conf stop > /dev/null"
+successOrFail $? 'done' 'error' 'Could not stop local node.'
 
+printf "\nFinished. Please use './services start' to run your new regtest node."
 
-if [[ $BTK_SLPDB == 1 ]]; then
-
-    git submodule update --init -- slpdb
-    cd slpdb && 
-    docker-compose build --no-cache &&
-    cd ..
-fi
-
-
-
-
-echo "Done."
-
+# End of file

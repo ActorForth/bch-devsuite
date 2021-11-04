@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+set -u
+
+abort() {
+    printf "%s" "$@"
+    exit 1
+}
+
+greentext() {
+    printf "\x1B[32m%b\e[0m\n" "$1"
+}
+source ./configs/pass.conf
+source ./configs/env.env
+
+BTK_SERVICES_UPGRADE=0
+BTK_SERVICES_START=0
+BTK_SERVICES_STOP=0
+BTK_SLEEP_TIME=${SLEEP:-6}
+
+if [[ ! -f "./.lock" ]]; then
+	abort "Please execute the './setup' script first."
+else
+	if [[ ! -z $1 ]]; then
+        source .lock
+		for var in "$@"
+            do  
+                [[ $var == "upgrade" ]] && BTK_SERVICES_UPGRADE=1
+                [[ $var == "run" || $var == "start" ]] && BTK_SERVICES_START=1
+                [[ $var == "stop" ]] && BTK_SERVICES_STOP=1
+            done
+    else
+		echo "usage: services [command]"
+		echo " - start: start the services specified during setup (i.e. node, rest, slp)"
+        echo " - stop: stops the services that are currently running"
+		exit 0
+	fi
+fi
+
+# Check that we have docker-compose installed
+if [ ! -x "$(command -v docker-compose)" ]; then
+	echo "Docker-compose not found. Please install docker-compose."
+	exit 1
+fi
+
+# Ensure only one of two exclusive commands are chosen
+if [[ $BTK_SERVICES_START == 1 && $BTK_SERVICES_STOP == 1 ]]; then
+    echo "You can't start and stop services at the same time..."
+    exit 1
+fi
+
+if [[ $BTK_SERVICES_START == 1 && $BTK_SERVICES_UPGRADE == 1 ]]; then
+    eval "docker-compose $DOCKER_ARGS pull && docker-compose $DOCKER_ARGS up -d"
+fi
+
+if [[ $BTK_SERVICES_START == 1 && $BTK_SERVICES_UPGRADE == 0 ]]; then
+	eval "docker-compose $DOCKER_ARGS up -d"
+fi
+
+if [[ $BTK_SERVICES_START == 0 && $BTK_SERVICES_UPGRADE == 1 ]]; then
+	eval "docker-compose $DOCKER_ARGS pull"
+fi
+
+if [[ $BTK_SERVICES_STOP == 1 ]]; then
+    eval "docker-compose $DOCKER_ARGS exec -T bch-node bitcoin-cli -conf=/bitcoin.conf stop"
+    sleep $BTK_SLEEP_TIME
+    eval "docker-compose $DOCKER_ARGS stop"
+fi

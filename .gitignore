@@ -1,6 +1,9 @@
 .DS_Store
 .BTK-container-lock
+.env
+.lock
 
+node_modules/*
 Electron-Cash-SLP
 Electron-Cash-SLP/*
 slpdb/*
@@ -8,7 +11,13 @@ bch-api/*
 misc/*
 cert/*
 data/*
-
+configs/cert
+config.json
 *.txt
 *.swp
 
+/configs/pass.conf
+/configs/env.env
+/configs/bitcoin-unlimited.conf
+
+venv/
