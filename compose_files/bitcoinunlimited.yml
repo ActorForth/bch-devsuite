@@ -1,7 +1,7 @@
 version: "3"
 services:
     bch-node:
-        image: actorforth/bitcoin-unlimited:${TAG_BITCOINUNLIMITED:-latest}
+        image: ghcr.io/actorforth/bitcoin-unlimited:${TAG_BITCOINUNLIMITED:-latest}
         container_name: bch-node
         volumes:
           - ../data/bitcoind:/data

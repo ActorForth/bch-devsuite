@@ -1,12 +1,12 @@
 version: "3"
 services:
     slpdb:
-        image: actorforth/slpdb:${TAG_SLPDB:-latest}
+        image: ghcr.io/actorforth/slpdb:${TAG_SLPDB:-latest}
         container_name: slpdb
         depends_on:
           - mongodb-slpdb
         volumes:
-          - ../configs/slpdb-config.sh:/home/safeuser/SLPDB/start.sh
+          - ../configs/slpdb-config.sh:/home/safeuser/start.sh
         environment:
           - db_url=mongodb://${MONGO_USER}:${MONGO_PASS}@mongodb-slpdb:27017?connectTimeoutMS=90000&socketTimeoutMS=90000
           - zmq_incoming_host=bch-node

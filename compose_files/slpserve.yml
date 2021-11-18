@@ -1,7 +1,7 @@
 version: "3"
 services:
     slpserve:
-        image: actorforth/slpserve:${TAG_SLPSERVE:-latest}
+        image: ghcr.io/actorforth/slpserve:${TAG_SLPSERVE:-latest}
         container_name: slpserve
         depends_on:
           - mongodb-slpdb

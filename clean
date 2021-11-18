@@ -56,6 +56,8 @@ deleteIfExists "indexer data" "./data/fulcrum"
 # Remove config file and lock
 deleteIfExists "config file" "./config.json"
 deleteIfExists "config file" "./configs/bitcoin-unlimited.conf"
+deleteIfExists "config file" "./configs/bitcoincashnode.conf"
+deleteIfExists "config file" "./configs/temp-fulcrum-config.conf"
 deleteIfExists "config file" "./configs/env.env"
 deleteIfExists "lock" "./.lock"
 

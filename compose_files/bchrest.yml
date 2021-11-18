@@ -1,7 +1,7 @@
 version: "3"
 services:
     bchrest:
-        image: actorforth/bchrest:${TAG_BCHREST:-latest-dev}
+        image: ghcr.io/actorforth/bchrest:${TAG_BCHREST:-latest}
         container_name: bchrest
         environment:
           - PORT=3000
