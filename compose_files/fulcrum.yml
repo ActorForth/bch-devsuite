@@ -7,7 +7,7 @@ services:
           - bch-node
         volumes:
           - ../data/fulcrum:/data
-          - ../configs/fulcrum-config.conf:/config.conf
+          - ../configs/temp-fulcrum-config.conf:/config.conf
         restart: always
         command: ["Fulcrum", "/config.conf"]
         networks:
