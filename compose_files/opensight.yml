@@ -1,7 +1,7 @@
 version: "3"
 services:
     opensight:
-        image: actorforth/opensight:${TAG_OPENSIGHT:-latest-dev}
+        image: ghcr.io/actorforth/opensight:${TAG_OPENSIGHT:-latest}
         container_name: opensight
         environment:
           - ELECTRUM_HOST=${ELECTRUM_INDEXER:-fulcrum}
