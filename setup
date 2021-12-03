@@ -347,6 +347,7 @@ if [[ $BTK_REGTEST == 1 ]]; then
         echo "regtest=1">>$NODE_CONFIG_FILE
         echo "export ELECTRUM_INDEXER=bch-node">>$ENV_FILE
     else
+        echo "regtest = 1" >>$NODE_CONFIG_FILE
         echo "[regtest]">>$NODE_CONFIG_FILE
         echo "bitcoind = bch-node:18443">>$FULCRUM_CONFIG_FILE
         echo "rpcuser = $RPC_USERNAME">>$FULCRUM_CONFIG_FILE
