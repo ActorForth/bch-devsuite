@@ -19,5 +19,7 @@ config.json
 /configs/pass.conf
 /configs/env.env
 /configs/bitcoin-unlimited.conf
+/configs/bitcoincashnode.conf
+/configs/temp-fulcrum-config.conf
 
 venv/
