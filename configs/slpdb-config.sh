@@ -17,7 +17,7 @@ echo "Finished DB migrations."
 export rpc_protocol='http'
 export rpc_host=bch-node
 export core_from=543375
-export core_from_testnet=0
+export core_from_testnet=1253801
 export zmq_incoming_host=bch-node
 export zmq_incoming_port=28332
 
