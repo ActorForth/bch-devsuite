@@ -6,14 +6,13 @@ services:
         environment:
           - PORT=3000
           - BITCOINCOM_BASEURL=http://opensight:3001/api/
-          - RPC_BASEURL=http://bch-node:18443/
+          - RPC_BASEURL=http://bch-node:${RPC_PORTS}/
           - RPC_PASSWORD=${RPC_PASSWORD}
           - RPC_USERNAME=${RPC_USERNAME}
           - ZEROMQ_URL=0
           - ZEROMQ_PORT=0
           - NETWORK=${NETWORK}
           - SLPDB_URL=http://slpserve:4000/
-          - DO_NOT_USE_RATE_LIMITS=true
         restart: always
         command: ["npm", "start"]
         networks:

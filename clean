@@ -9,6 +9,14 @@ greentext() {
     printf "\x1B[32m%b\e[0m\n" "$1"
 }
 
+redtext() {
+    for var in "$@"
+    do
+        printf "\x1B[31m%b\e[0m " "$var"
+    done
+    printf "\n"
+}
+
 successOrFail() {
     if [[ $1 == 0 ]]; then
         greentext $2

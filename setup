@@ -71,6 +71,7 @@ BTK_CASHNODE=0 # Default incl Fulcrum
 BTK_BCHREST=0
 BTK_BCHAPI=0 # Default incl NGINX
 BTK_SLP=0 # Default incl SLPDB, slpserve
+NETWORK=0
 
 BTK_DOCKER_NETWORK=${BTK_DOCKER_NETWORK:-"bch-toolkit-network"}
 ENV_FILE=./configs/env.env
@@ -83,9 +84,9 @@ if [[ ! -z "${1:-}" ]]; then
         if [[ $var == "bcnh" ]]; then
             abort "No command 'bcnh'. Did you mean 'bchn' ?"
         fi
-        [[ $var == "regtest" ]] && BTK_REGTEST=1
-        [[ $var == "testnet" ]] && BTK_TESTNET=1
-        [[ $var == "mainnet" ]] && BTK_MAINNET=1
+        [[ $var == "regtest" ]] && BTK_REGTEST=1 && NETWORK="regtest"
+        [[ $var == "testnet" ]] && BTK_TESTNET=1 && NETWORK="testnet"
+        [[ $var == "mainnet" ]] && BTK_MAINNET=1 && NETWORK="mainnet"
         [[ $var == "expose-ports" ]] && EXPOSE_PORTS=1
 		[[ $var == "bu" ]] && BTK_UNLIMITED=1
         [[ $var == "bchn" ]] && BTK_CASHNODE=1
@@ -252,17 +253,16 @@ if [[ $BTK_MAINNET == 1 ]]; then
     # Check if password already set
     if [[ -z ${RPC_PASSWORD} ]]; then
         printf "\n Please enter a username for the node RPC connection:\n"
-        read NEW_RPC_USERNAME
+        read RPC_USERNAME
         printf "\n Please enter a password for the RPC connection on the node.\n This will be stored in the pass.conf file in the configs directory.\n"
-        read NEW_RPC_PASSWORD
-        printf $NEW_RPC_PASSWORD
+        read RPC_PASSWORD
         
-        echo "rpcuser=$NEW_RPC_USERNAME">>$NODE_CONFIG_FILE
-        echo "rpcpassword=$NEW_RPC_PASSWORD">>$NODE_CONFIG_FILE
+        echo "rpcuser=$RPC_USERNAME">>$NODE_CONFIG_FILE
+        echo "rpcpassword=$RPC_PASSWORD">>$NODE_CONFIG_FILE
 
         # Add to pass.conf
-        echo "export RPC_USERNAME=$NEW_RPC_USERNAME">>./configs/pass.conf
-        echo "export RPC_PASSWORD=$NEW_RPC_PASSWORD">>./configs/pass.conf
+        echo "export RPC_USERNAME=$RPC_USERNAME">>./configs/pass.conf
+        echo "export RPC_PASSWORD=$RPC_PASSWORD">>./configs/pass.conf
     else
         printf "Password found\n"
         echo "rpcuser=$RPC_USERNAME">>$NODE_CONFIG_FILE
@@ -288,17 +288,16 @@ fi
 if [[ $BTK_TESTNET == 1 ]]; then
     if [[ -z ${RPC_PASSWORD} ]];then
         printf "\n Please enter a username for the node RPC connection:\n"
-        read NEW_RPC_USERNAME
+        read RPC_USERNAME
         printf "\n Please enter a password for the RPC connection on the node.\n This will be stored in the pass.conf file in the configs directory.\n"
-        read NEW_RPC_PASSWORD
-        printf $NEW_RPC_PASSWORD
+        read RPC_PASSWORD
     
-        echo "rpcuser=$NEW_RPC_USERNAME">>$NODE_CONFIG_FILE
-        echo "rpcpassword=$NEW_RPC_PASSWORD">>$NODE_CONFIG_FILE
+        echo "rpcuser=$RPC_USERNAME">>$NODE_CONFIG_FILE
+        echo "rpcpassword=$RPC_PASSWORD">>$NODE_CONFIG_FILE
 
         # Add to pass.conf
-        echo "export RPC_USERNAME=$NEW_RPC_USERNAME">>./configs/pass.conf
-        echo "export RPC_PASSWORD=$NEW_RPC_PASSWORD">>./configs/pass.conf
+        echo "export RPC_USERNAME=$RPC_USERNAME">>./configs/pass.conf
+        echo "export RPC_PASSWORD=$RPC_PASSWORD">>./configs/pass.conf
     else
         printf "Password found\n"
         echo "rpcuser=$RPC_USERNAME">>$NODE_CONFIG_FILE
@@ -328,16 +327,16 @@ if [[ $BTK_REGTEST == 1 ]]; then
 
     if [[ -z "${RPC_PASSWORD}" ]]; then
         printf "\n Please enter a username for the node RPC connection:\n"
-        read NEW_RPC_USERNAME
+        read RPC_USERNAME
         printf "\n Please enter a password for the RPC connection on the node.\n This will be stored in the pass.conf file in the configs directory.\n"
-        read NEW_RPC_PASSWORD
+        read RPC_PASSWORD
     
-        echo "rpcuser=$NEW_RPC_USERNAME">>$NODE_CONFIG_FILE
-        echo "rpcpassword=$NEW_RPC_PASSWORD">>$NODE_CONFIG_FILE
+        echo "rpcuser=$RPC_USERNAME">>$NODE_CONFIG_FILE
+        echo "rpcpassword=$RPC_PASSWORD">>$NODE_CONFIG_FILE
 
         # Add to pass.conf
-        echo "export RPC_USERNAME=$NEW_RPC_USERNAME">>./configs/pass.conf
-        echo "export RPC_PASSWORD=$NEW_RPC_PASSWORD">>./configs/pass.conf
+        echo "export RPC_USERNAME=$RPC_USERNAME">>./configs/pass.conf
+        echo "export RPC_PASSWORD=$RPC_PASSWORD">>./configs/pass.conf
     else
         echo "rpcuser=$RPC_USERNAME">>$NODE_CONFIG_FILE
         echo "rpcpassword=$RPC_PASSWORD">>$NODE_CONFIG_FILE    
@@ -453,7 +452,7 @@ successOrFail $? 'done' 'error' 'Could not create config files.'
 
 # Pull the Docker images
 source .lock
-eval "docker-compose -p bch-toolkit $DOCKER_ARGS pull"
+# eval "docker-compose -p bch-toolkit $DOCKER_ARGS pull"
 #TODO: Find a way to only run this if the images
 # aren't already pulled.
 
@@ -474,6 +473,6 @@ printf "Stopping local node\t... "
     eval "docker-compose $DOCKER_ARGS exec -T bch-node bitcoin-cli -conf=/bitcoin.conf stop > /dev/null"
 successOrFail $? 'done' 'error' 'Could not stop local node.'
 
-printf "\nFinished. Please use './services start' to run your new regtest node."
+printf "\nFinished. Please use './services start' to run your new $NETWORK node."
 
 # End of file
