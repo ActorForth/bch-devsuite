@@ -20,6 +20,8 @@ jobs:
           node-version: '14'
       - name: Setup
         run: ./setup regtest bu slp bchrest expose-ports
+      - name: Start services
+        run: ./services start
       - name: Collect Docker Logs
         if: failure()
         uses: jwalton/gh-docker-logs@v2.0.2
