@@ -1,0 +1,24 @@
+name: Run regtest node
+
+on:
+  push:
+    branches:
+      - test-ci
+
+  workflow_dispatch:
+
+
+jobs:
+  run-regtest-node:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - name: Setup
+        run: ./setup regtest bu slp bchrest expose-ports
+
+
+
