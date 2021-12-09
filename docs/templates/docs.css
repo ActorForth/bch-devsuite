@@ -1,3 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+pre {
+  @apply bg-gray-800 text-white py-4 px-4 my-6 rounded-md leading-7 text-sm;
+}
