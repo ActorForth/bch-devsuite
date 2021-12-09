@@ -126,6 +126,7 @@ def ensure_clean():
 
 
 def handle_local_node():
+    # TODO: Make this optional and be able to connect to remote
     node = inquirer.list_input(
         message="Local node?", choices=LOCAL_NODES, default=LOCAL_NODES[0]
     )
@@ -362,7 +363,7 @@ def validate_dependencies():
         typer.echo(f"docker ps failed. Please fix it")
 
 def finish():
-    typer.echo("\n\nFinished. Please use 'docker-compose up -d' to run your new system.")
+    typer.echo(f"\n\nFinished. Please use 'docker-compose up -d' to run your new {config.local_node.network} node.")
     # TODO: Show open ports for each component
 
 @app.command()
