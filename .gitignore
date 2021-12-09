@@ -16,7 +16,7 @@ config.json
 *.txt
 *.swp
 
-/configs/pass.conf
+# /configs/pass.conf
 /configs/env.env
 /configs/bitcoin-unlimited.conf
 
