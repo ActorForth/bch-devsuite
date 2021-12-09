@@ -2,6 +2,30 @@
 @tailwind components;
 @tailwind utilities;
 
-pre {
+.content-body h1 {
+  @apply block text-3xl font-extrabold text-gray-900 tracking-tight mb-1 mt-8;
+}
+
+.content-body h1:first-child {
+  @apply mt-0;
+}
+
+.content-body h3 {
+  @apply block text-lg font-bold text-gray-700 tracking-tight mb-1;
+}
+
+.content-body p {
+  @apply leading-7;
+}
+
+.content-body pre {
   @apply bg-gray-800 text-white py-4 px-4 my-6 rounded-md leading-7 text-sm;
+}
+
+.content-body ul {
+  @apply my-6 ml-8 list-disc;
+}
+
+.content-body ul li {
+  @apply leading-8;
 }
