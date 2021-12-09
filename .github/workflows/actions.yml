@@ -22,6 +22,8 @@ jobs:
         run: ./setup regtest bu slp bchrest expose-ports
       - name: Start services
         run: ./services start
+      - name: Create transaction
+        run: ./bitcoin-cli sendtoaddress bchreg:qr9lj8vmydqt7mywzk6gsmgq5cllzxe5gcldr4qlwj 1
       - name: Collect Docker Logs
         if: failure()
         uses: jwalton/gh-docker-logs@v2.0.2
