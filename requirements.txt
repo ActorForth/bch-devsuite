@@ -1,0 +1,10 @@
+blessed==1.19.0
+click==8.0.3
+inquirer==2.8.0
+Jinja2==3.0.3
+MarkupSafe==2.0.1
+python-editor==1.0.4
+readchar==2.0.1
+six==1.16.0
+typer==0.4.0
+wcwidth==0.2.5
