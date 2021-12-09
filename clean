@@ -1,9 +1,5 @@
 #!/usr/bin/env bash
 set -u
-if [[ -f "./configs/env.env" ]]; then
-    source ./configs/env.env
-fi 
-source ./configs/pass.conf
 
 greentext() {
     printf "\x1B[32m%b\e[0m\n" "$1"

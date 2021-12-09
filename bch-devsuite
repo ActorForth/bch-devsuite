@@ -363,7 +363,7 @@ def validate_dependencies():
         typer.echo(f"docker ps failed. Please fix it")
 
 def finish():
-    typer.echo(f"\n\nFinished. Please use 'docker-compose up -d' to run your new {config.local_node.network} node.")
+    typer.echo(f"\n\nFinished. Please use './bch-devsuite start' to run your new {config.local_node.network} node.")
     # TODO: Show open ports for each component
 
 @app.command()
