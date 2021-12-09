@@ -280,7 +280,7 @@ def setup_local_node():
             typer.echo(f"Setting up Bitcoin Unlimited node...", nl=False)
             with open("./configs/bitcoin-unlimited.conf", "w") as config_file:
                 config_file.write(
-                    templates.get_template("default_bitcoincashnode.conf").render(
+                    templates.get_template("default_bu.conf").render(
                         config=config
                     )
                 )
