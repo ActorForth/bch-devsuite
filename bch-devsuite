@@ -18,6 +18,8 @@ from jinja2 import Environment, FileSystemLoader
 __version__ = "0.1.0"
 
 DEFAULT_DOCKER_NETWORK = "bch-devsuite-network"
+DEFAULT_REGTEST_BLOCKS = 200
+DEFAULT_WAIT_TIME = 6
 BCH_GENERATE_ADDRESS = "bchreg:qzerfrqkvsclmrlx3hzl0j2ac2eh0k88wqa0efygtm"
 BCH_WIF = "cUDjy47QLpAUyv1beivDPoYCHjCRVqwRMwCuSnkdF4teVFBDD1ip"
 
@@ -55,17 +57,32 @@ class LocalNode:
     node: LocalNodeType
     network: Network
     rpc_conf: Optional[RPCConf] = None
-    regtest_blocks: Optional[int] = None
-    wait_time: int = 6
+    regtest_blocks: Optional[int] = DEFAULT_REGTEST_BLOCKS
+    wait_time: int = DEFAULT_WAIT_TIME
+
+    def rpc_port(self):
+        if self.network == Network.MAINNET:
+            return 8332
+        elif self.network == Network.TESTNET:
+            return 18332
+        elif self.network == Network.REGTEST:
+            return 18443
 
 
 @dataclass
-class InitState:
+class InitConfig:
     local_node: Optional[LocalNode] = None
     rest_service: Optional[RestService] = None
     slp: Optional[SLPMongoConf] = None
     exposed_ports: bool = True
     docker_network: str = DEFAULT_DOCKER_NETWORK
+
+    def slp_db_name(self):
+        if self.local_node:
+            if self.local_node.network == 'mainnet':
+                return 'slpdb'
+            else:
+                return 'slpdb_test'
 
 
 COMPONENTS = [
@@ -77,10 +94,12 @@ LOCAL_NODES = [("Bitcoin Unlimited Node", "bu"), ("Bitcoin Cash Node", "bchn")]
 NETWORKS = [e.value for e in Network]
 REST_SERVICES = [e.value for e in RestService]
 
-templates = Environment(loader=FileSystemLoader('./templates'))
+templates = Environment(
+    loader=FileSystemLoader("./templates"), trim_blocks=True, lstrip_blocks=True
+)
 
 app = typer.Typer()
-state = InitState()
+config = InitConfig()
 
 
 def version_callback(value: bool):
@@ -88,10 +107,17 @@ def version_callback(value: bool):
         typer.echo(f"BCH DevSuite version: {__version__}")
         raise typer.Exit()
 
+def check_setup():
+    if not (os.path.exists(".lock") and os.path.exists('docker-compose.yml')):
+        typer.secho(
+            "Please execute './bch-devsuite init' script first.",
+            fg=typer.colors.RED,
+        )
+        sys.exit(3)
 
 def ensure_clean():
     # Ensure working directory is clean before setup
-    if os.path.exists(".lock") or os.path.exists("config.json"):
+    if os.path.exists(".lock") or os.path.exists('docker-compose.yml'):
         typer.secho(
             "It appears you've already run this setup script before. Please run the ./clean script before trying to setup again.\n",
             fg=typer.colors.RED,
@@ -115,9 +141,10 @@ def handle_local_node():
     regtest_blocks = None
     if network == Network.REGTEST:
         regtest_blocks = inquirer.text(
-            message="Please enter number of initial blocks for regtest"
+            message="Please enter number of initial blocks for regtest",
+            default=DEFAULT_REGTEST_BLOCKS
         )
-    state.local_node = LocalNode(
+    config.local_node = LocalNode(
         node=node,
         network=network,
         rpc_conf=RPCConf(username=username, password=password),
@@ -129,14 +156,14 @@ def handle_restapi():
     rest_service = inquirer.list_input(
         message="REST Service?", choices=REST_SERVICES, default=REST_SERVICES[0]
     )
-    state.rest_service = rest_service
+    config.rest_service = rest_service
 
 
 def handle_slp():
     typer.echo("SLPDB uses mongodb, a username and password is recommended.")
     username = inquirer.text(message="Please enter a username for mongodb")
     password = inquirer.text(message="Please enter a password for mongodb")
-    state.slp = SLPMongoConf(username=username, password=password)
+    config.slp = SLPMongoConf(username=username, password=password)
 
 
 component_handlers = {
@@ -148,6 +175,24 @@ component_handlers = {
 success = typer.style("✓", fg=typer.colors.GREEN, bold=True)
 failed = typer.style("✖", fg=typer.colors.RED, bold=True)
 
+def build_config():
+    components: List[str] = inquirer.checkbox(
+        message="Which components do you want to install?",
+        choices=COMPONENTS,
+        default=[e[1] for e in COMPONENTS],
+    )
+    for component in components:
+        component_handlers[component]()
+
+    docker_network = inquirer.text(
+        message="docker network", default=DEFAULT_DOCKER_NETWORK
+    )
+    config.docker_network = docker_network
+
+    exposed_ports = inquirer.confirm(message="Exposed port?", default=True)
+    config.exposed_ports = exposed_ports
+    print(json.dumps(asdict(config), indent=2))
+    typer.confirm("Confirm?", abort=True)
 
 class DockerMisconfiguredException(Exception):
     pass
@@ -182,7 +227,7 @@ def validate_dependency(program: str) -> bool:
 def create_docker_network_if_not_exist():
     typer.echo(f"Creating docker network...", nl=False)
     created = subprocess.run(
-        f"docker network create {state.docker_network}",
+        f"docker network create {config.docker_network}",
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
         shell=True,
@@ -194,7 +239,7 @@ def create_docker_network_if_not_exist():
 
 
 def setup_rest_service():
-    if state.rest_service == RestService.BCH_API:
+    if config.rest_service == RestService.BCH_API:
         typer.echo("-----------------------")
         typer.echo(f"Setting up BCH-API...")
         typer.echo("Create new SSL certificate/key pair to be used on nginx server")
@@ -223,61 +268,102 @@ def setup_rest_service():
                 "/C=no/ST=no/L=no/O=no/OU=no/CN=no/emailAddress=no",
             ],
             stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
+            # stderr=subprocess.DEVNULL,
         )
         typer.echo("-----------------------")
 
 
 def setup_local_node():
-    if state.local_node:
-        if state.local_node.node == LocalNodeType.BITCOIN_UNLIMITED:
+    if config.local_node:
+        if config.local_node.node == LocalNodeType.BITCOIN_UNLIMITED:
             typer.echo(f"Setting up Bitcoin Unlimited node...", nl=False)
-            with open("./configs/bitcoin-unlimited.conf", 'w') as config_file:
-                config_file.write(templates.get_template("default_bitcoincashnode.conf").render(state=state))
+            with open("./configs/bitcoin-unlimited.conf", "w") as config_file:
+                config_file.write(
+                    templates.get_template("default_bitcoincashnode.conf").render(
+                        config=config
+                    )
+                )
             typer.echo(success)
-        elif state.local_node.node == LocalNodeType.BITCOIN_CASH_NODE:
+        elif config.local_node.node == LocalNodeType.BITCOIN_CASH_NODE:
             typer.echo(f"Setting up Bitcoin Unlimited node...", nl=False)
-            with open("./configs/bitcoincashnode.conf", 'w') as config_file:
-                config_file.write(templates.get_template("default_bitcoincashnode.conf").render(state=state))
-            with open("./configs/temp-fulcrum-config.conf", 'w') as config_file:
-                config_file.write(templates.get_template("fulcrum-config.conf").render(state=state))
+            with open("./configs/bitcoincashnode.conf", "w") as config_file:
+                config_file.write(
+                    templates.get_template("default_bitcoincashnode.conf").render(
+                        config=config
+                    )
+                )
+            with open("./configs/temp-fulcrum-config.conf", "w") as config_file:
+                config_file.write(
+                    templates.get_template("fulcrum-config.conf").render(config=config)
+                )
             typer.echo(success)
-
-def setup_environment():
-    if state.slp:
-        typer.echo(f"Setting up environment...", nl=False)
-        with open("./configs/env.env", 'w') as config_file:
-                config_file.write(templates.get_template("env.env").render(state=state))
-        with open("./configs/pass.conf", 'w') as config_file:
-                config_file.write(templates.get_template("pass.conf").render(state=state))
-        typer.echo(success)
 
 
 def setup_docker_compose():
-    typer.echo(f"Setting up lock file...", nl=False)
+    """
+    Generate docker-compose.yml and .lock file from config
+    """
+    typer.echo(f"Generate docker-compose file...", nl=False)
+    with open("docker-compose.yml", "w") as compose_file:
+        compose_file.write(
+            templates.get_template("compose.template").render(config=config)
+        )
+    with open(".lock", "w") as lock_file:
+        json.dump(asdict(config), lock_file)
     typer.echo(success)
 
 
 def pull_images():
-    typer.echo(f"Pull the Docker images...", nl=False)
+    """
+    Pull docker image
+    """
+    typer.echo(f"Pull the Docker images...")
+    subprocess.run("docker-compose pull", shell=True)
     typer.echo(success)
 
 
 def initialize_node():
-    if state.local_node:
-        time.sleep(state.local_node.wait_time)
-        if state.local_node.network == Network.REGTEST:
+    """
+    Local node initialisation
+    """
+    if config.local_node:
+        if config.local_node.network == Network.REGTEST:
             typer.echo(
-                f"Generating {state.local_node.regtest_blocks} initial blocks for regtest..."
+                f"Generating {config.local_node.regtest_blocks} initial blocks for regtest..."
             )
+            subprocess.run("docker-compose up -d bch-node", shell=True)
+            time.sleep(config.local_node.wait_time)
+            subprocess.run(f"docker-compose exec -T bch-node bitcoin-cli -conf=/bitcoin.conf generate {config.local_node.regtest_blocks}", shell=True)
             typer.echo(success)
 
 
 def stop_node():
-    if state.local_node:
+    """
+    Stop local node
+    """
+    if config.local_node:
         typer.echo("Stopping local node...", nl=False)
+        subprocess.run(f"docker-compose exec -T bch-node bitcoin-cli -conf=/bitcoin.conf stop", shell=True)
         typer.echo(success)
 
+
+def validate_dependencies():
+    typer.echo("\n#########################")
+    typer.echo("# VALIDATE DEPENDENCIES #")
+    typer.echo("#########################")
+    try:
+        validate_dependency("docker")
+        validate_dependency("docker-compose")
+        if config.rest_service and config.rest_service == RestService.BCH_API:
+            validate_dependency("openssl")
+    except DependencyNotFoundException as e:
+        typer.echo(f"{e.args[0]} not found. Please install {e.args[0]}")
+    except DockerMisconfiguredException as e:
+        typer.echo(f"docker ps failed. Please fix it")
+
+def finish():
+    typer.echo("\n\nFinished. Please use 'docker-compose up -d' to run your new system.")
+    # TODO: Show open ports for each component
 
 @app.command()
 def init(
@@ -285,56 +371,65 @@ def init(
         None, "--version", callback=version_callback, is_eager=True
     )
 ):
+    """
+    Initialise bch-devsuite
+    """
     ensure_clean()
-    components: List[str] = inquirer.checkbox(
-        message="Which components do you want to install?",
-        choices=COMPONENTS,
-        default=[e[1] for e in COMPONENTS],
-    )
-    for component in components:
-        component_handlers[component]()
-
-    docker_network = inquirer.text(
-        message="docker network", default=DEFAULT_DOCKER_NETWORK
-    )
-    state.docker_network = docker_network
-
-    exposed_ports = inquirer.confirm(message="Exposed port?", default=True)
-    state.exposed_ports = exposed_ports
-
-    print(json.dumps(asdict(state), indent=2))
-    typer.confirm("Confirm?", abort=True)
-
-    typer.echo("\n#########################")
-    typer.echo("# VALIDATE DEPENDENCIES #")
-    typer.echo("#########################")
-    try:
-        validate_dependency("docker")
-        validate_dependency("docker-compose")
-        if state.rest_service and state.rest_service == RestService.BCH_API:
-            validate_dependency("openssl")
-    except DependencyNotFoundException as e:
-        typer.echo(f"{e.args[0]} not found. Please install {e.args[0]}")
-    except DockerMisconfiguredException as e:
-        typer.echo(f"docker ps failed. Please fix it")
+    build_config()
+    validate_dependencies()
     typer.echo("\n##############")
     typer.echo("# SETTING UP #")
     typer.echo("##############")
     create_docker_network_if_not_exist()
     setup_local_node()
     setup_rest_service()
-    setup_environment()
     setup_docker_compose()
     pull_images()
     initialize_node()
     stop_node()
-    typer.echo("\n\nFinished. Please use './services start' to run your new system.")
+    finish()
+
+def remove(name: str, path: str):
+    typer.echo(f"Removing {name}...", nl=False)
+    subprocess.run(f"rm -rf {path}", shell=True, check=True)
+    typer.echo(success)
 
 
 @app.command()
 def clean():
-    print("TODO")
+    """
+    Clean up previous setup
+    """
+    check_setup()
+    subprocess.run("docker-compose down", shell=True)
+    # TODO: Make this non-sudo
+    remove("Node data", "./data/bitcoind")
+    remove("SLPDB data", "./data/mongodb")
+    remove("Indexer data", "./data/fulcrum")
+    remove("config file", "./config.json")
+    remove("config file", "./configs/bitcoin-unlimited.conf")
+    remove("config file", "./configs/bitcoincashnode.conf")
+    remove("config file", "./configs/temp-fulcrum-config.conf")
+    remove("config file", "./configs/env.env")
+    remove("docker-compose", "./docker-compose.yml")
+    remove("lock", "./.lock")
 
+@app.command()
+def start():
+    """
+    Start the local system
+    """
+    check_setup()
+    subprocess.run(f"docker-compose up -d", shell=True, check=True)
+
+
+@app.command()
+def stop():
+    """
+    Stop the local system
+    """
+    check_setup()
+    subprocess.run(f'docker-compose stop', shell=True, check=True)
 
 if __name__ == "__main__":
     app()

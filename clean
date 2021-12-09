@@ -37,9 +37,8 @@ do
 done
 
 if [[ -f "./.lock" ]]; then
-	source .lock
     printf "docker-compose down\t... "
-	eval "docker-compose $DOCKER_ARGS down"
+	eval "docker-compose down"
     successOrFail $? 'done' 'error' 'Could not docker-compose down.'
 	DID_SOMETHING=1
 fi
@@ -59,6 +58,7 @@ deleteIfExists "config file" "./configs/bitcoin-unlimited.conf"
 deleteIfExists "config file" "./configs/bitcoincashnode.conf"
 deleteIfExists "config file" "./configs/temp-fulcrum-config.conf"
 deleteIfExists "config file" "./configs/env.env"
+deleteIfExists "docker-compose" "./docker-compose.yml"
 deleteIfExists "lock" "./.lock"
 
 deleteIfExists "openssl certificate" "./configs/cert"
