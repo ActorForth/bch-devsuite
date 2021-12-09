@@ -411,7 +411,6 @@ def clean():
     remove("config file", "./configs/bitcoin-unlimited.conf")
     remove("config file", "./configs/bitcoincashnode.conf")
     remove("config file", "./configs/temp-fulcrum-config.conf")
-    remove("config file", "./configs/env.env")
     remove("docker-compose", "./docker-compose.yml")
     remove("lock", "./.lock")
 
