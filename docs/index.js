@@ -10,10 +10,10 @@ const exec = require("exec-sh").promise;
   const readme = fs.readFileSync("../README.md");
   const readme_html = md.render(readme.toString());
 
-  fs.ensureFileSync("_site/README/index.html");
+  fs.ensureFileSync("_site/index.html");
 
   fs.writeFileSync(
-    "_site/README/index.html",
+    "_site/index.html",
     docs_compiled_template({ content: new hb.SafeString(readme_html) })
   );
 
