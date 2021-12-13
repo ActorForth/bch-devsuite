@@ -135,7 +135,7 @@ services:
     image: ghcr.io/actorforth/opensight:${TAG_OPENSIGHT:-latest}
     container_name: opensight
     environment:
-      {% if config.local_node.node == 'bu' and config.local_node.network == 'regtest' %}
+      {% if config.local_node.node == 'bu' %}
       - ELECTRUM_HOST=bch-node
       {% else %}
       - ELECTRUM_HOST=fulcrum
