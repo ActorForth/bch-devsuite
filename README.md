@@ -14,14 +14,14 @@ To run this node, you must have the follow software installed on your local mach
 
 # Getting started
 
-## Cloning this repository.
+## Cloning this repository
 
 ```bash
 git clone https://github.com/ActorForth/bch-toolkit.git
 cd ./bch-toolkit
 ```
 
-## Setup infrastructure.
+## Setup infrastructure
 
 This will check that the necessary software is installed, and then it will download and prepare the docker containers. For a full list of options, run ./setup with no arguments to see its usage.
 
@@ -40,7 +40,7 @@ This will check that the necessary software is installed, and then it will downl
 
 **NOTE:** The SLP option will prompt the user to input a MONGODB username and password, this is to prevent external parties from modifying your database if the ports are exposed.
 
-## Running infrastructure.
+## Running infrastructure
 
 Execute the _services_ script to start the node, indexer, rest API, and/or SLPDB (depending which ones chose in the _setup_ script).
 
@@ -48,7 +48,7 @@ Execute the _services_ script to start the node, indexer, rest API, and/or SLPDB
 ./services start
 ```
 
-## Testing.
+## Testing
 
 ```bash
 ./bitcoin-cli getblockchaininfo
@@ -99,7 +99,7 @@ Expected result
 }
 ```
 
-## Stop infrastructure.
+## Stop infrastructure
 
 Once you decide to call it a day, you can shut down your local environment by executing:
 
