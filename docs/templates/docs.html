@@ -114,9 +114,11 @@
               </li>
               {{#each pages}}
               <li class="mt-8">
-                <h5 class="px-3 mb-3 lg:mb-3 uppercase tracking-wide font-semibold text-sm lg:text-xs text-gray-900">
-                  {{ name }}
-                </h5>
+                <a href="{{ slug }}">
+                  <h5 class="px-3 mb-3 lg:mb-3 uppercase tracking-wide font-semibold text-sm lg:text-xs text-gray-900">
+                    {{ name }}
+                  </h5>
+                </a>
                 <ul>
                   {{#each submenus}}
                   <li>
