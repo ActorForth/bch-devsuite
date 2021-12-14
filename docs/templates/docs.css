@@ -10,7 +10,7 @@
   @apply mt-0;
 }
 
-.content-body h3 {
+.content-body h2 {
   @apply block text-lg font-bold text-gray-700 tracking-tight mb-1;
 }
 

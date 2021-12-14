@@ -4,10 +4,10 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
-    "dom-parser": "^0.1.6",
     "exec-sh": "^0.4.0",
     "fs-extra": "^10.0.0",
     "handlebars": "^4.7.7",
+    "jsdom": "^19.0.0",
     "markdown-it": "^12.2.0",
     "slugify": "^1.6.3",
     "tailwindcss": "^2.2.19"
