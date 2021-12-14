@@ -41,6 +41,7 @@ function writePages(template, html) {
       const submenus = h2_nodes.map((h2) => {
         return {
           title: h2.textContent,
+          anchor: `${page_slug}/#${slugify(h2.textContent, { lower: true })}`,
         };
       });
       return {
