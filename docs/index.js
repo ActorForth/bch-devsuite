@@ -33,14 +33,20 @@ function writePages(template, html) {
     .map((x) => {
       const content = `<h1>${x}`;
       const dom = domParser.parseFromString(content);
-      const page_name = dom.getElementsByTagName("h1")[0].textContent;
-      const page_slug = slugify(page_name, { lower: true });
+      const page_title = dom.getElementsByTagName("h1")[0].textContent;
+      const page_slug = slugify(page_title, { lower: true });
       const file_name = `_site/${page_slug}.html`;
+      const submenus = dom.getElementsByTagName("h2").map((h2) => {
+        return {
+          title: h2.textContent,
+        };
+      });
       return {
-        name: page_name,
+        name: page_title,
         slug: page_slug,
         file_name: file_name,
         content,
+        submenus,
       };
     });
   for (const page of pages) {

@@ -118,7 +118,16 @@
                   {{ name }}
                 </h5>
                 <ul>
-                  <li><a
+                  {{#each submenus}}
+                  <li>
+                    <a class="px-3 py-2 transition-colors duration-200 relative block hover:text-gray-900 text-gray-500"
+                      href="/docs/optimizing-for-production">
+                      <span class="rounded-md absolute inset-0 bg-cyan-50 opacity-0"></span>
+                      <span class="relative">{{ title }}</span>
+                    </a>
+                  </li>
+                  {{/each}}
+                  <!-- <li><a
                       class="px-3 py-2 transition-colors duration-200 relative block hover:text-gray-900 text-gray-500"
                       href="/docs/installation"><span
                         class="rounded-md absolute inset-0 bg-cyan-50 opacity-0"></span><span
@@ -152,7 +161,7 @@
                       class="px-3 py-2 transition-colors duration-200 relative block hover:text-gray-900 text-gray-500"
                       href="/docs/browser-support"><span
                         class="rounded-md absolute inset-0 bg-cyan-50 opacity-0"></span><span class="relative">Browser
-                        Support</span></a></li>
+                        Support</span></a></li> -->
                 </ul>
               </li>
               {{/each}}
