@@ -21,25 +21,33 @@ const domParser = new DomParser();
     docs_compiled_template({ content: new hb.SafeString(readme_html) })
   );
 
-  extractPages(docs_compiled_template, readme_html);
+  writePages(docs_compiled_template, readme_html);
 
   await exec("npm run build:css");
 })();
 
-function extractPages(template, html) {
-  const htmls = html
+function writePages(template, html) {
+  const pages = html
     .split("<h1>")
     .filter((x) => !!x)
-    .map((x) => `<h1>${x}`);
-  for (const content of htmls) {
-    const dom = domParser.parseFromString(content);
-    const page_name = dom.getElementsByTagName("h1")[0].textContent;
-    const page_slug = slugify(page_name, { lower: true });
-    const file_name = `_site/${page_slug}.html`;
-    fs.ensureFileSync(file_name);
+    .map((x) => {
+      const content = `<h1>${x}`;
+      const dom = domParser.parseFromString(content);
+      const page_name = dom.getElementsByTagName("h1")[0].textContent;
+      const page_slug = slugify(page_name, { lower: true });
+      const file_name = `_site/${page_slug}.html`;
+      return {
+        name: page_name,
+        slug: page_slug,
+        file_name: file_name,
+        content,
+      };
+    });
+  for (const page of pages) {
+    fs.ensureFileSync(page.file_name);
     fs.writeFileSync(
-      file_name,
-      template({ content: new hb.SafeString(content) })
+      page.file_name,
+      template({ content: new hb.SafeString(page.content), pages })
     );
   }
 }

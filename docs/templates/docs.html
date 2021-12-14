@@ -100,7 +100,8 @@
                       <path d="M9.5 15.5a1 1 0 11-2 0 1 1 0 012 0z" fill="#60A5FA"></path>
                     </svg></div>Resources
                 </a></li>
-              <li><a href="https://www.youtube.com/tailwindlabs"
+              <li>
+                <a href="https://www.youtube.com/tailwindlabs"
                   class="flex items-center px-3 hover:text-gray-900 transition-colors duration-200 mb-10">
                   <div class="mr-3 rounded-md bg-gradient-to-br from-fuchsia-500 to-purple-600"><svg class="h-6 w-6"
                       viewBox="0 0 24 24">
@@ -109,10 +110,13 @@
                         d="M14.52 11.136a1 1 0 010 1.728l-3.016 1.759A1 1 0 0110 13.759v-3.518a1 1 0 011.504-.864l3.015 1.76z"
                         fill="#C084FC"></path>
                     </svg></div>Screencasts
-                </a></li>
+                </a>
+              </li>
+              {{#each pages}}
               <li class="mt-8">
                 <h5 class="px-3 mb-3 lg:mb-3 uppercase tracking-wide font-semibold text-sm lg:text-xs text-gray-900">
-                  Getting started</h5>
+                  {{ name }}
+                </h5>
                 <ul>
                   <li><a
                       class="px-3 py-2 transition-colors duration-200 relative block hover:text-gray-900 text-gray-500"
@@ -151,6 +155,7 @@
                         Support</span></a></li>
                 </ul>
               </li>
+              {{/each}}
             </ul>
           </nav>
         </div>
