@@ -21,7 +21,7 @@ const slugify = require("slugify");
 
   writePages(docs_compiled_template, readme_html);
 
-  await exec("npm run build:css");
+  // await exec("npm run build:css");
 })();
 
 function writePages(template, html) {
