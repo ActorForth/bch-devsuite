@@ -1,8 +1,6 @@
-# About
+# Getting started
 
-This repo intends to be a toolkit for running a local version of a Bitcoin Unlimited for development and testing purposes. Currently it provides a self-hosted local node, indexer (Electrs), a drop-in Ninsight replacement (Opensight), a regtest version of the rest.bitcoin.com REST APIs, an instance of SLPDB for token querying.
-
-# Prerequisites
+## Prerequisites
 
 To run this node, you must have the follow software installed on your local machine:
 
@@ -11,8 +9,6 @@ To run this node, you must have the follow software installed on your local mach
 - Virtualenv
 - Openssl
 - Git
-
-# Getting started
 
 ## Cloning this repository
 
@@ -107,7 +103,7 @@ Once you decide to call it a day, you can shut down your local environment by ex
 ./services stop
 ```
 
-# Cleaning Up
+## Cleaning Up
 
 If you experience any issues, or would like to completely erase the current wallet and node containers, run the following script:
 
@@ -119,7 +115,33 @@ If you experience any issues, or would like to completely erase the current wall
 
 **WARNING:** The 'clean' script is very destructive, so make sure you only use it when you want to _completely erase_ the entire current instance of nodes and the wallet.
 
-# Known Issues
+# Advance Usage
+
+how to operate in advance use cases, use case by use case
+
+# Reference
+
+explanation of all available options/configurations that can be used
+
+# Architecture
+
+deeper details of how things work together
+
+# Sponsorship
+
+provide a way to funding us
+
+# Roadmap
+
+# Contribution Guide
+
+# Archived
+
+## About
+
+This repo intends to be a toolkit for running a local version of a Bitcoin Unlimited for development and testing purposes. Currently it provides a self-hosted local node, indexer (Electrs), a drop-in Ninsight replacement (Opensight), a regtest version of the rest.bitcoin.com REST APIs, an instance of SLPDB for token querying.
+
+## Known Issues
 
 There are a few issues with this setup that could use improvement in the future.
 
