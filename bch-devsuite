@@ -190,7 +190,7 @@ def build_config():
     )
     config.docker_network = docker_network
 
-    exposed_ports = inquirer.confirm(message="Exposed port?", default=True)
+    exposed_ports = typer.confirm("Exposed port?")
     config.exposed_ports = exposed_ports
     print(json.dumps(asdict(config), indent=2))
     typer.confirm("Confirm?", abort=True)
