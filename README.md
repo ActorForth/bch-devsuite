@@ -6,15 +6,23 @@ To run this node, you must have the follow software installed on your local mach
 
 - Docker (including docker-compose)
 - Python 3
-- Virtualenv
+- Virtualenv (`sudo apt install python3-venv`)
 - Openssl
 - Git
 
 ## Cloning this repository
 
 ```bash
+# Clone repository
 git clone https://github.com/ActorForth/bch-toolkit.git
 cd ./bch-toolkit
+
+# Setup virtualenv
+python3 -m venv venv
+source ./venv/bin/activate
+
+# Install script dependencies
+pip install -r requirements.txt
 ```
 
 ## Setup infrastructure
@@ -24,15 +32,15 @@ This will check that the necessary software is installed, and then it will downl
 **NOTE:** If you wish to have any custom changes applied to the Bitcoin Unlimited, or REST API services, be sure to apply those changes within the _bitcoin.conf_, _fulcrum-config.conf_, or _restapi-config.sh_ files, respectively, before executing the setup script. Bitcoin Cash Node can alternatively be used with fulcrum, by commenting out bitcoin unlimited and uncommenting bitcoin cash node and fulcrum. These can not currently run simultaneously, and one or the other must be used.
 
 ```bash
-./setup {network} {bu or bchn} {slp} {bchrest or bchapi} {expose-ports}
+./bch-devsuite init
 # First we select a network, which must be regtest, mainnet or testnet
 # Next we specify the node, bitcoin unlimited or bitcoincash node
-# Slp is optional, selecting this option enables slpdb, slpserve and mongodb
 # Next we select a rest interface, bchrest is a fork of the rest.bitcoin.com api, while bchapi is a rest utilized with the bch-js library
+# Slp is optional, selecting this option enables slpdb, slpserve and mongodb
 # Lastly, we specify whether or not the ports will be exposed on the docker containers.
 ```
 
-**NOTE:** A RPC password and username prompt will appear for the node, these values will be stored in a pass.conf file. Subsequent setups will utilize these values, however changing these values while an existing toolkit is deployed may cause errors.
+**NOTE:** A RPC password and username prompt will appear for the node, these values will be stored in generated docker-compose.yml file.
 
 **NOTE:** The SLP option will prompt the user to input a MONGODB username and password, this is to prevent external parties from modifying your database if the ports are exposed.
 
@@ -41,7 +49,7 @@ This will check that the necessary software is installed, and then it will downl
 Execute the _services_ script to start the node, indexer, rest API, and/or SLPDB (depending which ones chose in the _setup_ script).
 
 ```bash
-./services start
+./bch-devsuite start
 ```
 
 ## Testing
@@ -100,7 +108,7 @@ Expected result
 Once you decide to call it a day, you can shut down your local environment by executing:
 
 ```bash
-./services stop
+./bch-devsuite stop
 ```
 
 ## Cleaning Up

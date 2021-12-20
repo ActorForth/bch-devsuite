@@ -5,21 +5,17 @@ greentext() {
     printf "\x1B[32m%b\e[0m\n" "$1"
 }
 
-source ./configs/pass.conf
-source ./configs/env.env
-
 if [ -f "./.lock" ]; then
-	source .lock
 	if [[ ! -z $1 ]]; then
 		# This will run the user's command
-		eval "docker-compose $DOCKER_ARGS exec -T bch-node bitcoin-cli -conf=/bitcoin.conf $@"
+		eval "docker-compose exec -T bch-node bitcoin-cli -conf=/bitcoin.conf $@"
 	else
 		# If the user gave no arguments, we'll just generate a block
 		printf "Generating 1 block ... "
-		eval "docker-compose $DOCKER_ARGS exec bch-node bitcoin-cli -conf=/bitcoin.conf generate 1"
+		eval "docker-compose exec bch-node bitcoin-cli -conf=/bitcoin.conf generate 1"
 		greentext "done"
 	fi
 else
-	printf "Use this script AFTER you've run ./setup and ./services start\n"
+	printf "Use this script AFTER you've run ./bch-devsuite init and ./services start\n"
 	exit 0
 fi

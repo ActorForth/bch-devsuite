@@ -1,0 +1,214 @@
+version: "3"
+networks:
+  {{ config.docker_network }}:
+    external: true
+services:
+  ##############
+  # LOCAL NODE #
+  ##############
+  {% if config.local_node %}
+  {% if config.local_node.node == 'bu' %}
+  # Bitcoin Unlimited Node
+  bch-node:
+    image: ghcr.io/actorforth/bitcoin-unlimited:${TAG_BITCOINUNLIMITED:-latest}
+    container_name: bch-node
+    volumes:
+      - ./data/bitcoind:/data
+      - ./configs/bitcoin-unlimited.conf:/bitcoin.conf
+    restart: always
+    command: ["bitcoind", "-conf=/bitcoin.conf"]
+    networks:
+      - {{ config.docker_network }}
+    {% if config.exposed_ports %}
+    ports:
+      - "{{ config.local_node.rpc_port() }}:{{ config.local_node.rpc_port() }}"
+      - "28332:28332"
+      - "50001:50001"
+    {% endif %}
+
+  {% elif config.local_node.node == 'bchn' %}
+  # Bitcoin Cash Node
+  bch-node:
+    image: ghcr.io/actorforth/bitcoin-cash-node:${TAG_BITCOINCASHNODE:-latest}
+    container_name: bch-node
+    volumes:
+      - ./data/bitcoind:/data
+      - ./configs/bitcoincashnode.conf:/bitcoin.conf
+    restart: always
+    command: ["bitcoind", "-conf=/bitcoin.conf"]
+    networks:
+      - {{ config.docker_network }}
+    {% if config.exposed_ports %}
+    ports:
+      - "{{ config.local_node.rpc_port() }}:{{ config.local_node.rpc_port() }}"
+      - "28332:28332"
+    {% endif %}
+  fulcrum:
+    image: cculianu/fulcrum:${TAG_FULCRUM:-latest}
+    container_name: fulcrum
+    depends_on:
+      - bch-node
+    volumes:
+      - ./data/fulcrum:/data
+      - ./configs/temp-fulcrum-config.conf:/config.conf
+    restart: always
+    command: ["Fulcrum", "/config.conf"]
+    networks:
+      - {{ config.docker_network }}
+    {% if config.exposed_ports %}
+    ports:
+      - "50001:50001"
+    {% endif %}
+  {% endif %}
+  {% endif %}
+  ################
+  # REST SERVICE #
+  ################
+  {% if config.rest_service %}
+  {% if config.rest_service == 'bchapi' %}
+  # bch-api
+  bch-api:
+    image: ghcr.io/actorforth/bch-api:${TAG_BCHAPI:-latest}
+    container_name: bch-api
+    environment:
+      - BLOCKBOOK_URL=https://<Blockbook IP>:9131/
+      - FULCRUM_PORT=50002
+      - FULCRUM_URL=bch-nginx
+      - NETWORK={{ config.local_node.network }}
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
+      - REDIS_HOST=6379
+      - REDIS_PORT=127.0.0.1
+      - RPC_BASEURL=http://bch-node:{{ config.local_node.rpc_port() }}/
+      - RPC_PASSWORD={{ config.local_node.rpc_conf.password }}
+      - RPC_USERNAME={{ config.local_node.rpc_conf.username }}
+      - SECURITY=false
+      - SLPDB_URL=http://slpserve:4000/
+      - TOKENSECRET=somelongpassword
+    restart: always
+    command: ["node", "./src/app.js"]
+    networks:
+      - {{ config.docker_network }}
+    {% if config.exposed_ports %}
+    ports:
+      - "3000:3000"
+    {% endif %}
+  bch-nginx:
+    image: nginx:${TAG_NGINX:-latest}
+    container_name: bch-nginx
+    volumes:
+      - ./configs/nginx.conf:/etc/nginx/nginx.conf
+      - ./configs/cert/cert.key:/etc/nginx/cert.key
+      - ./configs/cert/cert.crt:/etc/nginx/cert.crt
+    restart: always
+    networks:
+      - {{ config.docker_network }}
+    {% if config.exposed_ports %}
+    ports:
+      - "50002:50002"
+    {% endif %}
+
+  {% elif config.rest_service == 'bchrest' %}
+  # bchrest
+  bchrest:
+    image: ghcr.io/actorforth/bchrest:${TAG_BCHREST:-latest}
+    container_name: bchrest
+    environment:
+      - BITCOINCOM_BASEURL=http://opensight:3001/api/
+      - DO_NOT_USE_RATE_LIMITS=true
+      - NETWORK={{ config.local_node.network }}
+      - PORT=3000
+      - RPC_BASEURL=http://bch-node:{{ config.local_node.rpc_port() }}/
+      - RPC_PASSWORD={{ config.local_node.rpc_conf.password }}
+      - RPC_USERNAME={{ config.local_node.rpc_conf.username }}
+      - SLPDB_URL=http://slpserve:4000/
+      - ZEROMQ_PORT=0
+      - ZEROMQ_URL=0
+    restart: always
+    command: ["npm", "start"]
+    networks:
+      - {{ config.docker_network }}
+    {% if config.exposed_ports %}
+    ports:
+      - "12500:3000"
+    {% endif %}
+  opensight:
+    image: ghcr.io/actorforth/opensight:${TAG_OPENSIGHT:-latest}
+    container_name: opensight
+    environment:
+      {% if config.local_node.node == 'bu' %}
+      - ELECTRUM_HOST=bch-node
+      {% else %}
+      - ELECTRUM_HOST=fulcrum
+      {% endif %}
+      - ELECTRUM_PORT=50001
+      - NODE_RPC_HOST=bch-node
+      - NODE_RPC_PASS={{ config.local_node.rpc_conf.password }}
+      - NODE_RPC_PORT={{ config.local_node.rpc_port() }}
+      - NODE_RPC_USER={{ config.local_node.rpc_conf.username }}
+      - OPENSIGHT_PORT=3001
+    restart: always
+    networks:
+      - {{ config.docker_network }}
+    {% if config.exposed_ports %}
+    ports:
+      - "3001:3001"
+    {% endif %}
+  {% endif %}
+  {% endif %}
+  #######
+  # SLP #
+  #######
+  {% if config.slp %}
+  mongodb-slpdb:
+    image: mongo:${TAG_MONGODB:-latest}
+    container_name: mongodb-slpdb
+    volumes:
+      - ./data/mongodb:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME={{ config.slp.username }}
+      - MONGO_INITDB_ROOT_PASSWORD={{ config.slp.password }}
+    restart: always
+    command: mongod
+    networks:
+      - {{ config.docker_network }}
+    {% if config.exposed_ports %}
+    ports:
+      - "27017:27017"
+    {% endif %}
+  slpdb:
+    image: ghcr.io/actorforth/slpdb:${TAG_SLPDB:-latest}
+    container_name: slpdb
+    depends_on:
+      - mongodb-slpdb
+    volumes:
+      - ./configs/slpdb-config.sh:/home/safeuser/start.sh
+    environment:
+      - db_url=mongodb://{{ config.slp.username }}:{{ config.slp.password }}@mongodb-slpdb:27017?connectTimeoutMS=90000&socketTimeoutMS=90000
+      - rpc_host=bch-node
+      - rpc_pass={{ config.local_node.rpc_conf.password }}
+      - rpc_port={{ config.local_node.rpc_port() }}
+      - rpc_user={{ config.local_node.rpc_conf.username }}
+      - zmq_incoming_host=bch-node
+    restart: always
+    networks:
+      - {{ config.docker_network }}
+  slpserve:
+    image: ghcr.io/actorforth/slpserve:${TAG_SLPSERVE:-latest}
+    container_name: slpserve
+    depends_on:
+      - mongodb-slpdb
+    environment:
+      - db_name={{ config.slp_db_name() }}
+      - db_url=mongodb://{{ config.slp.username }}:{{ config.slp.password }}@mongodb-slpdb:27017
+      - slpserve_log=true
+      - slpserve_port=4000
+      - slpserve_timeout=30000
+    restart: always
+    command: ["npm", "start"]
+    networks:
+      - {{ config.docker_network }}
+    {% if config.exposed_ports %}
+    ports:
+      - "12300:4000"
+    {% endif %}
+  {% endif %}
