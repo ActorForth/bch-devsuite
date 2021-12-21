@@ -132,8 +132,20 @@ how to operate in advance use cases, use case by use case
 explanation of all available options/configurations that can be used
 
 # Architecture
+![Container architecture](/docs/assets/container-architecture.jpg "Container architecture")
 
-deeper details of how things work together
+All these component work together in stack means that if the lower part is missing then some of the API in [rest.bitcoin.com](https://github.com/ActorForth/rest.bitcoin.com) might not function properly.
+
+The main reason that you should use all of our fork stack is because we maintain and guarantee that all of the components will work well with the Regtest address format. Allow you to test locally more easily.
+
+The blue part is the node that you choose. Default node is Bitcoin unlimited. Currently this node is always required.
+
+The red part is an indexer. ElectrsCash is for indexing Bitcoin cash transaction and aggregate BCH balance per address. Without these you won't be able to query the amount of BCH you own in a particular address. OpenSight is a shim micro services to make ElectrsCash compatible with [rest.bitcoin.com](https://github.com/ActorForth/rest.bitcoin.com) API interface.
+SLPDB is an indexer for SLP token, color coin on top of Bitcoin Cash, this will verified if the data relate to the color coin is valid and checking if the coin follow the SLP off-chain concensus.
+
+The orange part is [rest.bitcoin.com](https://github.com/ActorForth/rest.bitcoin.com) API, a unify interface of anyone to interact with all of these complex services through REST API interface uniformly
+
+The green part is the client SDK that will interact with [rest.bitcoin.com](https://github.com/ActorForth/rest.bitcoin.com) interface. [Bitcash](https://github.com/ActorForth/bitcash) is written in Python and [Bitbox](https://github.com/ActorForth/bitbox-sdk) is written in typescript.
 
 # Sponsorship
 
@@ -147,7 +159,7 @@ provide a way to funding us
 
 ## About
 
-This repo intends to be a toolkit for running a local version of a Bitcoin Unlimited for development and testing purposes. Currently it provides a self-hosted local node, indexer (Electrs), a drop-in Ninsight replacement (Opensight), a regtest version of the rest.bitcoin.com REST APIs, an instance of SLPDB for token querying.
+This repo intends to be a toolkit for running a local version of a Bitcoin Unlimited for development and testing purposes. Currently it provides a self-hosted local node, indexer (Electrs), a drop-in Ninsight replacement (Opensight), a regtest version of the [rest.bitcoin.com](https://github.com/ActorForth/rest.bitcoin.com) REST APIs, an instance of SLPDB for token querying.
 
 ## Known Issues
 
