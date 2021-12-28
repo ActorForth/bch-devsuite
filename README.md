@@ -132,13 +132,18 @@ how to operate in advance use cases, use case by use case
 explanation of all available options/configurations that can be used
 
 # Architecture
-![Container architecture](/docs/assets/container-architecture.jpg "Container architecture")
+
+There is mainly 2 stack you can use 1. rest.bitcoin.com techstack 2. Chris Troutner JS tech stack
+
+### 1. rest.bitcoin.com tech stack
+
+![rest.bitcoin.com Tech Stack](/docs/assets/rest-bitcoin-com_techstack.jpg "rest.bitcoin.com Tech Stack")
 
 All these component work together in stack means that if the lower part is missing then some of the API in [rest.bitcoin.com](https://github.com/ActorForth/rest.bitcoin.com) might not function properly.
 
 The main reason that you should use all of our fork stack is because we maintain and guarantee that all of the components will work well with the Regtest address format. Allow you to test locally more easily.
 
-The blue part is the node that you choose. Default node is Bitcoin unlimited. Currently this node is always required.
+The blue part is the node that you choose. Default node is Bitcoin unlimited and there is Bitcoin Cash node as an option as well. Currently this node is always required.
 
 The red part is an indexer. ElectrsCash is for indexing Bitcoin cash transaction and aggregate BCH balance per address. Without these you won't be able to query the amount of BCH you own in a particular address. OpenSight is a shim micro services to make ElectrsCash compatible with [rest.bitcoin.com](https://github.com/ActorForth/rest.bitcoin.com) API interface.
 [SLPDB](slp.dev/tooling/slpdb/#what-is-slpdb) is an indexer for SLP token, color coin on top of Bitcoin Cash, this will verified if the data relate to the color coin is valid and checking if the coin follow the SLP off-chain concensus.
@@ -146,6 +151,12 @@ The red part is an indexer. ElectrsCash is for indexing Bitcoin cash transaction
 The orange part is [rest.bitcoin.com](https://github.com/ActorForth/rest.bitcoin.com) API, a unify interface of anyone to interact with all of these complex services through REST API interface uniformly
 
 The green part is the client SDK that will interact with [rest.bitcoin.com](https://github.com/ActorForth/rest.bitcoin.com) interface. [Bitcash](https://github.com/ActorForth/bitcash) is written in Python and [Bitbox](https://github.com/ActorForth/bitbox-sdk) is written in typescript.
+
+### 2. Chris Troutner JS tech stack
+
+![Chris Troutner JS Tech Stack](/docs/assets/Chris-Troutner-JS-techstack.jpg "Chris-Troutner-JS-techstack")
+
+The main different is the rest interface. bch-api have a different API from rest.bitcoin.com and can talk directly to Electrscash without requiring the shim.
 
 # Sponsorship
 
