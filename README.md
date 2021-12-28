@@ -141,7 +141,7 @@ The main reason that you should use all of our fork stack is because we maintain
 The blue part is the node that you choose. Default node is Bitcoin unlimited. Currently this node is always required.
 
 The red part is an indexer. ElectrsCash is for indexing Bitcoin cash transaction and aggregate BCH balance per address. Without these you won't be able to query the amount of BCH you own in a particular address. OpenSight is a shim micro services to make ElectrsCash compatible with [rest.bitcoin.com](https://github.com/ActorForth/rest.bitcoin.com) API interface.
-SLPDB is an indexer for SLP token, color coin on top of Bitcoin Cash, this will verified if the data relate to the color coin is valid and checking if the coin follow the SLP off-chain concensus.
+[SLPDB](slp.dev/tooling/slpdb/#what-is-slpdb) is an indexer for SLP token, color coin on top of Bitcoin Cash, this will verified if the data relate to the color coin is valid and checking if the coin follow the SLP off-chain concensus.
 
 The orange part is [rest.bitcoin.com](https://github.com/ActorForth/rest.bitcoin.com) API, a unify interface of anyone to interact with all of these complex services through REST API interface uniformly
 
