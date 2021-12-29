@@ -133,7 +133,7 @@ explanation of all available options/configurations that can be used
 
 # Architecture
 
-There is mainly 2 stack you can use 1. rest.bitcoin.com techstack 2. Chris Troutner JS tech stack
+Two REST APIs can be run: [rest.bitcoin.com](https://github.com/ActorForth/rest.bitcoin.com) and [bch-api](https://api.fullstack.cash/docs/).
 
 ### 1. rest.bitcoin.com tech stack
 
