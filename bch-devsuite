@@ -70,25 +70,32 @@ class LocalNode:
 
 
 @dataclass
+class SmartBCHConf:
+    pass
+
+
+@dataclass
 class InitConfig:
     local_node: Optional[LocalNode] = None
     rest_service: Optional[RestService] = None
     slp: Optional[SLPMongoConf] = None
+    smartbch: Optional[SmartBCHConf] = None
     exposed_ports: bool = True
     docker_network: str = DEFAULT_DOCKER_NETWORK
 
     def slp_db_name(self):
         if self.local_node:
-            if self.local_node.network == 'mainnet':
-                return 'slpdb'
+            if self.local_node.network == "mainnet":
+                return "slpdb"
             else:
-                return 'slpdb_test'
+                return "slpdb_test"
 
 
 COMPONENTS = [
     ("Local node (Bitcoin Unlimited node or Bitcoin Cash Node)", "local_node"),
     ("REST service (A rest.bitcoin.com-compatible or Bch-API)", "restapi"),
     ("SLP services (SLPDB, slpserve)", "slp"),
+    ("SmartBCH (https://smartbch.org/)", "smartbch"),
 ]
 LOCAL_NODES = [("Bitcoin Unlimited Node", "bu"), ("Bitcoin Cash Node", "bchn")]
 NETWORKS = [e.value for e in Network]
@@ -107,17 +114,19 @@ def version_callback(value: bool):
         typer.echo(f"BCH DevSuite version: {__version__}")
         raise typer.Exit()
 
+
 def check_setup():
-    if not (os.path.exists(".lock") and os.path.exists('docker-compose.yml')):
+    if not (os.path.exists(".lock") and os.path.exists("docker-compose.yml")):
         typer.secho(
             "Please execute './bch-devsuite init' script first.",
             fg=typer.colors.RED,
         )
         sys.exit(3)
 
+
 def ensure_clean():
     # Ensure working directory is clean before setup
-    if os.path.exists(".lock") or os.path.exists('docker-compose.yml'):
+    if os.path.exists(".lock") or os.path.exists("docker-compose.yml"):
         typer.secho(
             "It appears you've already run this setup script before. Please run the ./clean script before trying to setup again.\n",
             fg=typer.colors.RED,
@@ -143,7 +152,7 @@ def handle_local_node():
     if network == Network.REGTEST:
         regtest_blocks = inquirer.text(
             message="Please enter number of initial blocks for regtest",
-            default=DEFAULT_REGTEST_BLOCKS
+            default=DEFAULT_REGTEST_BLOCKS,
         )
     config.local_node = LocalNode(
         node=node,
@@ -167,14 +176,20 @@ def handle_slp():
     config.slp = SLPMongoConf(username=username, password=password)
 
 
+def handle_smartbch():
+    pass
+
+
 component_handlers = {
     "local_node": handle_local_node,
     "restapi": handle_restapi,
     "slp": handle_slp,
+    "smartbch": handle_smartbch,
 }
 
 success = typer.style("✓", fg=typer.colors.GREEN, bold=True)
 failed = typer.style("✖", fg=typer.colors.RED, bold=True)
+
 
 def build_config():
     components: List[str] = inquirer.checkbox(
@@ -194,6 +209,7 @@ def build_config():
     config.exposed_ports = exposed_ports
     print(json.dumps(asdict(config), indent=2))
     typer.confirm("Confirm?", abort=True)
+
 
 class DockerMisconfiguredException(Exception):
     pass
@@ -280,9 +296,7 @@ def setup_local_node():
             typer.echo(f"Setting up Bitcoin Unlimited node...", nl=False)
             with open("./configs/bitcoin-unlimited.conf", "w") as config_file:
                 config_file.write(
-                    templates.get_template("default_bu.conf").render(
-                        config=config
-                    )
+                    templates.get_template("default_bu.conf").render(config=config)
                 )
             typer.echo(success)
         elif config.local_node.node == LocalNodeType.BITCOIN_CASH_NODE:
@@ -334,7 +348,10 @@ def initialize_node():
             )
             subprocess.run("docker-compose up -d bch-node", shell=True)
             time.sleep(config.local_node.wait_time)
-            subprocess.run(f"docker-compose exec -T bch-node bitcoin-cli -conf=/bitcoin.conf generate {config.local_node.regtest_blocks}", shell=True)
+            subprocess.run(
+                f"docker-compose exec -T bch-node bitcoin-cli -conf=/bitcoin.conf generate {config.local_node.regtest_blocks}",
+                shell=True,
+            )
             typer.echo(success)
 
 
@@ -344,7 +361,10 @@ def stop_node():
     """
     if config.local_node:
         typer.echo("Stopping local node...", nl=False)
-        subprocess.run(f"docker-compose exec -T bch-node bitcoin-cli -conf=/bitcoin.conf stop", shell=True)
+        subprocess.run(
+            f"docker-compose exec -T bch-node bitcoin-cli -conf=/bitcoin.conf stop",
+            shell=True,
+        )
         typer.echo(success)
 
 
@@ -362,9 +382,13 @@ def validate_dependencies():
     except DockerMisconfiguredException as e:
         typer.echo(f"docker ps failed. Please fix it")
 
+
 def finish():
-    typer.echo(f"\n\nFinished. Please use './bch-devsuite start' to run your new {config.local_node.network} node.")
+    typer.echo(
+        f"\n\nFinished. Please use './bch-devsuite start' to run your new {config.local_node.network} node."
+    )
     # TODO: Show open ports for each component
+
 
 @app.command()
 def init(
@@ -390,6 +414,7 @@ def init(
     stop_node()
     finish()
 
+
 def remove(name: str, path: str):
     typer.echo(f"Removing {name}...", nl=False)
     subprocess.run(f"rm -rf {path}", shell=True, check=True)
@@ -414,6 +439,7 @@ def clean():
     remove("docker-compose", "./docker-compose.yml")
     remove("lock", "./.lock")
 
+
 @app.command()
 def start():
     """
@@ -429,7 +455,8 @@ def stop():
     Stop the local system
     """
     check_setup()
-    subprocess.run(f'docker-compose stop', shell=True, check=True)
+    subprocess.run(f"docker-compose stop", shell=True, check=True)
+
 
 if __name__ == "__main__":
     app()
