@@ -55,7 +55,6 @@ class RPCConf:
 @dataclass
 class LocalNode:
     node: LocalNodeType
-    network: Network
     rpc_conf: Optional[RPCConf] = None
     regtest_blocks: Optional[int] = DEFAULT_REGTEST_BLOCKS
     wait_time: int = DEFAULT_WAIT_TIME
@@ -76,6 +75,7 @@ class SmartBCHConf:
 
 @dataclass
 class InitConfig:
+    network: Network = None
     local_node: Optional[LocalNode] = None
     rest_service: Optional[RestService] = None
     slp: Optional[SLPMongoConf] = None
@@ -85,7 +85,7 @@ class InitConfig:
 
     def slp_db_name(self):
         if self.local_node:
-            if self.local_node.network == "mainnet":
+            if self.network == "mainnet":
                 return "slpdb"
             else:
                 return "slpdb_test"
@@ -139,9 +139,6 @@ def handle_local_node():
     node = inquirer.list_input(
         message="Local node?", choices=LOCAL_NODES, default=LOCAL_NODES[0]
     )
-    network = inquirer.list_input(
-        message="Network?", choices=NETWORKS, default=NETWORKS[0]
-    )
     username = inquirer.text(
         message="Please enter a username for the node RPC connection"
     )
@@ -149,14 +146,13 @@ def handle_local_node():
         message="Please enter a password for the node RPC connection"
     )
     regtest_blocks = None
-    if network == Network.REGTEST:
+    if config.network == Network.REGTEST:
         regtest_blocks = inquirer.text(
             message="Please enter number of initial blocks for regtest",
             default=DEFAULT_REGTEST_BLOCKS,
         )
     config.local_node = LocalNode(
         node=node,
-        network=network,
         rpc_conf=RPCConf(username=username, password=password),
         regtest_blocks=regtest_blocks,
     )
@@ -192,6 +188,10 @@ failed = typer.style("✖", fg=typer.colors.RED, bold=True)
 
 
 def build_config():
+    network = inquirer.list_input(
+        message="Network?", choices=NETWORKS, default=NETWORKS[0]
+    )
+    config.network = network
     components: List[str] = inquirer.checkbox(
         message="Which components do you want to install?",
         choices=COMPONENTS,
@@ -342,7 +342,7 @@ def initialize_node():
     Local node initialisation
     """
     if config.local_node:
-        if config.local_node.network == Network.REGTEST:
+        if config.network == Network.REGTEST:
             typer.echo(
                 f"Generating {config.local_node.regtest_blocks} initial blocks for regtest..."
             )
@@ -385,7 +385,7 @@ def validate_dependencies():
 
 def finish():
     typer.echo(
-        f"\n\nFinished. Please use './bch-devsuite start' to run your new {config.local_node.network} node."
+        f"\n\nFinished. Please use './bch-devsuite start' to run your new {config.network} node."
     )
     # TODO: Show open ports for each component
 
