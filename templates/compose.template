@@ -21,7 +21,7 @@ services:
       - {{ config.docker_network }}
     {% if config.exposed_ports %}
     ports:
-      - "{{ config.local_node.rpc_port() }}:{{ config.local_node.rpc_port() }}"
+      - "{{ rpc_port }}:{{ rpc_port }}"
       - "28332:28332"
       - "50001:50001"
     {% endif %}
@@ -40,7 +40,7 @@ services:
       - {{ config.docker_network }}
     {% if config.exposed_ports %}
     ports:
-      - "{{ config.local_node.rpc_port() }}:{{ config.local_node.rpc_port() }}"
+      - "{{ rpc_port }}:{{ rpc_port }}"
       - "28332:28332"
     {% endif %}
   fulcrum:
@@ -74,11 +74,11 @@ services:
       - BLOCKBOOK_URL=https://<Blockbook IP>:9131/
       - FULCRUM_PORT=50002
       - FULCRUM_URL=bch-nginx
-      - NETWORK={{ config.local_node.network }}
+      - NETWORK={{ config.network }}
       - NODE_TLS_REJECT_UNAUTHORIZED=0
       - REDIS_HOST=6379
       - REDIS_PORT=127.0.0.1
-      - RPC_BASEURL=http://bch-node:{{ config.local_node.rpc_port() }}/
+      - RPC_BASEURL=http://bch-node:{{ rpc_port }}/
       - RPC_PASSWORD={{ config.local_node.rpc_conf.password }}
       - RPC_USERNAME={{ config.local_node.rpc_conf.username }}
       - SECURITY=false
@@ -115,9 +115,9 @@ services:
     environment:
       - BITCOINCOM_BASEURL=http://opensight:3001/api/
       - DO_NOT_USE_RATE_LIMITS=true
-      - NETWORK={{ config.local_node.network }}
+      - NETWORK={{ config.network }}
       - PORT=3000
-      - RPC_BASEURL=http://bch-node:{{ config.local_node.rpc_port() }}/
+      - RPC_BASEURL=http://bch-node:{{ rpc_port }}/
       - RPC_PASSWORD={{ config.local_node.rpc_conf.password }}
       - RPC_USERNAME={{ config.local_node.rpc_conf.username }}
       - SLPDB_URL=http://slpserve:4000/
@@ -143,7 +143,7 @@ services:
       - ELECTRUM_PORT=50001
       - NODE_RPC_HOST=bch-node
       - NODE_RPC_PASS={{ config.local_node.rpc_conf.password }}
-      - NODE_RPC_PORT={{ config.local_node.rpc_port() }}
+      - NODE_RPC_PORT={{ rpc_port }}
       - NODE_RPC_USER={{ config.local_node.rpc_conf.username }}
       - OPENSIGHT_PORT=3001
     restart: always
@@ -186,7 +186,7 @@ services:
       - db_url=mongodb://{{ config.slp.username }}:{{ config.slp.password }}@mongodb-slpdb:27017?connectTimeoutMS=90000&socketTimeoutMS=90000
       - rpc_host=bch-node
       - rpc_pass={{ config.local_node.rpc_conf.password }}
-      - rpc_port={{ config.local_node.rpc_port() }}
+      - rpc_port={{ rpc_port }}
       - rpc_user={{ config.local_node.rpc_conf.username }}
       - zmq_incoming_host=bch-node
     restart: always
@@ -212,3 +212,21 @@ services:
       - "12300:4000"
     {% endif %}
   {% endif %}
+
+  ############
+  # SMARTBCH #
+  ############
+  smartbch:
+    image: ghcr.io/actorforth/smartbch:${TAG_SMARTBCH:-v0.3.5}
+    container_name: smartbch
+    restart: always
+    command: start --home /opt/smartbchd --mainnet-rpc-url=http://bch-node:{{ rpc_port }} --mainnet-rpc-username {{ config.local_node.rpc_conf.username }} --mainnet-rpc-password {{ config.local_node.rpc_conf.password }} --unlock {{ ','.join(config.smartbch.test_keys) }}
+    volumes:
+      - ./data/smartbchd:/opt/smartbchd/
+    networks:
+      - {{ config.docker_network }}
+    {% if config.exposed_ports %}
+    ports:
+      - "18545:8545"
+      - "18546:8546"
+    {% endif %}
