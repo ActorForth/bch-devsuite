@@ -19,7 +19,7 @@ jobs:
         with:
           node-version: '14'
       - name: update git submodule
-        run: git submodule update --remote
+        run: git submodule update --init --recursive
       - name: Setup
         run: ./setup regtest bu slp bchrest expose-ports
       - name: Start services
