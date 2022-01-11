@@ -360,15 +360,7 @@ def setup_smartbch():
     """
     Generate smartbch configuration
     """
-    typer.echo(f"Generate smartbch configs...", nl=False)
-    with open("./configs/smartbchd-app.toml", "w") as config_file:
-        config_file.write(
-            templates.get_template("smartbchd-app.toml").render(
-                config=config, rpc_port=config.rpc_port()
-            )
-        )
-
-    typer.echo(success)
+    pass
 
 
 def pull_images():
@@ -402,44 +394,43 @@ def initialize_smartbch():
     """
     Smartbch initialisation
     """
-    # if config.smartbch:
-    #     if config.network == Network.REGTEST:
-    import pdb; pdb.set_trace()
-    typer.echo("Generate some private keys only used for test")
-    # The output private keys will be used as input for the next step.
-    private_keys = config.smartbch.test_keys
-    # A validator needs two private keys: one ed25519 key for consensus engine (tendermint) and one secp256k1 key
-    # for operate it using smart contracts. Now we pick the secp256k1 key out from above generated keys.
-    # We just choose the first one and show its corresponding address:
-    typer.echo("Pick the secp256k1 key out from above generated keys.")
-    validator_priv = private_keys[0]
-    validator_address = Account.from_key(validator_priv).address
-    typer.echo(validator_address)
-    typer.echo("Initialize the node data using test keys generated above")
-    output = subprocess_run(
-        f"docker-compose run --rm smartbch --home /opt/smartbchd init mynode --chain-id 0x2711 --init-balance=1000000000000000000000000000000 --test-keys={','.join(private_keys)} --overwrite"
-    )
-    typer.echo(output.stdout)
-    typer.echo("generate genesis validator consensus key info")
-    output = subprocess_run(
-        f"docker-compose run --entrypoint /bin/sh smartbch -c './smartbchd --home /opt/smartbchd generate-consensus-key-info; cp ./priv_validator_key.json /opt/smartbchd/config/'"
-    )
-    consensus_pubkey = output.stdout.decode().strip()
-    typer.echo(consensus_pubkey)
-    # The output hex string is consensus pubkey which will be used in generate-genesis-validator command,
-    # and a file containing the consensus public and private key is generated under the current directory,
-    # named priv_validator_key.json.
-    # Since now we are just running a single node for test, the key file is not so important.
-    # In production, a validator's operator must take good care of this key file priv_validator_key.json and back it up safely.
-    output = subprocess_run(
-        f"docker-compose run --rm smartbch --home /opt/smartbchd generate-genesis-validator --validator-address={validator_address} --consensus-pubkey={consensus_pubkey} --voting-power=1 --staking-coin=1000000000000000000000 --introduction='freeman'"
-    )
-    # The output hex string contains the information of a validator.
-    genesis_validator = output.stdout.decode().strip()
-    typer.echo(genesis_validator)
-    output = subprocess_run(
-        f"docker-compose run --rm smartbch --home /opt/smartbchd add-genesis-validator {genesis_validator}"
-    )
+    if config.smartbch:
+        if config.network == Network.REGTEST:
+            typer.echo("Generate some private keys only used for test")
+            # The output private keys will be used as input for the next step.
+            private_keys = config.smartbch.test_keys
+            # A validator needs two private keys: one ed25519 key for consensus engine (tendermint) and one secp256k1 key
+            # for operate it using smart contracts. Now we pick the secp256k1 key out from above generated keys.
+            # We just choose the first one and show its corresponding address:
+            typer.echo("Pick the secp256k1 key out from above generated keys.")
+            validator_priv = private_keys[0]
+            validator_address = Account.from_key(validator_priv).address
+            typer.echo(validator_address)
+            typer.echo("Initialize the node data using test keys generated above")
+            output = subprocess_run(
+                f"docker-compose run --rm smartbch --home /opt/smartbchd init mynode --chain-id 0x2711 --init-balance=1000000000000000000000000000000 --test-keys={','.join(private_keys)} --overwrite"
+            )
+            typer.echo(output.stdout)
+            typer.echo("generate genesis validator consensus key info")
+            output = subprocess_run(
+                f"docker-compose run --entrypoint /bin/sh smartbch -c './smartbchd --home /opt/smartbchd generate-consensus-key-info; cp ./priv_validator_key.json /opt/smartbchd/config/'"
+            )
+            consensus_pubkey = output.stdout.decode().strip()
+            typer.echo(consensus_pubkey)
+            # The output hex string is consensus pubkey which will be used in generate-genesis-validator command,
+            # and a file containing the consensus public and private key is generated under the current directory,
+            # named priv_validator_key.json.
+            # Since now we are just running a single node for test, the key file is not so important.
+            # In production, a validator's operator must take good care of this key file priv_validator_key.json and back it up safely.
+            output = subprocess_run(
+                f"docker-compose run --rm smartbch --home /opt/smartbchd generate-genesis-validator --validator-address={validator_address} --consensus-pubkey={consensus_pubkey} --voting-power=1 --staking-coin=1000000000000000000000 --introduction='freeman'"
+            )
+            # The output hex string contains the information of a validator.
+            genesis_validator = output.stdout.decode().strip()
+            typer.echo(genesis_validator)
+            output = subprocess_run(
+                f"docker-compose run --rm smartbch --home /opt/smartbchd add-genesis-validator {genesis_validator}"
+            )
 
 
 def stop_node():
