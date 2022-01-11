@@ -13,6 +13,7 @@ from typing import List, Optional
 
 import inquirer
 import typer
+from eth_account import Account
 from jinja2 import Environment, FileSystemLoader
 
 __version__ = "0.1.0"
@@ -22,6 +23,20 @@ DEFAULT_REGTEST_BLOCKS = 200
 DEFAULT_WAIT_TIME = 6
 BCH_GENERATE_ADDRESS = "bchreg:qzerfrqkvsclmrlx3hzl0j2ac2eh0k88wqa0efygtm"
 BCH_WIF = "cUDjy47QLpAUyv1beivDPoYCHjCRVqwRMwCuSnkdF4teVFBDD1ip"
+
+
+def subprocess_run(command):
+    typer.echo(f"DEBUG:subprocess_run:command: {command}")
+    output = subprocess.run(
+        command,
+        shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    typer.echo(
+        f"DEBUG:subprocess_run: {output.returncode} | {output.stderr} | {output.stdout}"
+    )
+    return output
 
 
 class LocalNodeType(str, Enum):
@@ -59,18 +74,10 @@ class LocalNode:
     regtest_blocks: Optional[int] = DEFAULT_REGTEST_BLOCKS
     wait_time: int = DEFAULT_WAIT_TIME
 
-    def rpc_port(self):
-        if self.network == Network.MAINNET:
-            return 8332
-        elif self.network == Network.TESTNET:
-            return 18332
-        elif self.network == Network.REGTEST:
-            return 18443
-
 
 @dataclass
 class SmartBCHConf:
-    pass
+    test_keys: List[str] = None
 
 
 @dataclass
@@ -89,6 +96,14 @@ class InitConfig:
                 return "slpdb"
             else:
                 return "slpdb_test"
+
+    def rpc_port(self):
+        if self.network == Network.MAINNET:
+            return 8332
+        elif self.network == Network.TESTNET:
+            return 18332
+        elif self.network == Network.REGTEST:
+            return 18443
 
 
 COMPONENTS = [
@@ -173,7 +188,14 @@ def handle_slp():
 
 
 def handle_smartbch():
-    pass
+    if config.network == Network.REGTEST:
+        typer.echo("Generate some private keys only used for test")
+        output = subprocess_run(
+            f"docker run --rm -i ghcr.io/actorforth/smartbch:v0.3.5 gen-test-keys -n 10"
+        )
+        config.smartbch = SmartBCHConf(
+            test_keys=output.stdout.decode().strip().split("\n")
+        )
 
 
 component_handlers = {
@@ -296,20 +318,24 @@ def setup_local_node():
             typer.echo(f"Setting up Bitcoin Unlimited node...", nl=False)
             with open("./configs/bitcoin-unlimited.conf", "w") as config_file:
                 config_file.write(
-                    templates.get_template("default_bu.conf").render(config=config)
+                    templates.get_template("default_bu.conf").render(
+                        config=config, rpc_port=config.rpc_port()
+                    )
                 )
             typer.echo(success)
         elif config.local_node.node == LocalNodeType.BITCOIN_CASH_NODE:
-            typer.echo(f"Setting up Bitcoin Unlimited node...", nl=False)
+            typer.echo(f"Setting up Bitcoin cash node...", nl=False)
             with open("./configs/bitcoincashnode.conf", "w") as config_file:
                 config_file.write(
                     templates.get_template("default_bitcoincashnode.conf").render(
-                        config=config
+                        config=config, rpc_port=config.rpc_port()
                     )
                 )
             with open("./configs/temp-fulcrum-config.conf", "w") as config_file:
                 config_file.write(
-                    templates.get_template("fulcrum-config.conf").render(config=config)
+                    templates.get_template("fulcrum-config.conf").render(
+                        config=config, rpc_port=config.rpc_port()
+                    )
                 )
             typer.echo(success)
 
@@ -321,10 +347,27 @@ def setup_docker_compose():
     typer.echo(f"Generate docker-compose file...", nl=False)
     with open("docker-compose.yml", "w") as compose_file:
         compose_file.write(
-            templates.get_template("compose.template").render(config=config)
+            templates.get_template("compose.template").render(
+                config=config, rpc_port=config.rpc_port()
+            )
         )
     with open(".lock", "w") as lock_file:
         json.dump(asdict(config), lock_file)
+    typer.echo(success)
+
+
+def setup_smartbch():
+    """
+    Generate smartbch configuration
+    """
+    typer.echo(f"Generate smartbch configs...", nl=False)
+    with open("./configs/smartbchd-app.toml", "w") as config_file:
+        config_file.write(
+            templates.get_template("smartbchd-app.toml").render(
+                config=config, rpc_port=config.rpc_port()
+            )
+        )
+
     typer.echo(success)
 
 
@@ -353,6 +396,50 @@ def initialize_node():
                 shell=True,
             )
             typer.echo(success)
+
+
+def initialize_smartbch():
+    """
+    Smartbch initialisation
+    """
+    # if config.smartbch:
+    #     if config.network == Network.REGTEST:
+    import pdb; pdb.set_trace()
+    typer.echo("Generate some private keys only used for test")
+    # The output private keys will be used as input for the next step.
+    private_keys = config.smartbch.test_keys
+    # A validator needs two private keys: one ed25519 key for consensus engine (tendermint) and one secp256k1 key
+    # for operate it using smart contracts. Now we pick the secp256k1 key out from above generated keys.
+    # We just choose the first one and show its corresponding address:
+    typer.echo("Pick the secp256k1 key out from above generated keys.")
+    validator_priv = private_keys[0]
+    validator_address = Account.from_key(validator_priv).address
+    typer.echo(validator_address)
+    typer.echo("Initialize the node data using test keys generated above")
+    output = subprocess_run(
+        f"docker-compose run --rm smartbch --home /opt/smartbchd init mynode --chain-id 0x2711 --init-balance=1000000000000000000000000000000 --test-keys={','.join(private_keys)} --overwrite"
+    )
+    typer.echo(output.stdout)
+    typer.echo("generate genesis validator consensus key info")
+    output = subprocess_run(
+        f"docker-compose run --entrypoint /bin/sh smartbch -c './smartbchd --home /opt/smartbchd generate-consensus-key-info; cp ./priv_validator_key.json /opt/smartbchd/config/'"
+    )
+    consensus_pubkey = output.stdout.decode().strip()
+    typer.echo(consensus_pubkey)
+    # The output hex string is consensus pubkey which will be used in generate-genesis-validator command,
+    # and a file containing the consensus public and private key is generated under the current directory,
+    # named priv_validator_key.json.
+    # Since now we are just running a single node for test, the key file is not so important.
+    # In production, a validator's operator must take good care of this key file priv_validator_key.json and back it up safely.
+    output = subprocess_run(
+        f"docker-compose run --rm smartbch --home /opt/smartbchd generate-genesis-validator --validator-address={validator_address} --consensus-pubkey={consensus_pubkey} --voting-power=1 --staking-coin=1000000000000000000000 --introduction='freeman'"
+    )
+    # The output hex string contains the information of a validator.
+    genesis_validator = output.stdout.decode().strip()
+    typer.echo(genesis_validator)
+    output = subprocess_run(
+        f"docker-compose run --rm smartbch --home /opt/smartbchd add-genesis-validator {genesis_validator}"
+    )
 
 
 def stop_node():
@@ -408,9 +495,11 @@ def init(
     create_docker_network_if_not_exist()
     setup_local_node()
     setup_rest_service()
+    setup_smartbch()
     setup_docker_compose()
     pull_images()
     initialize_node()
+    initialize_smartbch()
     stop_node()
     finish()
 
@@ -432,6 +521,7 @@ def clean():
     remove("Node data", "./data/bitcoind")
     remove("SLPDB data", "./data/mongodb")
     remove("Indexer data", "./data/fulcrum")
+    remove("Smartbch data", "./data/smartbchd")
     remove("config file", "./config.json")
     remove("config file", "./configs/bitcoin-unlimited.conf")
     remove("config file", "./configs/bitcoincashnode.conf")

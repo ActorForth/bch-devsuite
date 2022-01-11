@@ -8,3 +8,4 @@ readchar==2.0.1
 six==1.16.0
 typer==0.4.0
 wcwidth==0.2.5
+eth-account==0.5.6
