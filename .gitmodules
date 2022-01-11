@@ -1,3 +1,4 @@
 [submodule "bitcash"]
 	path = bitcash
 	url = git@github.com:ActorForth/bitcash.git
+	branch = develop-slp
