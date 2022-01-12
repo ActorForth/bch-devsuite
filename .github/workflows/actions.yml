@@ -14,12 +14,28 @@ jobs:
 
     steps:
       
-      - uses: actions/checkout@v2
+        # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it 
+      - name: Clone main repository 
+        uses: actions/checkout@v2 
+        with: 
+          token: ${{ secrets.INFRA_USER_GITHUB_ACTION }} 
+          submodules: recursive 
+          fetch-depth: 0
+      # Clear and resync submodule 
+      - name: Clear submodule 
+        run:  | 
+          git submodule deinit --all -f 
+          git submodule update --recursive --init 
+      - name: Check if TAG contains dirty 
+        run: | 
+          TAG=$(git describe --always --tags --dirty --abbrev=7) 
+          echo "TAG: $TAG." 
+          if [[ "$TAG" == *"dirty" ]]; then 
+            echo "The branch is dirty, please check your repo." && exit 1 
+          fi
       - uses: actions/setup-node@v2
         with:
           node-version: '14'
-      - name: update git submodule
-        run: git submodule update --init --recursive
       - name: Setup
         run: ./setup regtest bu slp bchrest expose-ports
       - name: Start services
