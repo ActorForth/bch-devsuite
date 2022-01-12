@@ -42,8 +42,8 @@ jobs:
         run: ./services start
       - name: sleep
         run: |
-        sleep 10
-        ls
+          sleep 10
+          ls
       - name: Collect Docker Logs
         if: failure()
         uses: jwalton/gh-docker-logs@v2.0.2
@@ -60,9 +60,9 @@ jobs:
           python-version: '3.11.0-alpha.3'
       - name: generate address for create slp token
         run: |
-        cd bitcash
-        ls 
-        python3 create_slp.py
+          cd bitcash
+          ls 
+          python3 create_slp.py
       - name: Make transaction for generated address
         run: ./bitcoin-cli sendtoaddress bchreg:qqqtrpvmrtkx6r2gxnv55q694ptsun2klvwyf5eedz 1
              ./bitcoin-cli sendtoaddress bchreg:qr6g0s5n7z6gk4ptrmf9ak55x6gtchszhuv2cc2l62 1
