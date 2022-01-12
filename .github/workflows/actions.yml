@@ -57,8 +57,9 @@ jobs:
           pip install -r requirements.txt
           python3 create_slp.py
       - name: Make transaction for generated address
-        run: ./bitcoin-cli sendtoaddress bchreg:qqqtrpvmrtkx6r2gxnv55q694ptsun2klvwyf5eedz 1
-             ./bitcoin-cli sendtoaddress bchreg:qr6g0s5n7z6gk4ptrmf9ak55x6gtchszhuv2cc2l62 1
+        run: |
+          ./bitcoin-cli sendtoaddress bchreg:qqqtrpvmrtkx6r2gxnv55q694ptsun2klvwyf5eedz 1
+          ./bitcoin-cli sendtoaddress bchreg:qr6g0s5n7z6gk4ptrmf9ak55x6gtchszhuv2cc2l62 1
 
 
 
