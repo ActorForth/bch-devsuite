@@ -228,7 +228,8 @@ services:
     command: start --home /opt/smartbchd --mainnet-rpc-url=http://bch-node:{{ rpc_port }} --mainnet-rpc-username {{ config.local_node.rpc_conf.username }} --mainnet-rpc-password {{ config.local_node.rpc_conf.password }} --unlock {{ ','.join(config.smartbch.test_keys) }}
     {% endif %}
     {% if config.network == 'testnet' %}
-    command: start --home /opt/smartbchd --mainnet-rpc-url=http://bch-node:{{ rpc_port }} --mainnet-rpc-username {{ config.local_node.rpc_conf.username }} --mainnet-rpc-password {{ config.local_node.rpc_conf.password }} --mainnet-genesis-height=602983
+    # command: start --home /opt/smartbchd --mainnet-rpc-url=http://bch-node:{{ rpc_port }} --mainnet-rpc-username {{ config.local_node.rpc_conf.username }} --mainnet-rpc-password {{ config.local_node.rpc_conf.password }} --mainnet-genesis-height=602983
+    command: start --home /opt/smartbchd --mainnet-genesis-height=602983
     {% endif %}
     volumes:
       - ./data/smartbchd:/opt/smartbchd/

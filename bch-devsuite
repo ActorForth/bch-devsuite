@@ -441,7 +441,7 @@ def initialize_smartbch():
             )
             typer.echo(output.stdout)
             output = subprocess_run(
-                f"docker-compose run --entrypoint /bin/sh smartbch -c 'cp -rf ~/.smartbchd /opt/smartbchd'"
+                f"docker-compose run --rm --entrypoint /bin/sh smartbch -c 'apt update; apt install -y wget; wget https://github.com/smartbch/artifacts/releases/download/v0.0.4/dot.smartbchd.tgz; tar zxvf dot.smartbchd.tgz; cp -rf dot.smartbchd/* /opt/smartbchd/'"
             )
             typer.echo(output.stdout)
 
