@@ -63,6 +63,7 @@ jobs:
       - name: create slp token
         run: |
           cd bitcash
+          pwd
           python3 create_slp2.py
 
 
