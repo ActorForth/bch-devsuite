@@ -39,6 +39,7 @@ jobs:
       - name: Setup
         run: |
           pwd
+          ls
           ./setup regtest bu slp bchrest expose-ports
       - name: Start services
         run: ./services start
