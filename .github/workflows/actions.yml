@@ -37,7 +37,9 @@ jobs:
         with:
           node-version: '14'
       - name: Setup
-        run: ./setup regtest bu slp bchrest expose-ports
+        run: |
+          pwd
+          ./setup regtest bu slp bchrest expose-ports
       - name: Start services
         run: ./services start
       - name: sleep
@@ -52,18 +54,9 @@ jobs:
           python-version: '3.11.0-alpha.3'
       - name: generate address for create slp token
         run: |
-          ls
           cd bitcash 
           pip install -r requirements.txt
           python3 create_slp.py
-      - name: Make transaction for generated address
-        run: |
-          ./bitcoin-cli sendtoaddress bchreg:qqqtrpvmrtkx6r2gxnv55q694ptsun2klvwyf5eedz 1
-          ./bitcoin-cli sendtoaddress bchreg:qr6g0s5n7z6gk4ptrmf9ak55x6gtchszhuv2cc2l62 1
-      - name: create slp token
-        run: |
-          cd bitcash
-          pwd
-          python3 create_slp2.py
+
 
 
