@@ -1,3 +1,6 @@
 [submodule "bitcash"]
 	path = bitcash
 	url = git@github.com:ActorForth/bitcash.git
+[submodule "restbch-newman"]
+	path = restbch-newman
+	url = git@github.com:Biggest-Fan-Productions/restbch-newman.git

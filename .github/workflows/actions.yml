@@ -58,6 +58,10 @@ jobs:
           cd bitcash 
           pip install -r requirements.txt
           python3 create_slp.py
-
+      - name: Run functions test script
+        run: |
+          cd restbch-newman
+          npm install
+          npm start
 
 
