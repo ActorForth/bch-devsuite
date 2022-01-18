@@ -60,6 +60,9 @@ jobs:
         run: |
           ./bitcoin-cli sendtoaddress bchreg:qqqtrpvmrtkx6r2gxnv55q694ptsun2klvwyf5eedz 1
           ./bitcoin-cli sendtoaddress bchreg:qr6g0s5n7z6gk4ptrmf9ak55x6gtchszhuv2cc2l62 1
-
+      - name: create slp token
+        run: |
+          cd bitcash
+          python3 create_slp2.py
 
 
