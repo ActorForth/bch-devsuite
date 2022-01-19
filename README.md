@@ -1,6 +1,4 @@
-# README
-
-## Getting started
+# Getting started
 
 ### Prerequisites
 
