@@ -228,6 +228,9 @@ if [[ $BTK_UNLIMITED == 1 ]]; then
 else
     cp ./configs/default_bitcoincashnode.conf ./configs/bitcoincashnode.conf
     NODE_CONFIG_FILE=./configs/bitcoincashnode.conf
+
+    cp ./configs/fulcrum-config.conf ./configs/temp-fulcrum-config.conf
+    FULCRUM_CONFIG_FILE=./configs/temp-fulcrum-config.conf
 fi
 
 if [[ $BTK_SLP == 1 ]]; then
@@ -265,7 +268,13 @@ if [[ $BTK_MAINNET == 1 ]]; then
         echo "rpcuser=$RPC_USERNAME">>$NODE_CONFIG_FILE
         echo "rpcpassword=$RPC_PASSWORD">>$NODE_CONFIG_FILE    
     fi
-    
+
+    if [[ $BTK_CASHNODE == 1 ]]; then
+        echo "bitcoind = bch-node:8332">>$FULCRUM_CONFIG_FILE
+        echo "rpcuser = $RPC_USERNAME">>$FULCRUM_CONFIG_FILE
+        echo "rpcpassword = $RPC_PASSWORD">>$FULCRUM_CONFIG_FILE
+    fi
+
     echo "rpcport=8332">>$NODE_CONFIG_FILE
     echo "rpcbind=0.0.0.0:8332">>$NODE_CONFIG_FILE
     echo "maxconnections=10">>$NODE_CONFIG_FILE
@@ -296,6 +305,12 @@ if [[ $BTK_TESTNET == 1 ]]; then
         echo "rpcpassword=$RPC_PASSWORD">>$NODE_CONFIG_FILE    
     fi
 
+    if [[ $BTK_CASHNODE == 1 ]]; then
+        echo "bitcoind = bch-node:18332">>$FULCRUM_CONFIG_FILE
+        echo "rpcuser = $RPC_USERNAME">>$FULCRUM_CONFIG_FILE
+        echo "rpcpassword = $RPC_PASSWORD">>$FULCRUM_CONFIG_FILE
+    fi
+
     echo "testnet=1">>$NODE_CONFIG_FILE
     echo "maxconnections=10">>$NODE_CONFIG_FILE
     echo "rpcport=18332">>$NODE_CONFIG_FILE
@@ -309,12 +324,7 @@ if [[ $BTK_TESTNET == 1 ]]; then
 fi
 
 if [[ $BTK_REGTEST == 1 ]]; then
-    if [[ $BTK_UNLIMITED == 1 ]]; then
-        echo "regtest=1">>$NODE_CONFIG_FILE
-        echo "export ELECTRUM_INDEXER=bch-node">>$ENV_FILE
-    else
-        echo "[regtest]">>$NODE_CONFIG_FILE
-    fi
+
 
     if [[ -z "${RPC_PASSWORD}" ]]; then
         printf "\n Please enter a username for the node RPC connection:\n"
@@ -332,9 +342,21 @@ if [[ $BTK_REGTEST == 1 ]]; then
         echo "rpcuser=$RPC_USERNAME">>$NODE_CONFIG_FILE
         echo "rpcpassword=$RPC_PASSWORD">>$NODE_CONFIG_FILE    
     fi
+
+    if [[ $BTK_UNLIMITED == 1 ]]; then
+        echo "regtest=1">>$NODE_CONFIG_FILE
+        echo "export ELECTRUM_INDEXER=bch-node">>$ENV_FILE
+    else
+        echo "regtest = 1" >>$NODE_CONFIG_FILE
+        echo "[regtest]">>$NODE_CONFIG_FILE
+        echo "bitcoind = bch-node:18443">>$FULCRUM_CONFIG_FILE
+        echo "rpcuser = $RPC_USERNAME">>$FULCRUM_CONFIG_FILE
+        echo "rpcpassword = $RPC_PASSWORD">>$FULCRUM_CONFIG_FILE
+    fi
+
     echo "rpcport=18443">>$NODE_CONFIG_FILE
     echo "rpcbind=0.0.0.0:18443">>$NODE_CONFIG_FILE
-    echo "maxconnections=1">>$NODE_CONFIG_FILE
+    echo "maxconnections=0">>$NODE_CONFIG_FILE
 
     # Config env file for ./services
     echo "export RPC_PORTS=18443">>$ENV_FILE

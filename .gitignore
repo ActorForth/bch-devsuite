@@ -14,10 +14,15 @@ data/*
 configs/cert
 config.json
 *.txt
+!requirements.txt
 *.swp
 
 # /configs/pass.conf
 /configs/env.env
 /configs/bitcoin-unlimited.conf
+/configs/bitcoincashnode.conf
+/configs/temp-fulcrum-config.conf
 
 venv/
+docker-compose.yml
+.vscode/
