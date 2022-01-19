@@ -1,21 +1,23 @@
-# Getting started
+# README
 
-## Prerequisites
+## Getting started
+
+### Prerequisites
 
 To run this node, you must have the follow software installed on your local machine:
 
-- Docker (including docker-compose)
-- Python 3
-- Virtualenv (`sudo apt install python3-venv`)
-- Openssl
-- Git
+* Docker (including docker-compose)
+* Python 3
+* Virtualenv (`sudo apt install python3-venv`)
+* Openssl
+* Git
 
-## Cloning this repository
+### Cloning this repository
 
 ```bash
 # Clone repository
-git clone https://github.com/ActorForth/bch-toolkit.git
-cd ./bch-toolkit
+git clone https://github.com/ActorForth/bch-devsuite.git
+cd ./bch-devsuite
 
 # Setup virtualenv
 python3 -m venv venv
@@ -25,7 +27,7 @@ source ./venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## Setup infrastructure
+### Setup infrastructure
 
 This will check that the necessary software is installed, and then it will download and prepare the docker containers. For a full list of options, run ./setup with no arguments to see its usage.
 
@@ -44,7 +46,7 @@ This will check that the necessary software is installed, and then it will downl
 
 **NOTE:** The SLP option will prompt the user to input a MONGODB username and password, this is to prevent external parties from modifying your database if the ports are exposed.
 
-## Running infrastructure
+### Running infrastructure
 
 Execute the _services_ script to start the node, indexer, rest API, and/or SLPDB (depending which ones chose in the _setup_ script).
 
@@ -52,7 +54,7 @@ Execute the _services_ script to start the node, indexer, rest API, and/or SLPDB
 ./bch-devsuite start
 ```
 
-## Testing
+### Testing
 
 ```bash
 ./bitcoin-cli getblockchaininfo
@@ -103,7 +105,7 @@ Expected result
 }
 ```
 
-## Stop infrastructure
+### Stop infrastructure
 
 Once you decide to call it a day, you can shut down your local environment by executing:
 
@@ -111,7 +113,7 @@ Once you decide to call it a day, you can shut down your local environment by ex
 ./bch-devsuite stop
 ```
 
-## Cleaning Up
+### Cleaning Up
 
 If you experience any issues, or would like to completely erase the current wallet and node containers, run the following script:
 
@@ -123,21 +125,21 @@ If you experience any issues, or would like to completely erase the current wall
 
 **WARNING:** The 'clean' script is very destructive, so make sure you only use it when you want to _completely erase_ the entire current instance of nodes and the wallet.
 
-# Advance Usage
+## Advance Usage
 
 how to operate in advance use cases, use case by use case
 
-# Reference
+## Reference
 
 explanation of all available options/configurations that can be used
 
-# Architecture
+## Architecture
 
 Two REST APIs can be run: [rest.bitcoin.com](https://github.com/ActorForth/rest.bitcoin.com) and [bch-api](https://api.fullstack.cash/docs/).
 
-### 1. rest.bitcoin.com tech stack
+#### 1. rest.bitcoin.com tech stack
 
-![rest.bitcoin.com Tech Stack](/docs/assets/rest-bitcoin-com_techstack.jpg "rest.bitcoin.com Tech Stack")
+![rest.bitcoin.com Tech Stack](docs/assets/rest-bitcoin-com\_techstack.jpg)
 
 All these components work together in a stack, which means that if the lower part is missing then some of the API in [rest.bitcoin.com](https://github.com/ActorForth/rest.bitcoin.com) might not function properly.
 
@@ -145,37 +147,35 @@ The main reason why you should use all of our fork stacks is because we maintain
 
 The blue part is the node that you choose. The default node is Bitcoin unlimited and there is Bitcoin Cash node as an option as well. Currently, this node is always required.
 
-The red part is an indexer. ElectrsCash is for indexing Bitcoin cash transactions and aggregate BCH balance per address. Without these, you won't be able to query the amount of BCH you own in a particular address. OpenSight is a shim micro service to make ElectrsCash compatible with [rest.bitcoin.com](https://github.com/ActorForth/rest.bitcoin.com) API interface.
-[SLPDB](slp.dev/tooling/slpdb/#what-is-slpdb) is an indexer for SLP token, color coin on top of Bitcoin Cash, this will be verified if the data relate to the color coin is valid and checks if the coin follows the SLP off-chain consensus.
+The red part is an indexer. ElectrsCash is for indexing Bitcoin cash transactions and aggregate BCH balance per address. Without these, you won't be able to query the amount of BCH you own in a particular address. OpenSight is a shim micro service to make ElectrsCash compatible with [rest.bitcoin.com](https://github.com/ActorForth/rest.bitcoin.com) API interface. [SLPDB](slp.dev/tooling/slpdb/#what-is-slpdb) is an indexer for SLP token, color coin on top of Bitcoin Cash, this will be verified if the data relate to the color coin is valid and checks if the coin follows the SLP off-chain consensus.
 
 The orange part is [rest.bitcoin.com](https://github.com/ActorForth/rest.bitcoin.com) API, a unified interface for anyone to interact with all of these complex services through REST API interface uniformly
 
 The green part is the client SDK that will interact with [rest.bitcoin.com](https://github.com/ActorForth/rest.bitcoin.com) interface. [Bitcash](https://github.com/ActorForth/bitcash) is written in Python and [Bitbox](https://github.com/ActorForth/bitbox-sdk) is written in typescript.
 
-### 2. Chris Troutner JS tech stack
+#### 2. Chris Troutner JS tech stack
 
-![Chris Troutner JS Tech Stack](/docs/assets/Chris-Troutner-JS-techstack.jpg "Chris-Troutner-JS-techstack")
+![Chris Troutner JS Tech Stack](docs/assets/Chris-Troutner-JS-techstack.jpg)
 
 The main difference is the rest interface. bch-api has a different API from rest.bitcoin.com and can talk directly to Electrscash without requiring the shim.
 
-# Sponsorship
+## Sponsorship
 
 provide a way to funding us
 
-# Roadmap
+## Roadmap
 
-# Contribution Guide
+## Contribution Guide
 
-# Archived
+## Archived
 
-## About
+### About
 
 This repo intends to be a toolkit for running a local version of a Bitcoin Unlimited for development and testing purposes. Currently it provides a self-hosted local node, indexer (Electrs), a drop-in Ninsight replacement (Opensight), a regtest version of the [rest.bitcoin.com](https://github.com/ActorForth/rest.bitcoin.com) REST APIs, an instance of SLPDB for token querying.
 
-## Known Issues
+### Known Issues
 
 There are a few issues with this setup that could use improvement in the future.
 
-- Currently, this setup relies on the built-in Electrscash indexing server included in the Bitcoin Unlimited node. This isn't an issue per se, but to test with other nodes (such as Bitcoin ABC, Bitcoin Cash Node, or bchd) it will be necessary to seperate the indexing server into a seperate container.
-
-- Currently blocks must be generated manually after transactions are made in order to mine them into blocks. The possibility of adding an automation to generate a block every few minutes could be a consideration to look into.
+* Currently, this setup relies on the built-in Electrscash indexing server included in the Bitcoin Unlimited node. This isn't an issue per se, but to test with other nodes (such as Bitcoin ABC, Bitcoin Cash Node, or bchd) it will be necessary to seperate the indexing server into a seperate container.
+* Currently blocks must be generated manually after transactions are made in order to mine them into blocks. The possibility of adding an automation to generate a block every few minutes could be a consideration to look into.
