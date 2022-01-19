@@ -122,15 +122,3 @@ If you experience any issues, or would like to completely erase the current wall
 **NOTE:** this command may need to be ran with sudo while on linux
 
 **WARNING:** The 'clean' script is very destructive, so make sure you only use it when you want to _completely erase_ the entire current instance of nodes and the wallet.
-
-
-
-## Sponsorship
-
-provide a way to funding us
-
-## Roadmap
-
-
-
-## Contribution Guide
