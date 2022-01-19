@@ -4,7 +4,7 @@ Two REST APIs can be run: [rest.bitcoin.com](https://github.com/ActorForth/rest.
 
 #### 1. rest.bitcoin.com tech stack
 
-![rest.bitcoin.com Tech Stack](docs/assets/rest-bitcoin-com\_techstack.jpg)
+![rest.bitcoin.com Tech Stack](assets/rest-bitcoin-com\_techstack.jpg)
 
 All these components work together in a stack, which means that if the lower part is missing then some of the API in [rest.bitcoin.com](https://github.com/ActorForth/rest.bitcoin.com) might not function properly.
 
@@ -20,6 +20,6 @@ The green part is the client SDK that will interact with [rest.bitcoin.com](http
 
 #### 2. Chris Troutner JS tech stack
 
-![Chris Troutner JS Tech Stack](docs/assets/Chris-Troutner-JS-techstack.jpg)
+![Chris Troutner JS Tech Stack](assets/Chris-Troutner-JS-techstack.jpg)
 
 The main difference is the rest interface. bch-api has a different API from rest.bitcoin.com and can talk directly to Electrscash without requiring the shim.
