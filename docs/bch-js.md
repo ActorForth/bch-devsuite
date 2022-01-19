@@ -1,4 +1,4 @@
-# Geting started with bch-js
+# Using with bch-js
 
 ### Prerequisites
 node and npm
