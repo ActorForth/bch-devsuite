@@ -127,11 +127,33 @@ If you experience any issues, or would like to completely erase the current wall
 
 ## Advance Usage
 
-how to operate in advance use cases, use case by use case
+* Automate test with Regtest node
+* Generate your own test coin in Regtest
 
-## Reference
+## Setup Option Reference
 
-explanation of all available options/configurations that can be used
+### Network
+
+* Regtest
+* Testnet
+* Mainnet
+
+### Component
+
+* Local node (Bitcoin Unlimited node or Bitcoin Cash Node)
+* REST service (A rest.bitcoin.com-compatible or Bch-API)
+* SLP services (SLPDB, slpserve)
+* SmartBCH (https://smartbch.org/ Currently only support regtest)
+
+### Local node
+
+* Bitcoin Unlimited Node
+* Bitcoin Cash Node
+
+### REST Service
+
+* bchrest (rest.bitcoin.com)
+* bchapi ([https://api.fullstack.cash/docs/](https://api.fullstack.cash/docs/))
 
 ## Architecture
 
@@ -164,6 +186,8 @@ The main difference is the rest interface. bch-api has a different API from rest
 provide a way to funding us
 
 ## Roadmap
+
+
 
 ## Contribution Guide
 
