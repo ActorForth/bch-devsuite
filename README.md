@@ -37,7 +37,7 @@ This will check that the necessary software is installed, and then it will downl
 # Next we specify the node, bitcoin unlimited or bitcoincash node
 # Next we select a rest interface, bchrest is a fork of the rest.bitcoin.com api, while bchapi is a rest utilized with the bch-js library
 # Slp is optional, selecting this option enables slpdb, slpserve and mongodb
-# Lastly, we specify whether or not the ports will be exposed on the docker containers.
+# Smartbch is optional, if the network is regtest, this also generate 10 test keys.
 ```
 
 **NOTE:** A RPC password and username prompt will appear for the node, these values will be stored in generated docker-compose.yml file.

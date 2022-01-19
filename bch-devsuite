@@ -77,6 +77,7 @@ class LocalNode:
 
 @dataclass
 class SmartBCHConf:
+    enabled: bool = False
     test_keys: List[str] = None
 
 
@@ -196,6 +197,8 @@ def handle_smartbch():
         config.smartbch = SmartBCHConf(
             test_keys=output.stdout.decode().strip().split("\n")
         )
+    elif config.network == Network.TESTNET:
+        config.smartbch = SmartBCHConf(enabled=True)
 
 
 component_handlers = {
@@ -431,6 +434,17 @@ def initialize_smartbch():
             output = subprocess_run(
                 f"docker-compose run --rm smartbch --home /opt/smartbchd add-genesis-validator {genesis_validator}"
             )
+        elif config.network == Network.TESTNET:
+            typer.echo("Init smartbchd testnet node")
+            output = subprocess_run(
+                f"docker-compose run --rm smartbch --home /opt/smartbchd init mynode --chain-id 0x2711"
+            )
+            typer.echo(output.stdout)
+            output = subprocess_run(
+                f"docker-compose run --rm --entrypoint /bin/sh smartbch -c 'apt update; apt install -y wget; wget https://github.com/smartbch/artifacts/releases/download/v0.0.4/dot.smartbchd.tgz; tar zxvf dot.smartbchd.tgz; cp -rf dot.smartbchd/* /opt/smartbchd/'"
+            )
+            typer.echo(output.stdout)
+
 
 
 def stop_node():
