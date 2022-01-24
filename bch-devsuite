@@ -197,7 +197,7 @@ def handle_smartbch():
         config.smartbch = SmartBCHConf(
             test_keys=output.stdout.decode().strip().split("\n")
         )
-    elif config.network == Network.TESTNET:
+    elif config.network in (Network.TESTNET, Network.MAINNET):
         config.smartbch = SmartBCHConf(enabled=True)
 
 
