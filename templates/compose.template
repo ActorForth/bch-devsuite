@@ -189,7 +189,7 @@ services:
       - rpc_port={{ rpc_port }}
       - rpc_user={{ config.local_node.rpc_conf.username }}
       - zmq_incoming_host=bch-node
-      - NODE_OPTIONS="--max-old-space-size=16384"
+      - NODE_OPTIONS=--max-old-space-size=16384
     restart: always
     networks:
       - {{ config.docker_network }}
