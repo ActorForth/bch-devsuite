@@ -226,7 +226,7 @@ services:
     container_name: smartbch
     restart: always
     {% if config.network == 'regtest' %}
-    command: start --home /opt/smartbchd --mainnet-rpc-url={{ config.bch_rpc_conf.host }}:{{ config.bch_rpc_conf.port}} --mainnet-rpc-username {{ config.bch_rpc_conf.username }} --mainnet-rpc-password {{ config.bch_rpc_conf.password }} --unlock {{ ','.join(config.smartbch.test_keys) }}
+    command: start --home /opt/smartbchd --mainnet-rpc-url={{ config.bch_rpc_conf.host }}:{{ config.bch_rpc_conf.port}} --mainnet-rpc-username={{ config.bch_rpc_conf.username }} --mainnet-rpc-password={{ config.bch_rpc_conf.password }} --unlock {{ ','.join(config.smartbch.test_keys) }}
     {% endif %}
     {% if config.network == 'testnet' %}
     command: start --home /opt/smartbchd --mainnet-genesis-height=602983
