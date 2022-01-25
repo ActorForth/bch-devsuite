@@ -1,4 +1,0 @@
-version: "3"
-networks:
-  bch-toolkit-network:
-    external: true

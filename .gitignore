@@ -14,6 +14,7 @@ data/*
 configs/cert
 config.json
 *.txt
+!requirements.txt
 *.swp
 
 /configs/pass.conf
@@ -23,3 +24,5 @@ config.json
 /configs/temp-fulcrum-config.conf
 
 venv/
+docker-compose.yml
+.vscode/

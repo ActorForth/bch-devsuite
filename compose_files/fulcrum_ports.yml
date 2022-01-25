@@ -1,5 +1,0 @@
-version: "3"
-services:
-    fulcrum:
-        ports:
-          - "50001:50001"

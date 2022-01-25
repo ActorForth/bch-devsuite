@@ -1,4 +1,4 @@
-# Getting started with BitCash
+# Using with BitCash
 ### Prerequisites
 pip or git
 A Python terminal ex: ipython
