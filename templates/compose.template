@@ -21,7 +21,7 @@ services:
       - {{ config.docker_network }}
     {% if config.exposed_ports %}
     ports:
-      - "{{ rpc_port }}:{{ rpc_port }}"
+      - "{{ config.bch_rpc_conf.port}}:{{ config.bch_rpc_conf.port}}"
       - "28332:28332"
       - "50001:50001"
     {% endif %}
@@ -40,7 +40,7 @@ services:
       - {{ config.docker_network }}
     {% if config.exposed_ports %}
     ports:
-      - "{{ rpc_port }}:{{ rpc_port }}"
+      - "{{ config.bch_rpc_conf.port}}:{{ config.bch_rpc_conf.port}}"
       - "28332:28332"
     {% endif %}
   fulcrum:
@@ -78,9 +78,9 @@ services:
       - NODE_TLS_REJECT_UNAUTHORIZED=0
       - REDIS_HOST=6379
       - REDIS_PORT=127.0.0.1
-      - RPC_BASEURL=http://bch-node:{{ rpc_port }}/
-      - RPC_PASSWORD={{ config.local_node.rpc_conf.password }}
-      - RPC_USERNAME={{ config.local_node.rpc_conf.username }}
+      - RPC_BASEURL={{ config.bch_rpc_conf.host }}:{{ config.bch_rpc_conf.port}}/
+      - RPC_PASSWORD={{ config.bch_rpc_conf.password }}
+      - RPC_USERNAME={{ config.bch_rpc_conf.username }}
       - SECURITY=false
       - SLPDB_URL=http://slpserve:4000/
       - TOKENSECRET=somelongpassword
@@ -117,9 +117,9 @@ services:
       - DO_NOT_USE_RATE_LIMITS=true
       - NETWORK={{ config.network }}
       - PORT=3000
-      - RPC_BASEURL=http://bch-node:{{ rpc_port }}/
-      - RPC_PASSWORD={{ config.local_node.rpc_conf.password }}
-      - RPC_USERNAME={{ config.local_node.rpc_conf.username }}
+      - RPC_BASEURL={{ config.bch_rpc_conf.host }}:{{ config.bch_rpc_conf.port}}/
+      - RPC_PASSWORD={{ config.bch_rpc_conf.password }}
+      - RPC_USERNAME={{ config.bch_rpc_conf.username }}
       - SLPDB_URL=http://slpserve:4000/
       - ZEROMQ_PORT=0
       - ZEROMQ_URL=0
@@ -136,15 +136,15 @@ services:
     container_name: opensight
     environment:
       {% if config.local_node.node == 'bu' %}
-      - ELECTRUM_HOST=bch-node
+      - ELECTRUM_HOST={{ config.bch_rpc_conf.host_without_protocol() }}
       {% else %}
       - ELECTRUM_HOST=fulcrum
       {% endif %}
       - ELECTRUM_PORT=50001
-      - NODE_RPC_HOST=bch-node
-      - NODE_RPC_PASS={{ config.local_node.rpc_conf.password }}
-      - NODE_RPC_PORT={{ rpc_port }}
-      - NODE_RPC_USER={{ config.local_node.rpc_conf.username }}
+      - NODE_RPC_HOST={{ config.bch_rpc_conf.host_without_protocol() }}
+      - NODE_RPC_PASS={{ config.bch_rpc_conf.password }}
+      - NODE_RPC_PORT={{ config.bch_rpc_conf.port}}
+      - NODE_RPC_USER={{ config.bch_rpc_conf.username }}
       - OPENSIGHT_PORT=3001
     restart: always
     networks:
@@ -184,11 +184,11 @@ services:
       - ./configs/slpdb-config.sh:/home/safeuser/start.sh
     environment:
       - db_url=mongodb://{{ config.slp.username }}:{{ config.slp.password }}@mongodb-slpdb:27017?connectTimeoutMS=90000&socketTimeoutMS=90000
-      - rpc_host=bch-node
-      - rpc_pass={{ config.local_node.rpc_conf.password }}
-      - rpc_port={{ rpc_port }}
-      - rpc_user={{ config.local_node.rpc_conf.username }}
-      - zmq_incoming_host=bch-node
+      - rpc_host={{ config.bch_rpc_conf.host_without_protocol() }}
+      - rpc_pass={{ config.bch_rpc_conf.password }}
+      - rpc_port={{ config.bch_rpc_conf.port}}
+      - rpc_user={{ config.bch_rpc_conf.username }}
+      - zmq_incoming_host={{ config.bch_rpc_conf.host_without_protocol() }}
       - NODE_OPTIONS=--max-old-space-size=16384
     restart: always
     networks:
@@ -226,13 +226,13 @@ services:
     container_name: smartbch
     restart: always
     {% if config.network == 'regtest' %}
-    command: start --home /opt/smartbchd --mainnet-rpc-url=http://bch-node:{{ rpc_port }} --mainnet-rpc-username {{ config.local_node.rpc_conf.username }} --mainnet-rpc-password {{ config.local_node.rpc_conf.password }} --unlock {{ ','.join(config.smartbch.test_keys) }}
+    command: start --home /opt/smartbchd --mainnet-rpc-url={{ config.bch_rpc_conf.host }}:{{ config.bch_rpc_conf.port}} --mainnet-rpc-username {{ config.bch_rpc_conf.username }} --mainnet-rpc-password {{ config.bch_rpc_conf.password }} --unlock {{ ','.join(config.smartbch.test_keys) }}
     {% endif %}
     {% if config.network == 'testnet' %}
     command: start --home /opt/smartbchd --mainnet-genesis-height=602983
     {% endif %}
     {% if config.network == 'mainnet' %}
-    command: start --home /opt/smartbchd --mainnet-rpc-url=http://bch-node:{{ rpc_port }} --mainnet-rpc-username={{ config.local_node.rpc_conf.username }} --mainnet-rpc-password={{ config.local_node.rpc_conf.password }} --mainnet-genesis-height=698502
+    command: start --home /opt/smartbchd --mainnet-rpc-url={{ config.bch_rpc_conf.host }}:{{ config.bch_rpc_conf.port}} --mainnet-rpc-username={{ config.bch_rpc_conf.username }} --mainnet-rpc-password={{ config.bch_rpc_conf.password }} --mainnet-genesis-height=698502
     {% endif %}
     volumes:
       - ./data/smartbchd:/opt/smartbchd/
