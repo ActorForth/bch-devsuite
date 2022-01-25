@@ -189,6 +189,7 @@ services:
       - rpc_port={{ rpc_port }}
       - rpc_user={{ config.local_node.rpc_conf.username }}
       - zmq_incoming_host=bch-node
+      - NODE_OPTIONS="--max-old-space-size=16384"
     restart: always
     networks:
       - {{ config.docker_network }}
@@ -228,8 +229,10 @@ services:
     command: start --home /opt/smartbchd --mainnet-rpc-url=http://bch-node:{{ rpc_port }} --mainnet-rpc-username {{ config.local_node.rpc_conf.username }} --mainnet-rpc-password {{ config.local_node.rpc_conf.password }} --unlock {{ ','.join(config.smartbch.test_keys) }}
     {% endif %}
     {% if config.network == 'testnet' %}
-    {# command: start --home /opt/smartbchd --mainnet-rpc-url=http://bch-node:{{ rpc_port }} --mainnet-rpc-username {{ config.local_node.rpc_conf.username }} --mainnet-rpc-password {{ config.local_node.rpc_conf.password }} --mainnet-genesis-height=602983 #}
     command: start --home /opt/smartbchd --mainnet-genesis-height=602983
+    {% endif %}
+    {% if config.network == 'mainnet' %}
+    command: start --home /opt/smartbchd --mainnet-rpc-url=http://bch-node:{{ rpc_port }} --mainnet-rpc-username={{ config.local_node.rpc_conf.username }} --mainnet-rpc-password={{ config.local_node.rpc_conf.password }} --mainnet-genesis-height=698502
     {% endif %}
     volumes:
       - ./data/smartbchd:/opt/smartbchd/

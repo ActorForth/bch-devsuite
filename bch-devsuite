@@ -197,7 +197,7 @@ def handle_smartbch():
         config.smartbch = SmartBCHConf(
             test_keys=output.stdout.decode().strip().split("\n")
         )
-    elif config.network == Network.TESTNET:
+    elif config.network in (Network.TESTNET, Network.MAINNET):
         config.smartbch = SmartBCHConf(enabled=True)
 
 
@@ -444,7 +444,15 @@ def initialize_smartbch():
                 f"docker-compose run --rm --entrypoint /bin/sh smartbch -c 'apt update; apt install -y wget; wget https://github.com/smartbch/artifacts/releases/download/v0.0.4/dot.smartbchd.tgz; tar zxvf dot.smartbchd.tgz; cp -rf dot.smartbchd/* /opt/smartbchd/'"
             )
             typer.echo(output.stdout)
-
+        elif config.network == Network.MAINNET:
+            output = subprocess_run(
+                f"docker-compose run --rm smartbch --home /opt/smartbchd init mynode --chain-id 0x2710"
+            )
+            typer.echo(output.stdout)
+            output = subprocess_run(
+                f"docker-compose run --rm --entrypoint /bin/sh smartbch -c 'apt update; apt install -y wget; wget https://github.com/smartbch/artifacts/releases/download/v0.0.3/dot.smartbchd.tgz; tar zxvf dot.smartbchd.tgz; cp -rf dot.smartbchd/* /opt/smartbchd/'"
+            )
+            typer.echo(output.stdout)
 
 
 def stop_node():
