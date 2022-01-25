@@ -8,6 +8,5 @@
 * [Architecture](architecture.md)
 * [Advance Usage](advance-usage.md)
 * [Sponsorship](sponsorship.md)
-* [Roadmap](roadmap.md)
 * [Contribution Guide](contribution-guide.md)
 * [Archived](archived.md)
