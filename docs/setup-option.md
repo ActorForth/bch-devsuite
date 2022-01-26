@@ -11,7 +11,7 @@
 * Local node (Bitcoin Unlimited node or Bitcoin Cash Node)
 * REST service (A rest.bitcoin.com-compatible or Bch-API)
 * SLP services (SLPDB, slpserve)
-* SmartBCH (https://smartbch.org/ Currently only support regtest)
+* SmartBCH (https://smartbch.org/)
 
 ### Local node
 

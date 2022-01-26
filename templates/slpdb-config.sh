@@ -15,10 +15,10 @@ echo "Finished DB migrations."
 
 # Set the full node IP address and port
 export rpc_protocol='http'
-export rpc_host=bch-node
+export rpc_host={{ config.bch_rpc_conf.host_without_protocol() }}
 export core_from=543375
 export core_from_testnet=0
-export zmq_incoming_host=bch-node
+export zmq_incoming_host={{ config.bch_rpc_conf.host_without_protocol() }}
 export zmq_incoming_port=28332
 
 # Turn off graph search
