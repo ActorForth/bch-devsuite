@@ -41,7 +41,7 @@ You can run this command and follow the command-line wizard
 
 ![build-config screencast](./assets/build-config.gif "build-config screencast")
 
-or create a config file by hand, note that you can remove the part if you don't want that component.
+or create a config file by hand, note that you can remove the part if you don't want that component. See [Configuration Examples](./configuration-examples.md) for more examples.
 
 ```toml
 # Example TOML config file

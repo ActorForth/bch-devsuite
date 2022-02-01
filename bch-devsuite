@@ -531,7 +531,8 @@ def read_config(input_file: Path):
             )
         if "smartbch" in cf and cf["smartbch"]:
             config.smartbch = SmartBCHConf(
-                enabled=cf["smartbch"]["enabled"], test_keys=cf["smartbch"]["test_keys"]
+                enabled=cf["smartbch"]["enabled"],
+                test_keys=cf["smartbch"].get("test_keys", []),
             )
         config.bch_rpc_conf = RPCConf(
             host=cf["bch_rpc_conf"]["host"],

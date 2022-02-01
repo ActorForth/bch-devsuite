@@ -49,7 +49,7 @@ deleteIfExists "SLPDB data" "./data/mongodb"
 deleteIfExists "indexer data" "./data/fulcrum"
 
 # Remove smartbch data
-deleteIfExists "SmartBCH data" "./data/smartbch"
+deleteIfExists "SmartBCH data" "./data/smartbchd"
 
 # Remove config file and lock
 deleteIfExists "config file" "./config.json"
