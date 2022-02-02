@@ -48,6 +48,9 @@ deleteIfExists "SLPDB data" "./data/mongodb"
 # Remove indexer data files
 deleteIfExists "indexer data" "./data/fulcrum"
 
+# Remove smartbch data
+deleteIfExists "SmartBCH data" "./data/smartbchd"
+
 # Remove config file and lock
 deleteIfExists "config file" "./config.json"
 deleteIfExists "config file" "./configs/bitcoin-unlimited.conf"

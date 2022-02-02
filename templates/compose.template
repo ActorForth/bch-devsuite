@@ -3,10 +3,10 @@ networks:
   {{ config.docker_network }}:
     external: true
 services:
+  {% if config.local_node %}
   ##############
   # LOCAL NODE #
   ##############
-  {% if config.local_node %}
   {% if config.local_node.node == 'bu' %}
   # Bitcoin Unlimited Node
   bch-node:
@@ -61,10 +61,10 @@ services:
     {% endif %}
   {% endif %}
   {% endif %}
+  {% if config.rest_service %}
   ################
   # REST SERVICE #
   ################
-  {% if config.rest_service %}
   {% if config.rest_service == 'bchapi' %}
   # bch-api
   bch-api:
@@ -155,10 +155,10 @@ services:
     {% endif %}
   {% endif %}
   {% endif %}
+  {% if config.slp %}
   #######
   # SLP #
   #######
-  {% if config.slp %}
   mongodb-slpdb:
     image: mongo:${TAG_MONGODB:-latest}
     container_name: mongodb-slpdb
@@ -214,6 +214,7 @@ services:
     {% endif %}
   {% endif %}
 
+  {% if config.smartbch.enabled %}
   ############
   # SMARTBCH #
   ############
@@ -242,4 +243,5 @@ services:
     ports:
       - "18545:8545"
       - "18546:8546"
+    {% endif %}
     {% endif %}
