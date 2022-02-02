@@ -52,8 +52,8 @@ exposed_ports = true
 docker_network = "bch-devsuite-network" # docker-network name
 
 [local_node] # Local node configuration
-node = "bu" # bu (bitcoin unlimited) or bchn bitcoin cash node
-wait_time = 6 # please do not touch this
+node = "bu" # bu (bitcoin unlimited) or bchn (bitcoin cash node)
+wait_time = 6 # a delay before running initializes command. Need to be high if you run on a slow system.
 
 [slp] # SLPDB
 username = "actorforth" # MongoDB username
