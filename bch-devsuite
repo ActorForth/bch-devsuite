@@ -26,8 +26,6 @@ __version__ = "0.1.0"
 DEFAULT_DOCKER_NETWORK = "bch-devsuite-network"
 DEFAULT_REGTEST_BLOCKS = 200
 DEFAULT_WAIT_TIME = 6
-BCH_GENERATE_ADDRESS = "bchreg:qzerfrqkvsclmrlx3hzl0j2ac2eh0k88wqa0efygtm"
-BCH_WIF = "cUDjy47QLpAUyv1beivDPoYCHjCRVqwRMwCuSnkdF4teVFBDD1ip"
 
 
 def subprocess_run(command):
