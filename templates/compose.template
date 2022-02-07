@@ -74,7 +74,7 @@ services:
       - BLOCKBOOK_URL=https://<Blockbook IP>:9131/
       - FULCRUM_PORT=50002
       - FULCRUM_URL=bch-nginx
-      - NETWORK={{ config.network }}
+      - NETWORK={{ config.network.value }}
       - NODE_TLS_REJECT_UNAUTHORIZED=0
       - REDIS_HOST=6379
       - REDIS_PORT=127.0.0.1
@@ -115,7 +115,7 @@ services:
     environment:
       - BITCOINCOM_BASEURL=http://opensight:3001/api/
       - DO_NOT_USE_RATE_LIMITS=true
-      - NETWORK={{ config.network }}
+      - NETWORK={{ config.network.value }}
       - PORT=3000
       - RPC_BASEURL={{ config.bch_rpc_conf.host }}:{{ config.bch_rpc_conf.port}}/
       - RPC_PASSWORD={{ config.bch_rpc_conf.password }}
