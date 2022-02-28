@@ -220,9 +220,9 @@ services:
   ############
   smartbch:
     {% if config.network == 'testnet' %}
-    image: ghcr.io/actorforth/smartbch-amber:${TAG_SMARTBCH:-v0.3.5}
+    image: smartbch/smartbchd:${TAG_SMARTBCH:-v0.4.2-amber}
     {% else %}
-    image: ghcr.io/actorforth/smartbch:${TAG_SMARTBCH:-v0.3.5}
+    image: smartbch/smartbchd:${TAG_SMARTBCH:-v0.4.2}
     {% endif %}
     container_name: smartbch
     restart: always

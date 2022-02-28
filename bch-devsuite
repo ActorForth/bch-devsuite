@@ -194,7 +194,7 @@ def handle_smartbch():
     if config.network == Network.REGTEST:
         typer.echo("Generate some private keys only used for test")
         output = subprocess_run(
-            f"docker run --rm -i ghcr.io/actorforth/smartbch:v0.3.5 gen-test-keys -n 10"
+            f"docker run --rm -i smartbch/smartbchd:v0.4.2 gen-test-keys -n 10"
         )
         config.smartbch = SmartBCHConf(
             enabled=True, test_keys=output.stdout.decode().strip().split("\n")
