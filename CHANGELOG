@@ -1,0 +1,8 @@
+# Changelog
+
+## [Unreleased]
+
+### Changed
+
+- Upgrade SmartBCH from v0.3.5 to v0.4.2
+- SmartBCH now use smartbch's official docker image
