@@ -4,11 +4,11 @@
 
 To run this node, you must have the follow software installed on your local machine:
 
-* Docker (including docker-compose)
-* Python 3
-* Virtualenv (`sudo apt install python3-venv`)
-* Openssl
-* Git
+- Docker (including docker-compose)
+- Python 3
+- Virtualenv (`sudo apt install python3-venv`)
+- Openssl
+- Git
 
 ### Cloning this repository
 
@@ -25,28 +25,65 @@ source ./venv/bin/activate
 pip install -r requirements.txt
 ```
 
+### Configuration
+
+bch-devsuite initialize the infrastructure from configuration file, see configuration for more details.
+
 ### Setup infrastructure
 
-This will check that the necessary software is installed, and then it will download and prepare the docker containers. For a full list of options, run ./setup with no arguments to see its usage.
+#### 1. Generate configuration
 
-**NOTE:** If you wish to have any custom changes applied to the Bitcoin Unlimited, or REST API services, be sure to apply those changes within the _bitcoin.conf_, _fulcrum-config.conf_, or _restapi-config.sh_ files, respectively, before executing the setup script. Bitcoin Cash Node can alternatively be used with fulcrum, by commenting out bitcoin unlimited and uncommenting bitcoin cash node and fulcrum. These can not currently run simultaneously, and one or the other must be used.
+You can run this command and follow the command-line wizard
 
 ```bash
-./bch-devsuite init
-# First we select a network, which must be regtest, mainnet or testnet
-# Next we specify the node, bitcoin unlimited or bitcoincash node
-# Next we select a rest interface, bchrest is a fork of the rest.bitcoin.com api, while bchapi is a rest utilized with the bch-js library
-# Slp is optional, selecting this option enables slpdb, slpserve and mongodb
-# Smartbch is optional, if the network is regtest, this also generate 10 test keys.
+./bch-devsuite build-config /tmp/bch-devsuite.toml
 ```
 
-**NOTE:** A RPC password and username prompt will appear for the node, these values will be stored in generated docker-compose.yml file.
+![build-config screencast](./assets/build-config.gif "build-config screencast")
 
-**NOTE:** The SLP option will prompt the user to input a MONGODB username and password, this is to prevent external parties from modifying your database if the ports are exposed.
+or create a config file by hand, note that you can remove the part if you don't want that component. See [Configuration Examples](./configuration-examples.md) for more examples.
+
+```toml
+# Example TOML config file
+
+network = "mainnet" # mainnet | testnet | regtest
+rest_service = "bchrest" # bchrest or bchapi
+exposed_ports = true
+docker_network = "bch-devsuite-network" # docker-network name
+
+[local_node] # Local node configuration
+node = "bu" # bu (bitcoin unlimited) or bchn (bitcoin cash node)
+wait_time = 6 # a delay before running initializes command. Need to be high if you run on a slow system.
+
+[slp] # SLPDB
+username = "actorforth" # MongoDB username
+password = "123ldsfoijqwerj" # MongoDB password
+
+[smartbch] # SmartBCH
+enabled = true
+test_keys = [ "0b7cdf43329298b26d34d311b25d39f19c60fff25ba45b121284f91e12f17658", "b4d85a7a944b08bab74d0e9e9d612ee409649b382e4de500ee3bd7b7e9c6954f", "216fe772968f326d1b992da744db79fcf06cf6f1142d18086fb4b5a7005cdb8f", "adb378c6b0b9b9cb6190c88cbcaa992388f8e37f1d9c7fc791d08201d04047dc", "09b13dbd311823699802bad7240315021f9e79fe029cc0c0a7a15ab614f303d3", "7c5f4f8eb1f8a82dc9f243350082a1542b2d77d09832023b5cf8f158196a717e", "2917909f71ca82665e6f9ab50b05ecc869f49b9157d0b17976ccd000b3987e29", "989a02864785024b8488d4b22bbdea98048389c18879c18a95e72fbca11c0048", "e473abfa2982915d2cadb204dd41e41afce1b4e8851783a6b1356f5e6784774b", "e3bab3da3a55ac52b241f5d4c2066125b47e197316339540536f66ff92f38585"] # test accounts, only needed for regtest
+
+[bch_rpc_conf]
+host = "http://bch-node" # BCH RPC host, leave it to be "http://bch-node" if you also run BCH local node with bch-devsuite
+port = "8332" # BCH RPC port
+username = "actorforth" # BCH RPC username
+password = "BWrzap0bqMjezoeHtOzgOOcUgzkxaL6w" # BCH RPC password
+```
+
+#### 2. Init infrastructure
+
+Run:
+
+```bash
+./bch-devsuite init -f /tmp/bch-devsuite.toml
+```
+
+This command will read configuration file, generate files, check necessary softwares is installed, and then it will download and prepare the docker containers.
+![init screencast](./assets/init.gif "init screencast")
 
 ### Running infrastructure
 
-Execute the _services_ script to start the node, indexer, rest API, and/or SLPDB (depending which ones chose in the _setup_ script).
+Execute the _services_ script to start the node, indexer, rest API, and/or SLPDB (depending which ones defined in configuration file).
 
 ```bash
 ./bch-devsuite start
@@ -60,7 +97,7 @@ Execute the _services_ script to start the node, indexer, rest API, and/or SLPDB
 
 Expected result
 
-```
+```json
 {
   "chain": "regtest",
   "blocks": 200,
@@ -96,10 +133,8 @@ Expected result
       }
     }
   ],
-  "bip9_softforks": {
-  },
-  "bip135_forks": {
-  }
+  "bip9_softforks": {},
+  "bip135_forks": {}
 }
 ```
 
@@ -116,7 +151,7 @@ Once you decide to call it a day, you can shut down your local environment by ex
 If you experience any issues, or would like to completely erase the current wallet and node containers, run the following script:
 
 ```bash
-./clean
+sudo ./clean
 ```
 
 **NOTE:** this command may need to be ran with sudo while on linux

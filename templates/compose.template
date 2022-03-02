@@ -3,10 +3,10 @@ networks:
   {{ config.docker_network }}:
     external: true
 services:
+  {% if config.local_node %}
   ##############
   # LOCAL NODE #
   ##############
-  {% if config.local_node %}
   {% if config.local_node.node == 'bu' %}
   # Bitcoin Unlimited Node
   bch-node:
@@ -61,10 +61,10 @@ services:
     {% endif %}
   {% endif %}
   {% endif %}
+  {% if config.rest_service %}
   ################
   # REST SERVICE #
   ################
-  {% if config.rest_service %}
   {% if config.rest_service == 'bchapi' %}
   # bch-api
   bch-api:
@@ -74,7 +74,7 @@ services:
       - BLOCKBOOK_URL=https://<Blockbook IP>:9131/
       - FULCRUM_PORT=50002
       - FULCRUM_URL=bch-nginx
-      - NETWORK={{ config.network }}
+      - NETWORK={{ config.network.value }}
       - NODE_TLS_REJECT_UNAUTHORIZED=0
       - REDIS_HOST=6379
       - REDIS_PORT=127.0.0.1
@@ -115,7 +115,7 @@ services:
     environment:
       - BITCOINCOM_BASEURL=http://opensight:3001/api/
       - DO_NOT_USE_RATE_LIMITS=true
-      - NETWORK={{ config.network }}
+      - NETWORK={{ config.network.value }}
       - PORT=3000
       - RPC_BASEURL={{ config.bch_rpc_conf.host }}:{{ config.bch_rpc_conf.port}}/
       - RPC_PASSWORD={{ config.bch_rpc_conf.password }}
@@ -155,10 +155,10 @@ services:
     {% endif %}
   {% endif %}
   {% endif %}
+  {% if config.slp %}
   #######
   # SLP #
   #######
-  {% if config.slp %}
   mongodb-slpdb:
     image: mongo:${TAG_MONGODB:-latest}
     container_name: mongodb-slpdb
@@ -214,14 +214,15 @@ services:
     {% endif %}
   {% endif %}
 
+  {% if config.smartbch.enabled %}
   ############
   # SMARTBCH #
   ############
   smartbch:
     {% if config.network == 'testnet' %}
-    image: ghcr.io/actorforth/smartbch-amber:${TAG_SMARTBCH:-v0.3.5}
+    image: smartbch/smartbchd:${TAG_SMARTBCH:-v0.4.2-amber}
     {% else %}
-    image: ghcr.io/actorforth/smartbch:${TAG_SMARTBCH:-v0.3.5}
+    image: smartbch/smartbchd:${TAG_SMARTBCH:-v0.4.2}
     {% endif %}
     container_name: smartbch
     restart: always
@@ -242,4 +243,5 @@ services:
     ports:
       - "18545:8545"
       - "18546:8546"
+    {% endif %}
     {% endif %}
