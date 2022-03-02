@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.2.1 [2022-03-02]
+
+### Bug Fixed
+- bch-devsuite use incorrect SmartBCH configuration file for Mainnet and Testnet.
+
 ## v1.2.0 [2022-03-02]
 
 ### Changed
