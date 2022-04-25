@@ -9,5 +9,6 @@
 * [Architecture](architecture.md)
 * [Advance Usage](advance-usage.md)
 * [Sponsorship](sponsorship.md)
+* [Known Issues](known-issues.md)
 * [Contribution Guide](contribution-guide.md)
 * [Archived](archived.md)
