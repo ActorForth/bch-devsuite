@@ -1,6 +1,7 @@
 # Table of contents
 
 * [Getting started](README.md)
+* [Configuration Examples](configuration-examples.md)
 * [Getting started with SDK](getting-started-with-sdk/README.md)
   * [Geting started with bch-js](getting-started-with-sdk/geting-started-with-bch-js.md)
   * [Getting started with BitCash](getting-started-with-sdk/getting-started-with-bitcash.md)
