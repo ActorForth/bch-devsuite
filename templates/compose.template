@@ -10,7 +10,7 @@ services:
   {% if config.local_node.node == 'bu' %}
   # Bitcoin Unlimited Node
   bch-node:
-    image: ghcr.io/actorforth/bitcoin-unlimited:${TAG_BITCOINUNLIMITED:-latest}
+    image: zquestz/bitcoin-unlimited:${TAG_BITCOINUNLIMITED:-1.10.0.0}
     container_name: bch-node
     volumes:
       - ./data/bitcoind:/data
@@ -29,7 +29,7 @@ services:
   {% elif config.local_node.node == 'bchn' %}
   # Bitcoin Cash Node
   bch-node:
-    image: ghcr.io/actorforth/bitcoin-cash-node:${TAG_BITCOINCASHNODE:-latest}
+    image: zquestz/bitcoin-cash-node:${TAG_BITCOINCASHNODE:-24.0.0}
     container_name: bch-node
     volumes:
       - ./data/bitcoind:/data

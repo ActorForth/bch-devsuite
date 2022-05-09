@@ -18,6 +18,7 @@ from urllib.parse import urlparse
 import inquirer
 import toml
 import typer
+import yaml
 from eth_account import Account
 from jinja2 import Environment, FileSystemLoader
 
@@ -572,6 +573,25 @@ def init(
 
 
 @app.command()
+def upgrade(
+    config_file: Optional[Path] = typer.Option(
+        None, "-f", "--config-file", prompt=True
+    ),
+):
+    """
+    Initialise bch-devsuite
+    """
+    read_config(config_file)
+    validate_dependencies()
+    typer.echo("\n##############")
+    typer.echo("# SETTING UP #")
+    typer.echo("##############")
+    setup_docker_compose()
+    pull_images()
+    finish()
+
+
+@app.command()
 def build_config(output: Path):
     """
     Build configuration and output to a file
@@ -600,7 +620,7 @@ def build_config(output: Path):
     with open(output, "w") as f:
         f.write(toml.dumps(asdict(config)))
         typer.echo(
-            f"Config file generated and saved at {output.absolute()}, you can initialize the bch-devsuite stack with ./bch-devsuite init {output.absolute()}"
+            f"Config file generated and saved at {output.absolute()}, you can initialize the bch-devsuite stack with ./bch-devsuite init -f {output.absolute()}"
         )
 
 
@@ -608,6 +628,26 @@ def remove(name: str, path: str):
     typer.echo(f"Removing {name}...", nl=False)
     subprocess.run(f"rm -rf {path}", shell=True, check=True)
     typer.echo(success)
+
+
+def check_dependencies():
+    dependencies = {
+        "bch-node": {
+            "image": {
+                "ghcr.io/actorforth/bitcoin-cash-node:${TAG_BITCOINCASHNODE:-latest}": "zquestz/bitcoin-cash-node:${TAG_BITCOINCASHNODE:-24.0.0}",
+                "ghcr.io/actorforth/bitcoin-unlimited:${TAG_BITCOINUNLIMITED:-latest}": "zquestz/bitcoin-unlimited:${TAG_BITCOINUNLIMITED:-1.10.0.0}",
+            }
+        },
+    }
+    with open("docker-compose.yml", "r") as docker_compose_file:
+        docker_compose = yaml.safe_load(docker_compose_file)
+    for service, conf in dependencies.items():
+        docker_compose_services = docker_compose["services"]
+        if service in docker_compose_services:
+            current_image = docker_compose_services[service]["image"]
+            if current_image in conf["image"]:
+                print("Found outdated image(s)")
+                print("Please run ./bch-devsuite upgrade -f CONFIG_FILE")
 
 
 @app.command()
@@ -637,6 +677,7 @@ def start():
     Start the local system
     """
     check_setup()
+    check_dependencies()
     subprocess.run(f"docker-compose up -d", shell=True, check=True)
 
 
