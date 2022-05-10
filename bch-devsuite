@@ -639,6 +639,12 @@ def check_dependencies():
                 "ghcr.io/actorforth/bitcoin-unlimited:${TAG_BITCOINUNLIMITED:-latest}": "zquestz/bitcoin-unlimited:${TAG_BITCOINUNLIMITED:-1.10.0.0}",
             }
         },
+        "smartbch": {
+            "image": {
+                "smartbch/smartbchd:${TAG_SMARTBCH:-v0.4.2}": "smartbch/smartbchd:${TAG_SMARTBCH:-v0.4.4}",
+                "smartbch/smartbchd:${TAG_SMARTBCH:-v0.4.2-amber}": "smartbch/smartbchd:${TAG_SMARTBCH:-v0.4.4-amber}",
+            }
+        },
     }
     with open("docker-compose.yml", "r") as docker_compose_file:
         docker_compose = yaml.safe_load(docker_compose_file)
@@ -649,6 +655,7 @@ def check_dependencies():
             if current_image in conf["image"]:
                 print("Found outdated image(s)")
                 print("Please run ./bch-devsuite upgrade -f CONFIG_FILE")
+                sys.exit(0)
 
 
 @app.command()
