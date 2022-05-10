@@ -586,6 +586,7 @@ def upgrade(
     typer.echo("\n##############")
     typer.echo("# SETTING UP #")
     typer.echo("##############")
+    setup_local_node()
     setup_docker_compose()
     pull_images()
     finish()
