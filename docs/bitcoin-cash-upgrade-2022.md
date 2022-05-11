@@ -1,6 +1,6 @@
 # Bitcoin Cash Upgrade 2022
 
-On May 15th, 2022, Bitcoin Cash will undergo a technical upgrade to further expand its virtual machine (VM) contracting capabilities. bch-devsuite users have to perform the upgrade before that.
+On May 15th, 2022, Bitcoin Cash will undergo a technical upgrade to further expand its virtual machine (VM) contracting capabilities. bch-devsuite version < 1.3.0 have to perform the upgrade.
 
 ## Instructions
 
