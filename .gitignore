@@ -25,5 +25,6 @@ config.json
 
 venv/
 docker-compose.yml
+docker-compose.smartbch.yml
 .vscode/
 /configs/slpdb-config.sh
