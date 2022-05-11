@@ -672,8 +672,8 @@ def check_dependencies():
         },
         "smartbch": {
             "image": {
-                "smartbch/smartbchd:${TAG_SMARTBCH:-v0.4.2}": "smartbch/smartbchd:${TAG_SMARTBCH:-v0.4.4}",
-                "smartbch/smartbchd:${TAG_SMARTBCH:-v0.4.2-amber}": "smartbch/smartbchd:${TAG_SMARTBCH:-v0.4.4-amber}",
+                # "smartbch/smartbchd:${TAG_SMARTBCH:-v0.4.2}": "smartbch/smartbchd:${TAG_SMARTBCH:-v0.4.4}",
+                # "smartbch/smartbchd:${TAG_SMARTBCH:-v0.4.2-amber}": "smartbch/smartbchd:${TAG_SMARTBCH:-v0.4.4-amber}",
             }
         },
     }
