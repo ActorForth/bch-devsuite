@@ -214,34 +214,3 @@ services:
     {% endif %}
   {% endif %}
 
-  {% if config.smartbch.enabled %}
-  ############
-  # SMARTBCH #
-  ############
-  smartbch:
-    {% if config.network == 'testnet' %}
-    image: smartbch/smartbchd:${TAG_SMARTBCH:-v0.4.2-amber}
-    {% else %}
-    image: smartbch/smartbchd:${TAG_SMARTBCH:-v0.4.2}
-    {% endif %}
-    container_name: smartbch
-    restart: always
-    {% if config.network == 'regtest' %}
-    command: start --home /opt/smartbchd --mainnet-rpc-url={{ config.bch_rpc_conf.host }}:{{ config.bch_rpc_conf.port}} --mainnet-rpc-username={{ config.bch_rpc_conf.username }} --mainnet-rpc-password={{ config.bch_rpc_conf.password }} --unlock {{ ','.join(config.smartbch.test_keys) }}
-    {% endif %}
-    {% if config.network == 'testnet' %}
-    command: start --home /opt/smartbchd --mainnet-genesis-height=602983
-    {% endif %}
-    {% if config.network == 'mainnet' %}
-    command: start --home /opt/smartbchd --mainnet-rpc-url={{ config.bch_rpc_conf.host }}:{{ config.bch_rpc_conf.port}} --mainnet-rpc-username={{ config.bch_rpc_conf.username }} --mainnet-rpc-password={{ config.bch_rpc_conf.password }} --mainnet-genesis-height=698502
-    {% endif %}
-    volumes:
-      - ./data/smartbchd:/opt/smartbchd/
-    networks:
-      - {{ config.docker_network }}
-    {% if config.exposed_ports %}
-    ports:
-      - "18545:8545"
-      - "18546:8546"
-    {% endif %}
-    {% endif %}

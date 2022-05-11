@@ -58,6 +58,7 @@ deleteIfExists "config file" "./configs/bitcoincashnode.conf"
 deleteIfExists "config file" "./configs/temp-fulcrum-config.conf"
 deleteIfExists "config file" "./configs/env.env"
 deleteIfExists "docker-compose" "./docker-compose.yml"
+deleteIfExists "docker-compose.smartbch" "./docker-compose.smartbch.yml"
 deleteIfExists "lock" "./.lock"
 
 deleteIfExists "openssl certificate" "./configs/cert"
