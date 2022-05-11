@@ -698,6 +698,7 @@ def check_dependencies():
 
 
 def getblockchaininfo():
+    time.sleep(5)
     return json.loads(
         subprocess.run(
             "./bitcoin-cli getblockchaininfo",
