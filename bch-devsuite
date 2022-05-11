@@ -541,6 +541,40 @@ def read_config(input_file: Path):
         )
 
 
+def read_lock():
+    global config
+    with open(".lock", "r") as f:
+        cf = json.load(f)
+        # network
+        config.network = Network(cf["network"])
+        # local node
+        if "local_node" in cf and cf["local_node"]:
+            cf_local_node = cf["local_node"]
+            config.local_node = LocalNode(
+                node=cf_local_node["node"],
+                regtest_blocks=cf_local_node.get("regtest_blocks"),
+            )
+        # rest service
+        if "rest_service" in cf and cf["rest_service"]:
+            config.rest_service = RestService(cf["rest_service"])
+        # slp
+        if "slp" in cf and cf["slp"]:
+            config.slp = SLPMongoConf(
+                username=cf["slp"]["username"], password=cf["slp"]["password"]
+            )
+        if "smartbch" in cf and cf["smartbch"]:
+            config.smartbch = SmartBCHConf(
+                enabled=cf["smartbch"]["enabled"],
+                test_keys=cf["smartbch"].get("test_keys", []),
+            )
+        config.bch_rpc_conf = RPCConf(
+            host=cf["bch_rpc_conf"]["host"],
+            port=cf["bch_rpc_conf"]["port"],
+            username=cf["bch_rpc_conf"]["username"],
+            password=cf["bch_rpc_conf"]["password"],
+        )
+
+
 @app.command()
 def init(
     version: Optional[bool] = typer.Option(
@@ -573,15 +607,12 @@ def init(
 
 
 @app.command()
-def upgrade(
-    config_file: Optional[Path] = typer.Option(
-        None, "-f", "--config-file", prompt=True
-    ),
-):
+def upgrade():
     """
     Initialise bch-devsuite
     """
-    read_config(config_file)
+    check_setup()
+    read_lock()
     validate_dependencies()
     typer.echo("\n##############")
     typer.echo("# SETTING UP #")
@@ -654,7 +685,7 @@ def check_dependencies():
             current_image = docker_compose_services[service]["image"]
             if current_image in conf["image"]:
                 print("Found outdated image(s)")
-                print("Please run ./bch-devsuite upgrade -f CONFIG_FILE")
+                print("Please run ./bch-devsuite upgrade")
                 sys.exit(0)
 
 
