@@ -18,10 +18,11 @@ from urllib.parse import urlparse
 import inquirer
 import toml
 import typer
+import yaml
 from eth_account import Account
 from jinja2 import Environment, FileSystemLoader
 
-__version__ = "0.1.0"
+__version__ = "1.3.0"
 
 DEFAULT_DOCKER_NETWORK = "bch-devsuite-network"
 DEFAULT_REGTEST_BLOCKS = 200
@@ -194,7 +195,7 @@ def handle_smartbch():
     if config.network == Network.REGTEST:
         typer.echo("Generate some private keys only used for test")
         output = subprocess_run(
-            f"docker run --rm -i smartbch/smartbchd:v0.4.2 gen-test-keys -n 10"
+            f"docker run --rm -i smartbch/smartbchd:v0.4.4 gen-test-keys -n 10"
         )
         config.smartbch = SmartBCHConf(
             enabled=True, test_keys=output.stdout.decode().strip().split("\n")
@@ -345,6 +346,13 @@ def setup_docker_compose():
                 config=config, rpc_port=config.rpc_port()
             )
         )
+    if config.smartbch.enabled:
+        with open("docker-compose.smartbch.yml", "w") as smartbch_compose_file:
+            smartbch_compose_file.write(
+                templates.get_template("compose.smartbch.template").render(
+                    config=config, rpc_port=config.rpc_port()
+                )
+            )
     with open(".lock", "w") as lock_file:
         json.dump(
             {
@@ -427,12 +435,12 @@ def initialize_smartbch():
             typer.echo(validator_address)
             typer.echo("Initialize the node data using test keys generated above")
             output = subprocess_run(
-                f"docker-compose run --rm smartbch --home /opt/smartbchd init mynode --chain-id 0x2711 --init-balance=1000000000000000000000000000000 --test-keys={','.join(private_keys)} --overwrite"
+                f"docker-compose -f docker-compose.smartbch.yml run --rm smartbch --home /opt/smartbchd init mynode --chain-id 0x2711 --init-balance=1000000000000000000000000000000 --test-keys={','.join(private_keys)} --overwrite"
             )
             typer.echo(output.stdout)
             typer.echo("generate genesis validator consensus key info")
             output = subprocess_run(
-                f"docker-compose run --entrypoint /bin/sh smartbch -c './smartbchd --home /opt/smartbchd generate-consensus-key-info; cp ./priv_validator_key.json /opt/smartbchd/config/'"
+                f"docker-compose -f docker-compose.smartbch.yml run --entrypoint /bin/sh smartbch -c './smartbchd --home /opt/smartbchd generate-consensus-key-info; cp ./priv_validator_key.json /opt/smartbchd/config/'"
             )
             consensus_pubkey = output.stdout.decode().strip()
             typer.echo(consensus_pubkey)
@@ -442,31 +450,31 @@ def initialize_smartbch():
             # Since now we are just running a single node for test, the key file is not so important.
             # In production, a validator's operator must take good care of this key file priv_validator_key.json and back it up safely.
             output = subprocess_run(
-                f"docker-compose run --rm smartbch --home /opt/smartbchd generate-genesis-validator --validator-address={validator_address} --consensus-pubkey={consensus_pubkey} --voting-power=1 --staking-coin=1000000000000000000000 --introduction='freeman'"
+                f"docker-compose -f docker-compose.smartbch.yml run --rm smartbch --home /opt/smartbchd generate-genesis-validator --validator-address={validator_address} --consensus-pubkey={consensus_pubkey} --voting-power=1 --staking-coin=1000000000000000000000 --introduction='freeman'"
             )
             # The output hex string contains the information of a validator.
             genesis_validator = output.stdout.decode().strip()
             typer.echo(genesis_validator)
             output = subprocess_run(
-                f"docker-compose run --rm smartbch --home /opt/smartbchd add-genesis-validator {genesis_validator}"
+                f"docker-compose -f docker-compose.smartbch.yml run --rm smartbch --home /opt/smartbchd add-genesis-validator {genesis_validator}"
             )
         elif config.network == Network.TESTNET:
             typer.echo("Init smartbchd testnet node")
             output = subprocess_run(
-                f"docker-compose run --rm smartbch --home /opt/smartbchd init mynode --chain-id 0x2711"
+                f"docker-compose -f docker-compose.smartbch.yml run --rm smartbch --home /opt/smartbchd init mynode --chain-id 0x2711"
             )
             typer.echo(output.stdout)
             output = subprocess_run(
-                f"docker-compose run --rm --entrypoint /bin/sh smartbch -c 'apt update; apt install -y wget; wget https://github.com/smartbch/artifacts/releases/download/v0.0.5/dot.smartbchd.tgz; tar zxvf dot.smartbchd.tgz; cp -rf dot.smartbchd/* /opt/smartbchd/'"
+                f"docker-compose -f docker-compose.smartbch.yml run --rm --entrypoint /bin/sh smartbch -c 'apt update; apt install -y wget; wget https://github.com/smartbch/artifacts/releases/download/v0.0.5/dot.smartbchd.tgz; tar zxvf dot.smartbchd.tgz; cp -rf dot.smartbchd/* /opt/smartbchd/'"
             )
             typer.echo(output.stdout)
         elif config.network == Network.MAINNET:
             output = subprocess_run(
-                f"docker-compose run --rm smartbch --home /opt/smartbchd init mynode --chain-id 0x2710"
+                f"docker-compose -f docker-compose.smartbch.yml run --rm smartbch --home /opt/smartbchd init mynode --chain-id 0x2710"
             )
             typer.echo(output.stdout)
             output = subprocess_run(
-                f"docker-compose run --rm --entrypoint /bin/sh smartbch -c 'apt update; apt install -y wget; wget https://github.com/smartbch/artifacts/releases/download/v0.0.6/dot.smartbchd.tgz; tar zxvf dot.smartbchd.tgz; cp -rf dot.smartbchd/* /opt/smartbchd/'"
+                f"docker-compose -f docker-compose.smartbch.yml run --rm --entrypoint /bin/sh smartbch -c 'apt update; apt install -y wget; wget https://github.com/smartbch/artifacts/releases/download/v0.0.6/dot.smartbchd.tgz; tar zxvf dot.smartbchd.tgz; cp -rf dot.smartbchd/* /opt/smartbchd/'"
             )
             typer.echo(output.stdout)
 
@@ -476,12 +484,13 @@ def stop_node():
     Stop local node
     """
     if config.local_node:
-        typer.echo("Stopping local node...", nl=False)
-        subprocess.run(
-            f"docker-compose exec -T bch-node bitcoin-cli -conf=/bitcoin.conf stop",
-            shell=True,
-        )
-        typer.echo(success)
+        if config.network == Network.REGTEST:
+            typer.echo("Stopping local node...", nl=False)
+            subprocess.run(
+                f"docker-compose exec -T bch-node bitcoin-cli -conf=/bitcoin.conf stop",
+                shell=True,
+            )
+            typer.echo(success)
 
 
 def validate_dependencies():
@@ -510,6 +519,40 @@ def read_config(input_file: Path):
     global config
     with open(input_file, "r") as f:
         cf = toml.loads(f.read())
+        # network
+        config.network = Network(cf["network"])
+        # local node
+        if "local_node" in cf and cf["local_node"]:
+            cf_local_node = cf["local_node"]
+            config.local_node = LocalNode(
+                node=cf_local_node["node"],
+                regtest_blocks=cf_local_node.get("regtest_blocks"),
+            )
+        # rest service
+        if "rest_service" in cf and cf["rest_service"]:
+            config.rest_service = RestService(cf["rest_service"])
+        # slp
+        if "slp" in cf and cf["slp"]:
+            config.slp = SLPMongoConf(
+                username=cf["slp"]["username"], password=cf["slp"]["password"]
+            )
+        if "smartbch" in cf and cf["smartbch"]:
+            config.smartbch = SmartBCHConf(
+                enabled=cf["smartbch"]["enabled"],
+                test_keys=cf["smartbch"].get("test_keys", []),
+            )
+        config.bch_rpc_conf = RPCConf(
+            host=cf["bch_rpc_conf"]["host"],
+            port=cf["bch_rpc_conf"]["port"],
+            username=cf["bch_rpc_conf"]["username"],
+            password=cf["bch_rpc_conf"]["password"],
+        )
+
+
+def read_lock():
+    global config
+    with open(".lock", "r") as f:
+        cf = json.load(f)
         # network
         config.network = Network(cf["network"])
         # local node
@@ -572,6 +615,23 @@ def init(
 
 
 @app.command()
+def upgrade():
+    """
+    Initialise bch-devsuite
+    """
+    check_setup()
+    read_lock()
+    validate_dependencies()
+    typer.echo("\n##############")
+    typer.echo("# SETTING UP #")
+    typer.echo("##############")
+    setup_local_node()
+    setup_docker_compose()
+    pull_images()
+    finish()
+
+
+@app.command()
 def build_config(output: Path):
     """
     Build configuration and output to a file
@@ -600,7 +660,7 @@ def build_config(output: Path):
     with open(output, "w") as f:
         f.write(toml.dumps(asdict(config)))
         typer.echo(
-            f"Config file generated and saved at {output.absolute()}, you can initialize the bch-devsuite stack with ./bch-devsuite init {output.absolute()}"
+            f"Config file generated and saved at {output.absolute()}, you can initialize the bch-devsuite stack with ./bch-devsuite init -f {output.absolute()}"
         )
 
 
@@ -608,6 +668,49 @@ def remove(name: str, path: str):
     typer.echo(f"Removing {name}...", nl=False)
     subprocess.run(f"rm -rf {path}", shell=True, check=True)
     typer.echo(success)
+
+
+def check_dependencies():
+    dependencies = {
+        "bch-node": {
+            "image": {
+                "ghcr.io/actorforth/bitcoin-cash-node:${TAG_BITCOINCASHNODE:-latest}": "zquestz/bitcoin-cash-node:${TAG_BITCOINCASHNODE:-24.0.0}",
+                "ghcr.io/actorforth/bitcoin-unlimited:${TAG_BITCOINUNLIMITED:-latest}": "zquestz/bitcoin-unlimited:${TAG_BITCOINUNLIMITED:-1.10.0.0}",
+            }
+        },
+        "smartbch": {
+            "image": {
+                "smartbch/smartbchd:${TAG_SMARTBCH:-v0.4.4}": "smartbch/smartbchd:${TAG_SMARTBCH:-v0.4.4}",
+                "smartbch/smartbchd:${TAG_SMARTBCH:-v0.4.4-amber}": "smartbch/smartbchd:${TAG_SMARTBCH:-v0.4.4-amber}",
+            }
+        },
+    }
+    with open("docker-compose.yml", "r") as docker_compose_file:
+        docker_compose = yaml.safe_load(docker_compose_file)
+    for service, conf in dependencies.items():
+        docker_compose_services = docker_compose["services"]
+        if service in docker_compose_services:
+            current_image = docker_compose_services[service]["image"]
+            if current_image in conf["image"]:
+                print("Found outdated image(s)")
+                print("Please run ./bch-devsuite upgrade")
+                sys.exit(0)
+
+
+def getblockchaininfo():
+    time.sleep(5)
+    return json.loads(
+        subprocess.run(
+            "./bitcoin-cli getblockchaininfo",
+            shell=True,
+            check=True,
+            stdout=subprocess.PIPE,
+        ).stdout.decode("utf-8")
+    )
+
+
+def initialblockdownload():
+    return getblockchaininfo()["initialblockdownload"]
 
 
 @app.command()
@@ -637,7 +740,41 @@ def start():
     Start the local system
     """
     check_setup()
+    check_dependencies()
     subprocess.run(f"docker-compose up -d", shell=True, check=True)
+    if os.path.isfile("docker-compose.smartbch.yml"):
+        if not initialblockdownload():
+            subprocess.run(
+                f"docker-compose -f docker-compose.smartbch.yml up -d",
+                shell=True,
+                check=True,
+            )
+        else:
+            typer.echo(
+                "Cannot start smartbch due to the BCH Node is syncing up, try ./bch-devsuite start-smartbch later"
+            )
+
+
+@app.command()
+def start_smartbch():
+    """
+    Start smartbch
+    """
+    check_setup()
+    check_dependencies()
+    if os.path.isfile("docker-compose.smartbch.yml"):
+        if not initialblockdownload():
+            subprocess.run(
+                f"docker-compose -f docker-compose.smartbch.yml up -d",
+                shell=True,
+                check=True,
+            )
+        else:
+            typer.echo(
+                "Cannot start smartbch due to the BCH Node is syncing up, try ./bch-devsuite start-smartbch later"
+            )
+    else:
+        typer.echo("Smartbch not setup, do nothing.")
 
 
 @app.command()
@@ -646,7 +783,14 @@ def stop():
     Stop the local system
     """
     check_setup()
-    subprocess.run(f"docker-compose stop", shell=True, check=True)
+    included_smartbch = ""
+    if os.path.isfile("docker-compose.smartbch.yml"):
+        included_smartbch = "-f docker-compose.smartbch.yml"
+    subprocess.run(
+        f"docker-compose -f docker-compose.yml {included_smartbch} stop",
+        shell=True,
+        check=True,
+    )
 
 
 if __name__ == "__main__":
