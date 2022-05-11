@@ -793,10 +793,5 @@ def stop():
     )
 
 
-@app.command()
-def getblock():
-    print(initialblockdownload())
-
-
 if __name__ == "__main__":
     app()
