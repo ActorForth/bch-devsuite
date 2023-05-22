@@ -10,7 +10,7 @@ services:
   {% if config.local_node.node == 'bu' %}
   # Bitcoin Unlimited Node
   bch-node:
-    image: ghcr.io/actorforth/bitcoin-unlimited:${TAG_BITCOINUNLIMITED:-release-1.10.0.0}
+    image: ghcr.io/actorforth/bitcoin-unlimited:${TAG_BITCOINUNLIMITED:-release-2.0.0.0}
     container_name: bch-node
     volumes:
       - ./data/bitcoind:/data
