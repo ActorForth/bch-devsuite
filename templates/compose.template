@@ -29,7 +29,7 @@ services:
   {% elif config.local_node.node == 'bchn' %}
   # Bitcoin Cash Node
   bch-node:
-    image: zquestz/bitcoin-cash-node:${TAG_BITCOINCASHNODE:-24.0.0}
+    image: zquestz/bitcoin-cash-node:${TAG_BITCOINCASHNODE:-26.0.0}
     container_name: bch-node
     volumes:
       - ./data/bitcoind:/data
