@@ -29,7 +29,7 @@ services:
   {% elif config.local_node.node == 'bchn' %}
   # Bitcoin Cash Node
   bch-node:
-    image: zquestz/bitcoin-cash-node:${TAG_BITCOINCASHNODE:-26.0.0}
+    image: zquestz/bitcoin-cash-node:${TAG_BITCOINCASHNODE:-28.0.1}
     container_name: bch-node
     volumes:
       - ./data/bitcoind:/data
@@ -50,7 +50,7 @@ services:
       - bch-node
     volumes:
       - ./data/fulcrum:/data
-      - ./configs/temp-fulcrum-config.conf:/config.conf
+      - ./configs/fulcrum.conf:/config.conf
     restart: always
     command: ["Fulcrum", "/config.conf"]
     networks:
@@ -146,6 +146,10 @@ services:
       - NODE_RPC_PORT={{ config.bch_rpc_conf.port}}
       - NODE_RPC_USER={{ config.bch_rpc_conf.username }}
       - OPENSIGHT_PORT=3001
+      - SESSION_TIMEOUT=45
+    depends_on:
+      - fulcrum
+      - bch-node
     restart: always
     networks:
       - {{ config.docker_network }}
