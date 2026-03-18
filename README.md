@@ -37,7 +37,6 @@ This will check that the necessary software is installed, and then it will downl
 # Next we specify the node, bitcoin unlimited or bitcoincash node
 # Next we select a rest interface, bchrest is a fork of the rest.bitcoin.com api, while bchapi is a rest utilized with the bch-js library
 # Slp is optional, selecting this option enables slpdb, slpserve and mongodb
-# Smartbch is optional, if the network is regtest, this also generate 10 test keys.
 ```
 
 **NOTE:** A RPC password and username prompt will appear for the node, these values will be stored in generated docker-compose.yml file.
@@ -136,7 +135,6 @@ If you experience any issues, or would like to completely erase the current wall
 * Local node (Bitcoin Unlimited node or Bitcoin Cash Node)
 * REST service (A rest.bitcoin.com-compatible or Bch-API)
 * SLP services (SLPDB, slpserve)
-* SmartBCH (https://smartbch.org/ Currently only support regtest)
 
 ### Local node
 
