@@ -29,12 +29,12 @@ pip install -r requirements.txt
 
 This will check that the necessary software is installed, and then it will download and prepare the docker containers. For a full list of options, run ./setup with no arguments to see its usage.
 
-**NOTE:** If you wish to have any custom changes applied to the Bitcoin Unlimited, or REST API services, be sure to apply those changes within the _bitcoin.conf_, _fulcrum-config.conf_, or _restapi-config.sh_ files, respectively, before executing the setup script. Bitcoin Cash Node can alternatively be used with fulcrum, by commenting out bitcoin unlimited and uncommenting bitcoin cash node and fulcrum. These can not currently run simultaneously, and one or the other must be used.
+**NOTE:** If you wish to have any custom changes applied to the Bitcoin Cash Node or REST API services, be sure to apply those changes within the _bitcoin.conf_, _fulcrum-config.conf_, or _restapi-config.sh_ files, respectively, before executing the setup script.
 
 ```bash
 ./bch-devsuite init
 # First we select a network, which must be regtest, mainnet or testnet
-# Next we specify the node, bitcoin unlimited or bitcoincash node
+# Next we specify the node (Bitcoin Cash Node)
 # Next we select a rest interface, bchrest is a fork of the rest.bitcoin.com api, while bchapi is a rest utilized with the bch-js library
 # Slp is optional, selecting this option enables slpdb, slpserve and mongodb
 ```
@@ -132,13 +132,12 @@ If you experience any issues, or would like to completely erase the current wall
 
 ### Component
 
-* Local node (Bitcoin Unlimited node or Bitcoin Cash Node)
+* Local node (Bitcoin Cash Node)
 * REST service (A rest.bitcoin.com-compatible or Bch-API)
 * SLP services (SLPDB, slpserve)
 
 ### Local node
 
-* Bitcoin Unlimited Node
 * Bitcoin Cash Node
 
 ### REST Service
@@ -158,7 +157,7 @@ All these components work together in a stack, which means that if the lower par
 
 The main reason why you should use all of our fork stacks is because we maintain and guarantee that all of the components will work well with the Regtest address format. Allowing you to test locally more easily.
 
-The blue part is the node that you choose. The default node is Bitcoin unlimited and there is Bitcoin Cash node as an option as well. Currently, this node is always required.
+The blue part is the node (Bitcoin Cash Node). This node is always required.
 
 The red part is an indexer. ElectrsCash is for indexing Bitcoin cash transactions and aggregate BCH balance per address. Without these, you won't be able to query the amount of BCH you own in a particular address. OpenSight is a shim micro service to make ElectrsCash compatible with [rest.bitcoin.com](https://github.com/ActorForth/rest.bitcoin.com) API interface. [SLPDB](slp.dev/tooling/slpdb/#what-is-slpdb) is an indexer for SLP token, color coin on top of Bitcoin Cash, this will be verified if the data relate to the color coin is valid and checks if the coin follows the SLP off-chain consensus.
 
@@ -186,11 +185,11 @@ provide a way to funding us
 
 ### About
 
-This repo intends to be a toolkit for running a local version of a Bitcoin Unlimited for development and testing purposes. Currently it provides a self-hosted local node, indexer (Electrs), a drop-in Ninsight replacement (Opensight), a regtest version of the [rest.bitcoin.com](https://github.com/ActorForth/rest.bitcoin.com) REST APIs, an instance of SLPDB for token querying.
+This repo intends to be a toolkit for running a local BCH node for development and testing purposes. Currently it provides a self-hosted local node (Bitcoin Cash Node), indexer (Fulcrum), a drop-in Ninsight replacement (Opensight), a regtest version of the [rest.bitcoin.com](https://github.com/ActorForth/rest.bitcoin.com) REST APIs, an instance of SLPDB for token querying.
 
 ### Known Issues
 
 There are a few issues with this setup that could use improvement in the future.
 
-* Currently, this setup relies on the built-in Electrscash indexing server included in the Bitcoin Unlimited node. This isn't an issue per se, but to test with other nodes (such as Bitcoin ABC, Bitcoin Cash Node, or bchd) it will be necessary to seperate the indexing server into a seperate container.
+* The setup uses Fulcrum as the Electrum indexing server alongside Bitcoin Cash Node.
 * Currently blocks must be generated manually after transactions are made in order to mine them into blocks. The possibility of adding an automation to generate a block every few minutes could be a consideration to look into.

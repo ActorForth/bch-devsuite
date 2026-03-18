@@ -43,7 +43,6 @@ def subprocess_run(command):
 
 
 class LocalNodeType(str, Enum):
-    BITCOIN_UNLIMITED = "bu"
     BITCOIN_CASH_NODE = "bchn"
 
 
@@ -110,11 +109,11 @@ class InitConfig:
 
 
 COMPONENTS = [
-    ("Local node (Bitcoin Unlimited node or Bitcoin Cash Node)", "local_node"),
+    ("Local node (Bitcoin Cash Node)", "local_node"),
     ("REST service (A rest.bitcoin.com-compatible or Bch-API)", "restapi"),
     ("SLP services (SLPDB, slpserve)", "slp"),
 ]
-LOCAL_NODES = [("Bitcoin Unlimited Node", "bu"), ("Bitcoin Cash Node", "bchn")]
+LOCAL_NODES = [("Bitcoin Cash Node", "bchn")]
 NETWORKS = [e.value for e in Network]
 REST_SERVICES = [e.value for e in RestService]
 
@@ -286,16 +285,7 @@ def setup_rest_service():
 
 def setup_local_node():
     if config.local_node:
-        if config.local_node.node == LocalNodeType.BITCOIN_UNLIMITED:
-            typer.echo(f"Setting up Bitcoin Unlimited node...", nl=False)
-            with open("./configs/bitcoin-unlimited.conf", "w") as config_file:
-                config_file.write(
-                    templates.get_template("default_bu.conf").render(
-                        config=config, rpc_port=config.rpc_port()
-                    )
-                )
-            typer.echo(success)
-        elif config.local_node.node == LocalNodeType.BITCOIN_CASH_NODE:
+        if config.local_node.node == LocalNodeType.BITCOIN_CASH_NODE:
             typer.echo(f"Setting up Bitcoin cash node...", nl=False)
             with open("./configs/bitcoincashnode.conf", "w") as config_file:
                 config_file.write(
@@ -564,7 +554,6 @@ def check_dependencies():
         "bch-node": {
             "image": {
                 "ghcr.io/actorforth/bitcoin-cash-node:${TAG_BITCOINCASHNODE:-latest}": "zquestz/bitcoin-cash-node:${TAG_BITCOINCASHNODE:-24.0.0}",
-                "ghcr.io/actorforth/bitcoin-unlimited:${TAG_BITCOINUNLIMITED:-latest}": "zquestz/bitcoin-unlimited:${TAG_BITCOINUNLIMITED:-1.10.0.0}",
             }
         },
     }
@@ -608,7 +597,6 @@ def clean():
     remove("SLPDB data", "./data/mongodb")
     remove("Indexer data", "./data/fulcrum")
     remove("config file", "./config.json")
-    remove("config file", "./configs/bitcoin-unlimited.conf")
     remove("config file", "./configs/bitcoincashnode.conf")
     remove("config file", "./configs/slpdb-config.sh")
     remove("config file", "./configs/temp-fulcrum-config.conf")

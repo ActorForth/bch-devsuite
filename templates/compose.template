@@ -7,26 +7,6 @@ services:
   ##############
   # LOCAL NODE #
   ##############
-  {% if config.local_node.node == 'bu' %}
-  # Bitcoin Unlimited Node
-  bch-node:
-    image: ghcr.io/actorforth/bitcoin-unlimited:${TAG_BITCOINUNLIMITED:-release-2.0.0.0}
-    container_name: bch-node
-    volumes:
-      - ./data/bitcoind:/data
-      - ./configs/bitcoin-unlimited.conf:/bitcoin.conf
-    restart: always
-    command: ["bitcoind", "-conf=/bitcoin.conf"]
-    networks:
-      - {{ config.docker_network }}
-    {% if config.exposed_ports %}
-    ports:
-      - "{{ config.bch_rpc_conf.port}}:{{ config.bch_rpc_conf.port}}"
-      - "28332:28332"
-      - "50001:50001"
-    {% endif %}
-
-  {% elif config.local_node.node == 'bchn' %}
   # Bitcoin Cash Node
   bch-node:
     image: zquestz/bitcoin-cash-node:${TAG_BITCOINCASHNODE:-28.0.1}
@@ -135,11 +115,7 @@ services:
     image: ghcr.io/actorforth/opensight:${TAG_OPENSIGHT:-latest}
     container_name: opensight
     environment:
-      {% if config.local_node.node == 'bu' %}
-      - ELECTRUM_HOST={{ config.bch_rpc_conf.host_without_protocol() }}
-      {% else %}
       - ELECTRUM_HOST=fulcrum
-      {% endif %}
       - ELECTRUM_PORT=50001
       - NODE_RPC_HOST={{ config.bch_rpc_conf.host_without_protocol() }}
       - NODE_RPC_PASS={{ config.bch_rpc_conf.password }}
